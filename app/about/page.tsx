@@ -54,12 +54,13 @@ export default function RicSauAboutPage() {
       {/* Hero Section */}
       <section className="relative h-[80vh] flex items-center justify-center text-white overflow-hidden">
         <Image
-        src="\ric-sau-cover.jpg"
-        alt="SAU Campus"
-        fill
-        className="object-cover brightness-50"
-        priority
-      />
+          src="/ric-sau-cover.jpg"
+          alt="SAU Campus"
+          fill
+          className="object-cover brightness-50"
+          priority
+          sizes="100vw"
+        />
         <div className="absolute inset-0 bg-gradient-to-b from-blue-600/70 via-purple-600/60 to-blue-800/80"></div>
 
         <motion.div
@@ -68,14 +69,21 @@ export default function RicSauAboutPage() {
           transition={{ duration: 1 }}
           className="relative z-10 text-center px-6"
         >
-          <motion.img
-            src="/RIC SAU logo.png"
-            alt="RIC SAU Logo"
-            className="mx-auto mb-6 w-28 h-28 rounded-full shadow-lg bg-white p-2"
+          <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1, delay: 0.3 }}
-          />
+            className="mx-auto mb-6 w-28 h-28 rounded-full shadow-lg bg-white p-2 relative"
+          >
+            <Image
+              src="/RIC SAU logo.png"
+              alt="RIC SAU Logo"
+              fill
+              className="object-contain rounded-full"
+              priority
+              sizes="112px"
+            />
+          </motion.div>
           <h1 className="text-4xl lg:text-6xl font-bold mb-4">
             Research & Innovation Center (RIC - SAU)
           </h1>

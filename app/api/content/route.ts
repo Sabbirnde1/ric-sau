@@ -1,6 +1,7 @@
-export const dynamic = "force-dynamic";
-
 import { NextRequest, NextResponse } from 'next/server';
+
+// Cache configuration for GET requests
+export const revalidate = 60; // Revalidate every 60 seconds
 
 // Mock database - in production, replace with real DB
 let mockData = {
@@ -107,18 +108,32 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
 
+    let responseData;
     switch (type) {
       case 'projects':
-        return NextResponse.json({ success: true, data: mockData.projects });
+        responseData = { success: true, data: mockData.projects };
+        break;
       case 'news':
-        return NextResponse.json({ success: true, data: mockData.news });
+        responseData = { success: true, data: mockData.news };
+        break;
       case 'team':
-        return NextResponse.json({ success: true, data: mockData.team });
+        responseData = { success: true, data: mockData.team };
+        break;
       case 'events':
-        return NextResponse.json({ success: true, data: mockData.events });
+        responseData = { success: true, data: mockData.events };
+        break;
       default:
-        return NextResponse.json({ success: true, data: mockData });
+        responseData = { success: true, data: mockData };
     }
+
+    // Add caching headers for better performance
+    return NextResponse.json(responseData, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+        'CDN-Cache-Control': 'public, s-maxage=60',
+        'Vercel-CDN-Cache-Control': 'public, s-maxage=60',
+      },
+    });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ success: false, error: 'Failed to fetch data' }, { status: 500 });

@@ -1,4 +1,5 @@
 import MotionWrapper from '@/components/MotionWrapper';
+import Image from 'next/image';
 
 const newsArticles = [
   {
@@ -59,11 +60,16 @@ export default function NewsDetailsPage({ params }: { params: { slug: string } }
       {/* Content */}
       <section className="py-16 max-w-4xl mx-auto px-6">
         <MotionWrapper>
-          <img
-            src={article.image}
-            alt={article.title}
-            className="w-full h-96 object-cover rounded-2xl shadow-lg mb-8"
-          />
+          <div className="relative w-full h-96 mb-8 rounded-2xl overflow-hidden shadow-lg">
+            <Image
+              src={article.image}
+              alt={article.title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+              priority
+            />
+          </div>
           <div
             className="prose prose-lg text-gray-700"
             dangerouslySetInnerHTML={{ __html: article.content }}

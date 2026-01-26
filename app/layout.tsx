@@ -4,11 +4,17 @@ import { Inter, Poppins } from 'next/font/google';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ 
+  subsets: ['latin'],
+  display: 'swap',
+  preload: true,
+});
 const poppins = Poppins({ 
   weight: ['300', '400', '500', '600', '700'],
   subsets: ['latin'],
-  variable: '--font-poppins'
+  variable: '--font-poppins',
+  display: 'swap',
+  preload: true,
 });
 
 export const metadata: Metadata = {
@@ -46,6 +52,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${poppins.variable}`}>
+      <head>
+        {/* Resource hints for faster external resource loading */}
+        <link rel="preconnect" href="https://images.pexels.com" />
+        <link rel="dns-prefetch" href="https://images.pexels.com" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
       <body className={`${inter.className} antialiased`}>
         <Navbar />
         <main className="min-h-screen">

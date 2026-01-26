@@ -36,8 +36,18 @@ export function Navbar() {
   const router = useRouter();
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
+    // Throttle scroll handler for better performance
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 20);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -94,6 +104,7 @@ export function Navbar() {
               <div key={item.name} className="relative group">
                 <Link
                   href={item.href}
+                  prefetch={true}
                   className={`px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors ${
                     pathname === item.href
                       ? 'text-blue-600 bg-blue-50'
@@ -110,6 +121,7 @@ export function Navbar() {
                       <Link
                         key={subitem.name}
                         href={subitem.href}
+                        prefetch={true}
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
                       >
                         {subitem.name}
@@ -153,6 +165,7 @@ export function Navbar() {
                 <div key={item.name}>
                   <Link
                     href={item.href}
+                    prefetch={true}
                     className={`block px-3 py-2 rounded-md text-base font-medium ${
                       pathname === item.href
                         ? 'text-blue-600 bg-blue-50'
@@ -168,6 +181,7 @@ export function Navbar() {
                         <Link
                           key={subitem.name}
                           href={subitem.href}
+                          prefetch={true}
                           className="block px-3 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md"
                           onClick={() => setIsOpen(false)}
                         >

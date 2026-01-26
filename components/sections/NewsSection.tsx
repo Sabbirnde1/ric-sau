@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Calendar, Tag, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const news = [
   {
@@ -67,13 +68,19 @@ export function NewsSection() {
               className="group bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100"
             >
               <div className="relative h-48 overflow-hidden">
-                <motion.img
+                <motion.div
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.4 }}
-                  src={article.image}
-                  alt={article.title}
-                  className="w-full h-full object-cover"
-                />
+                  className="w-full h-full"
+                >
+                  <Image
+                    src={article.image}
+                    alt={article.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                </motion.div>
                 <div className="absolute top-4 left-4">
                   <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-gray-700 text-sm font-medium rounded-full">
                     {article.category}

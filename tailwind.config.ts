@@ -7,6 +7,12 @@ const config: Config = {
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  // Performance optimizations
+  corePlugins: {
+    preflight: true,
+  },
+  // Enable JIT mode for faster builds
+  mode: 'jit',
   theme: {
     extend: {
       backgroundImage: {

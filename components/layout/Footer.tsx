@@ -24,22 +24,22 @@ export function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              <li><Link href="/about" className="text-gray-300 hover:text-white">About Us</Link></li>
-              <li><Link href="/research" className="text-gray-300 hover:text-white">Research</Link></li>
-              <li><Link href="/team" className="text-gray-300 hover:text-white">Team</Link></li>
-              <li><Link href="/news" className="text-gray-300 hover:text-white">News</Link></li>
-              <li><Link href="/contact" className="text-gray-300 hover:text-white">Contact</Link></li>
+              <li><Link href="/about" prefetch={true} className="text-gray-300 hover:text-white">About Us</Link></li>
+              <li><Link href="/research" prefetch={true} className="text-gray-300 hover:text-white">Research</Link></li>
+              <li><Link href="/team" prefetch={true} className="text-gray-300 hover:text-white">Team</Link></li>
+              <li><Link href="/news" prefetch={true} className="text-gray-300 hover:text-white">News</Link></li>
+              <li><Link href="/contact" prefetch={true} className="text-gray-300 hover:text-white">Contact</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="text-lg font-semibold mb-4">Research Areas</h3>
             <ul className="space-y-2">
-              <li><Link href="/research/projects" className="text-gray-300 hover:text-white">AI & Machine Learning</Link></li>
-              <li><Link href="/research/projects" className="text-gray-300 hover:text-white">Software Engineering</Link></li>
-              <li><Link href="/research/projects" className="text-gray-300 hover:text-white">Data Science</Link></li>
-              <li><Link href="/research/projects" className="text-gray-300 hover:text-white">Cybersecurity</Link></li>
-              <li><Link href="/research/projects" className="text-gray-300 hover:text-white">IoT Systems</Link></li>
+              <li><Link href="/research/projects" prefetch={true} className="text-gray-300 hover:text-white">AI & Machine Learning</Link></li>
+              <li><Link href="/research/projects" prefetch={true} className="text-gray-300 hover:text-white">Software Engineering</Link></li>
+              <li><Link href="/research/projects" prefetch={true} className="text-gray-300 hover:text-white">Data Science</Link></li>
+              <li><Link href="/research/projects" prefetch={true} className="text-gray-300 hover:text-white">Cybersecurity</Link></li>
+              <li><Link href="/research/projects" prefetch={true} className="text-gray-300 hover:text-white">IoT Systems</Link></li>
             </ul>
           </div>
 
