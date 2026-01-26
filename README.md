@@ -35,8 +35,8 @@ Includes: News, Events, Image/Video Galleries, Achievements, Partnerships, Press
 
 ```bash
 # 1) clone
-git clone https://github.com/yourusername/research-website.git
-cd research-website
+git clone https://github.com/kallanchandraroy/ric-sau.git
+cd ric-sau
 
 # 2) install deps
 npm install
