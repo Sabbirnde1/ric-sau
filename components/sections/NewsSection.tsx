@@ -1,42 +1,21 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Tag, ArrowRight } from 'lucide-react';
+import { Calendar, Tag, ArrowRight, Newspaper } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
 
-const news = [
-  {
-    id: 1,
-    title: 'Research Team Wins International AI Innovation Award',
-    excerpt: 'Our machine learning research team has been recognized with the prestigious Global AI Innovation Award for their groundbreaking work in medical diagnosis.',
-    date: '2024-01-20',
-    category: 'Awards',
-    image: 'https://images.pexels.com/photos/3861972/pexels-photo-3861972.jpeg?auto=compress&cs=tinysrgb&w=600',
-    readTime: '3 min read'
-  },
-  {
-    id: 2,
-    title: 'New Partnership with Leading Tech Companies Announced',
-    excerpt: 'We are excited to announce strategic partnerships with major technology companies to accelerate our research in quantum computing and cybersecurity.',
-    date: '2024-01-18',
-    category: 'Partnership',
-    image: 'https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=600',
-    readTime: '5 min read'
-  },
-  {
-    id: 3,
-    title: 'Breakthrough in Sustainable IoT Technology Published',
-    excerpt: 'Our latest research paper on energy-efficient IoT systems has been published in the top-tier International Journal of Smart Systems.',
-    date: '2024-01-15',
-    category: 'Publication',
-    image: 'https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg?auto=compress&cs=tinysrgb&w=600',
-    readTime: '4 min read'
-  }
-];
-
 export function NewsSection() {
+  const [news, setNews] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/content?type=news')
+      .then(res => res.json())
+      .then(data => setNews((data.data || []).slice(0, 3)))
+      .catch(() => {});
+  }, []);
   return (
     <section className="py-24 bg-white animate-on-scroll">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -57,17 +36,21 @@ export function NewsSection() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {news.map((article, index) => (
+          {news.length === 0 ? (
+            <p className="col-span-full text-center text-gray-500">No news articles yet.</p>
+          ) : (
+          news.map((article, index) => (
             <motion.article
               key={article.id}
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: index * 0.2 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
               whileHover={{ y: -5 }}
               className="group bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100"
             >
-              <div className="relative h-48 overflow-hidden">
+              <div className="relative h-48 overflow-hidden bg-gradient-to-br from-blue-50 to-purple-50">
+                {article.image && article.image.trim() !== '' ? (
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.4 }}
@@ -81,6 +64,11 @@ export function NewsSection() {
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                 </motion.div>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Newspaper className="w-12 h-12 text-blue-200" />
+                  </div>
+                )}
                 <div className="absolute top-4 left-4">
                   <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-gray-700 text-sm font-medium rounded-full">
                     {article.category}
@@ -105,7 +93,7 @@ export function NewsSection() {
                   {article.excerpt}
                 </p>
 
-                <Link href={`/news/${article.id}`}>
+                <Link href={`/news/${article.slug || article.id}`}>
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -117,7 +105,8 @@ export function NewsSection() {
                 </Link>
               </div>
             </motion.article>
-          ))}
+          ))
+          )}
         </div>
 
         <motion.div

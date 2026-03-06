@@ -12,41 +12,61 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
+const defaultInnovations = [
+  { ripd: "AG-01-133", title: "Vertical Farming: Future Farming Technology for Food", pi: "S.M.Anamul Arefin", coPi: "Zerin Tasnim" },
+  { ripd: "AG-01-156", title: "IoT Based Modular Smart Farming System for Aeroponics, Hydroponics, and Aquaponics", pi: "Md. Iftikhar Alam Omar", coPi: "Md. Zulfiker Ali" },
+  { ripd: "FI-01-05", title: "Solar Brilliance: Revolutionizing Fish Drying in Bangladesh with Sustainable Technology", pi: "MD. Masud Rana", coPi: "Md. Abu Saeid" },
+  { ripd: "FI-01-32", title: "PONDVISION: Real-Time Fish Monitoring for Count and Health with AI & IoT", pi: "Md. Aminul Islam", coPi: "Nazia Islam Purba" },
+  { ripd: "FO-01-30", title: "NHP Showcase: Customized Product Display Freezer", pi: "AKM Ganiul Zadid", coPi: "Md Mosaraf Hossain Tipu" },
+  { ripd: "FO-01-51", title: "Rapid Detection Kit for Lead Chromate and Metanil Yellow in Turmeric Powder", pi: "Md. Latiful Bari", coPi: "Sharmin Zaman Emon" },
+  { ripd: "NV-01-57", title: "AirZenith Oxyfier", pi: "Nahid Hassan", coPi: "Md. Badsha Molla" },
+  { ripd: "OT-01-11", title: "Simulation-Based Driving, Road Rules, Problem Identification & Vehicle Repair Training Simulator", pi: "Mohammad Mojibur Rahman Sagar", coPi: "Krishna Ray" },
+  { ripd: "OT-01-20", title: "Scalable Menstrual Hygiene Management via Diva Sanitary Pad Vending Machines", pi: "Md. Nazrul Islam Anik", coPi: "Ishmam Ur Rahman" },
+  { ripd: "OT-01-294", title: "Revolutionizing Transportation: Hyperloop Simulation for Goods Transportation", pi: "Dr. Rajib Nandee", coPi: "Md. Rifat Khandaker" },
+  { ripd: "OT-01-302", title: "Smart CCRM (Citizen & Customer Relationship Management)", pi: "Tanvir Hassan Sourov", coPi: "Shahidul Islam" },
+  { ripd: "OT-01-319", title: "Pet Care & Tracker", pi: "Mahamudul Hasan", coPi: "Ehsanul Siddiq Arannya" },
+  { ripd: "TR-01-51", title: "Digital Driver", pi: "Shubho Al Farooque", coPi: "Shuvro Pal" },
+  { ripd: "TR-01-77", title: "Electric Delivery Pickup Van for Last-Mile Delivery Solutions", pi: "Mustafa Al Momin", coPi: "Faisal Akram Ether" },
+  { ripd: "OT-01-310", title: "Hybrid Cadastral Surveying Map Preparation Using Smart Technology", pi: "Eng. Pulak Kanti Barua", coPi: "Dr M Mizanur Rahman" },
+  { ripd: "TR-01-76", title: "Develop an Affordable and configurable amphibious aircraft for emerging economics", pi: "Raisul Azad Khandoker", coPi: "Sayed Mosharrf Ali" },
+  { ripd: "OT-01-346", title: "Smart Seaweed Processing & Marketing: Leveraging Technology for Efficient Soup Production and Quality Control", pi: "Mir Mohammad Ali", coPi: "Ashfia Nisha Bristy" },
+  { ripd: "HE-01-346", title: "Green Solution for Dengue Management: A Sustainable Approach using indigenous Bacillus thuringiensis for vector control", pi: "Professor Dr. Shakila Nargis Khan", coPi: "Professor Dr. Muhammad Manjurul Karim" },
+];
+
 export default function InnovatorsPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
+  const [innovations, setInnovations] = useState<any[]>(defaultInnovations);
 
-  const innovations = [
-    { ripd: "AG-01-133", title: "Vertical Farming: Future Farming Technology for Food", pi: "S.M.Anamul Arefin", coPi: "Zerin Tasnim" },
-    { ripd: "AG-01-156", title: "IoT Based Modular Smart Farming System for Aeroponics, Hydroponics, and Aquaponics", pi: "Md. Iftikhar Alam Omar", coPi: "Md. Zulfiker Ali" },
-    { ripd: "FI-01-05", title: "Solar Brilliance: Revolutionizing Fish Drying in Bangladesh with Sustainable Technology", pi: "MD. Masud Rana", coPi: "Md. Abu Saeid" },
-    { ripd: "FI-01-32", title: "PONDVISION: Real-Time Fish Monitoring for Count and Health with AI & IoT", pi: "Md. Aminul Islam", coPi: "Nazia Islam Purba" },
-    { ripd: "FO-01-30", title: "NHP Showcase: Customized Product Display Freezer", pi: "AKM Ganiul Zadid", coPi: "Md Mosaraf Hossain Tipu" },
-    { ripd: "FO-01-51", title: "Rapid Detection Kit for Lead Chromate and Metanil Yellow in Turmeric Powder", pi: "Md. Latiful Bari", coPi: "Sharmin Zaman Emon" },
-    { ripd: "NV-01-57", title: "AirZenith Oxyfier", pi: "Nahid Hassan", coPi: "Md. Badsha Molla" },
-    { ripd: "OT-01-11", title: "Simulation-Based Driving, Road Rules, Problem Identification & Vehicle Repair Training Simulator", pi: "Mohammad Mojibur Rahman Sagar", coPi: "Krishna Ray" },
-    { ripd: "OT-01-20", title: "Scalable Menstrual Hygiene Management via Diva Sanitary Pad Vending Machines", pi: "Md. Nazrul Islam Anik", coPi: "Ishmam Ur Rahman" },
-    { ripd: "OT-01-294", title: "Revolutionizing Transportation: Hyperloop Simulation for Goods Transportation", pi: "Dr. Rajib Nandee", coPi: "Md. Rifat Khandaker" },
-    { ripd: "OT-01-302", title: "Smart CCRM (Citizen & Customer Relationship Management)", pi: "Tanvir Hassan Sourov", coPi: "Shahidul Islam" },
-    { ripd: "OT-01-319", title: "Pet Care & Tracker", pi: "Mahamudul Hasan", coPi: "Ehsanul Siddiq Arannya" },
-    { ripd: "TR-01-51", title: "Digital Driver", pi: "Shubho Al Farooque", coPi: "Shuvro Pal" },
-    { ripd: "TR-01-77", title: "Electric Delivery Pickup Van for Last-Mile Delivery Solutions", pi: "Mustafa Al Momin", coPi: "Faisal Akram Ether" },
-    { ripd: "OT-01-310", title: "Hybrid Cadastral Surveying Map Preparation Using Smart Technology", pi: "Eng. Pulak Kanti Barua", coPi: "Dr M Mizanur Rahman" },
-    { ripd: "TR-01-76", title: "Develop an Affordable and configurable amphibious aircraft for emerging economics", pi: "Raisul Azad Khandoker", coPi: "Sayed Mosharrf Ali" },
-    { ripd: "OT-01-346", title: "Smart Seaweed Processing & Marketing: Leveraging Technology for Efficient Soup Production and Quality Control", pi: "Mir Mohammad Ali", coPi: "Ashfia Nisha Bristy" },
-    { ripd: "HE-01-346", title: "Green Solution for Dengue Management: A Sustainable Approach using indigenous Bacillus thuringiensis for vector control", pi: "Professor Dr. Shakila Nargis Khan", coPi: "Professor Dr. Muhammad Manjurul Karim" },
-  ];
+  useEffect(() => {
+    fetch('/api/content?type=innovators')
+      .then(res => res.json())
+      .then(res => {
+        if (res.data && res.data.length > 0) {
+          setInnovations(res.data);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
-  const categories = ["All", "AG", "FI", "FO", "NV", "OT", "TR", "HE"];
+  const categories = ["All", ...Array.from(new Set(innovations.map((item: any) => {
+    const ripd = item.ripd || item.category || '';
+    const prefix = ripd.split('-')[0];
+    return prefix;
+  }).filter(Boolean)))];
 
   // Filtered list
-  const filteredInnovations = innovations.filter((item) => {
-    const matchFilter = filter === "All" || item.ripd.startsWith(filter);
+  const filteredInnovations = innovations.filter((item: any) => {
+    const ripdVal = item.ripd || item.category || '';
+    const matchFilter = filter === "All" || ripdVal.startsWith(filter);
+    const titleVal = item.title || item.name || '';
+    const piVal = item.pi || '';
+    const coPiVal = item.coPi || '';
     const matchSearch =
-      item.title.toLowerCase().includes(search.toLowerCase()) ||
-      item.pi.toLowerCase().includes(search.toLowerCase()) ||
-      item.coPi?.toLowerCase().includes(search.toLowerCase());
+      titleVal.toLowerCase().includes(search.toLowerCase()) ||
+      piVal.toLowerCase().includes(search.toLowerCase()) ||
+      coPiVal.toLowerCase().includes(search.toLowerCase());
     return matchFilter && matchSearch;
   });
 
@@ -66,7 +86,7 @@ export default function InnovatorsPage() {
             scrollTrigger: {
               trigger: element,
               start: "top 90%",
-              toggleActions: "play none none reverse",
+              toggleActions: "play none none none",
             },
           }
         );
@@ -126,21 +146,32 @@ export default function InnovatorsPage() {
 
         {/* Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredInnovations.map((item, i) => (
+          {filteredInnovations.map((item: any, i: number) => (
             <motion.div
-              key={i}
+              key={item.id || i}
               className="innovation-card bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition"
             >
-              <div className="text-xs font-semibold text-primary mb-2">
-                RIPD: {item.ripd}
-              </div>
-              <h3 className="text-lg font-bold text-gray-800 mb-3">{item.title}</h3>
+              {item.ripd && (
+                <div className="text-xs font-semibold text-primary mb-2">
+                  RIPD: {item.ripd}
+                </div>
+              )}
+              <h3 className="text-lg font-bold text-gray-800 mb-3">{item.title || item.name}</h3>
               <p className="text-sm text-gray-600 leading-relaxed">
-                <strong>PI:</strong> {item.pi}
-                <br />
+                {item.pi && (
+                  <>
+                    <strong>PI:</strong> {item.pi}
+                    <br />
+                  </>
+                )}
                 {item.coPi && (
                   <>
                     <strong>Co-PI:</strong> {item.coPi}
+                  </>
+                )}
+                {!item.pi && item.specialization && (
+                  <>
+                    <strong>Specialization:</strong> {item.specialization}
                   </>
                 )}
               </p>

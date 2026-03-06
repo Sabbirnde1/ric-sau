@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -11,22 +11,56 @@ export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  // Hardcoded default admin credentials
-  const defaultUser = {
-    username: 'admin',
-    password: 'admin123'
-  };
-
-  const handleLogin = () => {
-    if (username === defaultUser.username && password === defaultUser.password) {
-      // Save static "login" in localStorage
-      localStorage.setItem('adminToken', 'loggedIn');
-      router.push('/dashboard'); // Redirect to dashboard
+  // Check if user is already logged in
+  useEffect(() => {
+    const token = localStorage.getItem('adminToken');
+    if (token === 'loggedIn') {
+      router.push('/dashboard');
     } else {
-      setError('Invalid username or password');
+      setLoading(false);
+    }
+  }, [router]);
+
+  const handleLogin = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        localStorage.setItem('adminToken', 'loggedIn');
+        localStorage.setItem('adminUser', JSON.stringify(data.user));
+        router.push('/dashboard');
+      } else {
+        setError(data.error || 'Invalid username or password');
+        setLoading(false);
+      }
+    } catch {
+      setError('Login failed. Please try again.');
+      setLoading(false);
     }
   };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleLogin();
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-gray-600">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -40,7 +74,9 @@ export default function LoginPage() {
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              onKeyPress={handleKeyPress}
               placeholder="Enter username"
+              autoComplete="username"
             />
           </div>
           <div>
@@ -50,7 +86,9 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onKeyPress={handleKeyPress}
               placeholder="Enter password"
+              autoComplete="current-password"
             />
           </div>
           <Button className="w-full mt-4" onClick={handleLogin}>

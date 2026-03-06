@@ -1,39 +1,29 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 export function CTASection() {
+  const [cta, setCta] = useState<any>({});
+
+  useEffect(() => {
+    fetch('/api/content?type=home')
+      .then(res => res.json())
+      .then(data => {
+        if (data.data?.cta) setCta(data.data.cta);
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <section className="py-24 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 relative overflow-hidden">
-      {/* Animated Background Elements */}
+      {/* Subtle Background Elements */}
       <div className="absolute inset-0">
-        <motion.div
-          animate={{ 
-            rotate: [0, 360],
-            scale: [1, 1.2, 1],
-          }}
-          transition={{ 
-            duration: 20, 
-            repeat: Infinity, 
-            ease: 'linear' 
-          }}
-          className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{ 
-            rotate: [360, 0],
-            scale: [1.2, 1, 1.2],
-          }}
-          transition={{ 
-            duration: 25, 
-            repeat: Infinity, 
-            ease: 'linear' 
-          }}
-          className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl"
-        />
+        <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -44,14 +34,12 @@ export function CTASection() {
           viewport={{ once: true }}
         >
           <h2 className="text-3xl lg:text-5xl font-bold text-white mb-6">
-            Ready to Collaborate on 
-            <span className="block text-yellow-300">Groundbreaking Research?</span>
+            {cta.title || 'Ready to Collaborate on'}
+            <span className="block text-yellow-300">{cta.highlight || 'Groundbreaking Research?'}</span>
           </h2>
           
           <p className="text-lg lg:text-xl text-blue-100 mb-12 max-w-3xl mx-auto">
-            Join us in pushing the boundaries of technology and innovation. 
-            Whether you're a researcher, industry partner, or student, 
-            we welcome collaboration opportunities.
+            {cta.description || 'Join us in pushing the boundaries of technology and innovation. Whether you\'re a researcher, industry partner, or student, we welcome collaboration opportunities.'}
           </p>
         </motion.div>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
@@ -9,15 +9,27 @@ if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
 
+const defaultResources = [
+  { title: 'Lab Space', description: 'State-of-the-art laboratory space for research and development projects.' },
+  { title: 'Machinery', description: 'Access to modern machinery and equipment for experimentation and prototyping.' },
+  { title: 'Laboratory', description: 'Fully equipped laboratories to support scientific research and testing.' },
+  { title: 'Access & Allocation', description: 'Proper allocation system to ensure fair access to all RIC–SAU resources.' },
+];
+
 export default function ResourcesPage() {
+  const [resources, setResources] = useState<any[]>(defaultResources);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const resources = [
-    { title: 'Lab Space', description: 'State-of-the-art laboratory space for research and development projects.' },
-    { title: 'Machinery', description: 'Access to modern machinery and equipment for experimentation and prototyping.' },
-    { title: 'Laboratory', description: 'Fully equipped laboratories to support scientific research and testing.' },
-    { title: 'Access & Allocation', description: 'Proper allocation system to ensure fair access to all RIC–SAU resources.' },
-  ];
+  useEffect(() => {
+    fetch('/api/content?type=resources')
+      .then(res => res.json())
+      .then(res => {
+        if (res.data && res.data.length > 0) {
+          setResources(res.data);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -34,7 +46,7 @@ export default function ResourcesPage() {
             scrollTrigger: {
               trigger: element,
               start: 'top 90%',
-              toggleActions: 'play none none reverse',
+              toggleActions: 'play none none none',
             },
           }
         );
@@ -65,8 +77,17 @@ export default function ResourcesPage() {
           {resources.map((item, i) => (
             <motion.div
               key={i}
-              className="resource-card bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-transform transform hover:scale-105"
+              className="resource-card bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-shadow duration-300"
             >
+              <div className="w-full h-40 relative overflow-hidden rounded-lg mb-4 bg-gradient-to-br from-purple-50 to-blue-50">
+                {item.image && item.image.trim() !== '' ? (
+                  <img src={item.image} alt={item.title} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <svg className="w-10 h-10 text-purple-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" /></svg>
+                  </div>
+                )}
+              </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
               <p className="text-gray-700">{item.description}</p>
             </motion.div>

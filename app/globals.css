@@ -89,6 +89,77 @@
   background-size: 20px 20px;
 }
 
+/* ── Hero Section Premium Effects ── */
+.hero-grid-overlay {
+  background-image:
+    linear-gradient(rgba(99,102,241,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99,102,241,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.hero-orb-blue {
+  background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);
+  animation: hero-orb-drift-a 14s ease-in-out infinite;
+}
+.hero-orb-purple {
+  background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
+  animation: hero-orb-drift-b 16s ease-in-out infinite;
+}
+.hero-orb-center {
+  background: radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 60%);
+}
+@keyframes hero-orb-drift-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, -20px) scale(1.05); }
+}
+@keyframes hero-orb-drift-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-25px, 15px) scale(1.03); }
+}
+
+.hero-glow-ring {
+  animation: hero-glow-pulse 4s ease-in-out infinite;
+}
+@keyframes hero-glow-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+
+.hero-scanline {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(99,102,241,0.012) 2px,
+    rgba(99,102,241,0.012) 4px
+  );
+}
+
+.hero-stat-card {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.hero-stat-card:hover {
+  box-shadow: 0 0 30px rgba(99,102,241,0.08);
+  border-color: rgba(255,255,255,0.1);
+}
+
+/* Hero gradient sweep */
+.hero-gradient-sweep {
+  background: conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(99,102,241,0.03) 60deg, transparent 120deg);
+  animation: hero-sweep-rotate 15s linear infinite;
+}
+@keyframes hero-sweep-rotate {
+  to { transform: rotate(360deg); }
+}
+
+/* Slow spin for orbit rings */
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;

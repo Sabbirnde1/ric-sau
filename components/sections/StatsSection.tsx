@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 
-const stats = [
+const defaultStats = [
   { label: 'Active Research Projects', value: 45, suffix: '+' },
   { label: 'Published Papers', value: 180, suffix: '+' },
   { label: 'Research Team Members', value: 28, suffix: '+' },
@@ -51,6 +51,23 @@ function AnimatedCounter({ value, suffix = '', duration = 2000 }: { value: numbe
 }
 
 export function StatsSection() {
+  const [stats, setStats] = useState(defaultStats);
+
+  useEffect(() => {
+    fetch('/api/content?type=home')
+      .then(res => res.json())
+      .then(data => {
+        if (data.data?.stats && data.data.stats.length > 0) {
+          setStats(data.data.stats.map((s: any) => ({
+            label: s.label,
+            value: typeof s.value === 'number' ? s.value : parseInt(String(s.value).replace(/[^0-9]/g, '')) || 0,
+            suffix: s.suffix ?? '+',
+          })));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <section className="py-24 bg-gradient-to-br from-blue-600 to-purple-700 text-white animate-on-scroll">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -81,7 +98,7 @@ export function StatsSection() {
               className="text-center group"
             >
               <motion.div
-                whileHover={{ scale: 1.1 }}
+                whileHover={{ scale: 1.03 }}
                 className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/20 transition-all duration-300"
               >
                 <div className="text-white mb-4 group-hover:text-yellow-300 transition-colors">

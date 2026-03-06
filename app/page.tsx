@@ -48,17 +48,16 @@ export default function Home() {
             // Smooth scrolling animation
             gsap.utils.toArray('.animate-on-scroll').forEach((element: any) => {
               gsap.fromTo(element, 
-                { y: 100, opacity: 0 },
+                { y: 40, opacity: 0 },
                 {
                   y: 0,
                   opacity: 1,
-                  duration: 1,
+                  duration: 0.6,
                   ease: 'power2.out',
                   scrollTrigger: {
                     trigger: element,
-                    start: 'top 80%',
-                    end: 'bottom 20%',
-                    toggleActions: 'play none none reverse'
+                    start: 'top 85%',
+                    toggleActions: 'play none none none'
                   }
                 }
               );

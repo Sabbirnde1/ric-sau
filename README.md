@@ -15,7 +15,12 @@ A modern, high-performance research & innovation website built with **Next.js 13
 - 🔬 **Research Projects** - Detailed project pages with filtering and categorization
 - 👥 **Team Directory** - Team member profiles with specializations
 - 📚 **Publications & Labs** - Research publications and laboratory information
-- 🔐 **Admin Dashboard** - Full CRUD operations for content management
+- 🎛️ **Advanced Admin Dashboard** - Comprehensive content management system with:
+  - 📸 Image upload system (file upload or URL)
+  - ✍️ Rich text editor with Markdown support
+  - 🎨 Logo & branding management
+  - 🔗 Social media integration
+  - 11 content management tabs
 - 🎬 **Video Integration** - YouTube video modal with `react-player`
 - ⚡ **Smooth Animations** - Framer Motion + GSAP for engaging user experience
 - 🧭 **Responsive Navigation** - Mobile-friendly navbar with login/logout state
@@ -117,7 +122,9 @@ ric-sau/
 ├── app/                    # Next.js App Router pages
 │   ├── about/             # About page
 │   ├── api/               # API routes
-│   │   └── content/       # Content management API
+│   │   ├── content/       # Content management API
+│   │   ├── upload/        # Image upload API
+│   │   └── settings/      # Site settings API
 │   ├── contact/           # Contact page
 │   ├── dashboard/         # Admin dashboard
 │   ├── events/            # Events pages
@@ -129,9 +136,13 @@ ric-sau/
 │   ├── layout/            # Layout components (Navbar, Footer)
 │   ├── sections/          # Page sections
 │   └── ui/                # UI components (shadcn/ui)
+│       ├── image-upload.tsx    # Image upload component
+│       └── rich-text-editor.tsx # Rich text editor
 ├── lib/                   # Utility functions
 ├── public/                 # Static assets
+│   └── uploads/           # Uploaded images directory
 ├── hooks/                  # Custom React hooks
+├── ADMIN_GUIDE.md         # Complete admin dashboard guide
 ├── next.config.js          # Next.js configuration
 ├── tailwind.config.ts     # Tailwind CSS configuration
 └── tsconfig.json          # TypeScript configuration
@@ -212,11 +223,49 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 To access the admin dashboard:
 
 1. Navigate to `/login`
-2. Enter any credentials (authentication is static for demo)
-3. Set `localStorage.setItem('adminToken', 'loggedIn')` in browser console
-4. Access `/dashboard` for content management
+2. Enter the following credentials:
+   - **Username:** `admin`
+   - **Password:** `admin123`
+3. You will be automatically redirected to `/dashboard` upon successful login
 
-**Note:** In production, implement proper authentication.
+### 🎛️ Advanced Dashboard Features
+
+The admin dashboard now includes **comprehensive content management** with the following capabilities:
+
+#### Content Management (11 Tabs)
+- **Overview** - Stats and quick insights
+- **Home** - Hero section with background image upload and video integration
+- **About** - Mission, vision, with rich text editor and image upload
+- **Projects** - Research projects with image uploads
+- **News** - Articles with rich text editor and featured images
+- **Events** - Event management with banner uploads
+- **Team** - Team profiles with photo uploads
+- **Innovators** - Innovator profiles with photo uploads
+- **RL-Committee** - Committee member profiles with photo uploads
+- **Contact** - Contact information management
+- **Settings** - Site-wide settings (logo, favicon, social media, branding)
+
+#### ✨ Advanced Features
+- 📸 **Image Upload System** - Upload files directly (max 5MB) or use URLs
+  - Supported formats: JPEG, PNG, GIF, WebP
+  - Automatic file storage in `/public/uploads/`
+  - Image preview and validation
+- ✍️ **Rich Text Editor** - Markdown-based editor with:
+  - Formatting toolbar (Bold, Italic, Headings, Lists, Links)
+  - Live preview tab
+  - Used for About page and News articles
+- 🎨 **Logo & Branding Management** - Upload site logo and favicon
+- 🔗 **Social Media Integration** - Configure social media links
+- 🌐 **Site Settings** - General information, SEO, theme configuration
+
+#### API Endpoints
+- `/api/content` - Content CRUD operations (GET, POST, PUT, DELETE)
+- `/api/upload` - Image file uploads with validation
+- `/api/settings` - Site settings management
+
+📖 **[View Complete Admin Guide](ADMIN_GUIDE.md)** for detailed instructions on using all dashboard features.
+
+**Note:** In production, implement proper authentication with secure password hashing, JWT tokens, and database integration.
 
 ---
 

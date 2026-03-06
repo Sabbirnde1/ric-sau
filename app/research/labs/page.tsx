@@ -1,19 +1,13 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import { MapPin, Users, Calendar, ArrowRight, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-}
-
-const labs = [
+const defaultLabs = [
   {
     id: 1,
     name: 'Artificial Intelligence Research Lab',
@@ -22,84 +16,30 @@ const labs = [
     established: 2018,
     members: 12,
     focus: ['Machine Learning', 'Deep Learning', 'Computer Vision', 'Natural Language Processing'],
-    description: 'Our AI Research Lab focuses on developing cutting-edge artificial intelligence technologies and applications. We work on advanced machine learning algorithms, neural networks, and AI systems that can solve complex real-world problems.',
+    description: 'Our AI Research Lab focuses on developing cutting-edge artificial intelligence technologies and applications.',
     equipment: ['High-Performance GPU Clusters', 'Quantum Computing Simulator', 'Advanced Workstations', 'Cloud Computing Resources'],
     projects: 8,
     publications: 45,
     image: 'https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800'
   },
-  {
-    id: 2,
-    name: 'Cybersecurity & Privacy Lab',
-    director: 'Prof. Michael Chen',
-    location: 'Building B, Floor 2',
-    established: 2019,
-    members: 8,
-    focus: ['Network Security', 'Cryptography', 'Privacy Protection', 'Threat Detection'],
-    description: 'The Cybersecurity Lab is dedicated to advancing the state of digital security and privacy protection. We develop innovative security protocols, encryption methods, and threat detection systems.',
-    equipment: ['Security Testing Environment', 'Network Analysis Tools', 'Cryptographic Hardware', 'Penetration Testing Suite'],
-    projects: 6,
-    publications: 32,
-    image: 'https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg?auto=compress&cs=tinysrgb&w=800'
-  },
-  {
-    id: 3,
-    name: 'IoT & Smart Systems Lab',
-    director: 'Dr. Emily Rodriguez',
-    location: 'Building C, Floor 1',
-    established: 2020,
-    members: 10,
-    focus: ['Internet of Things', 'Embedded Systems', 'Smart Cities', 'Edge Computing'],
-    description: 'Our IoT Lab specializes in developing intelligent connected systems and smart city solutions. We create innovative IoT devices, sensor networks, and edge computing platforms.',
-    equipment: ['IoT Development Boards', 'Sensor Networks', 'Edge Computing Devices', 'Smart City Testbed'],
-    projects: 9,
-    publications: 28,
-    image: 'https://images.pexels.com/photos/373543/pexels-photo-373543.jpeg?auto=compress&cs=tinysrgb&w=800'
-  },
-  {
-    id: 4,
-    name: 'Data Science & Analytics Lab',
-    director: 'Prof. David Wilson',
-    location: 'Building A, Floor 2',
-    established: 2017,
-    members: 15,
-    focus: ['Big Data Analytics', 'Statistical Modeling', 'Data Mining', 'Business Intelligence'],
-    description: 'The Data Science Lab focuses on extracting meaningful insights from large and complex datasets. We develop advanced analytics tools and methodologies for various domains.',
-    equipment: ['Big Data Clusters', 'Analytics Software Suite', 'Visualization Tools', 'Statistical Computing Resources'],
-    projects: 12,
-    publications: 38,
-    image: 'https://images.pexels.com/photos/590022/pexels-photo-590022.jpeg?auto=compress&cs=tinysrgb&w=800'
-  }
 ];
 
 export default function LabsPage() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [labs, setLabs] = useState<any[]>(defaultLabs);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      gsap.utils.toArray('.lab-card').forEach((element: any, index) => {
-        gsap.fromTo(element, 
-          { y: 100, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.8,
-            delay: index * 0.2,
-            ease: 'power2.out',
-            scrollTrigger: {
-              trigger: element,
-              start: 'top 80%',
-              end: 'bottom 20%',
-              toggleActions: 'play none none reverse'
-            }
-          }
-        );
-      });
-    }
+    fetch('/api/content?type=labs')
+      .then(res => res.json())
+      .then(res => {
+        if (res.data && res.data.length > 0) {
+          setLabs(res.data);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-gray-50 pt-20">
+    <div className="min-h-screen bg-gray-50 pt-20">
       {/* Hero Section */}
       <section className="py-24 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
@@ -185,13 +125,22 @@ export default function LabsPage() {
                 }`}
               >
                 <div className={index % 2 === 1 ? 'lg:col-start-2' : ''}>
-                  <motion.img
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.4 }}
-                    src={lab.image}
-                    alt={lab.name}
-                    className="w-full h-80 object-cover rounded-2xl shadow-2xl"
-                  />
+                  <div className="w-full h-80 relative rounded-2xl shadow-2xl overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50">
+                    {lab.image && lab.image.trim() !== '' ? (
+                    <motion.img
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.4 }}
+                      src={lab.image}
+                      alt={lab.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg className="w-16 h-16 text-blue-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611l-.772.13a18.142 18.142 0 01-6.126 0l-.772-.13c-1.717-.293-2.3-2.379-1.067-3.61L12.8 15.3" /></svg>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className={index % 2 === 1 ? 'lg:col-start-1 lg:row-start-1' : ''}>
@@ -242,7 +191,7 @@ export default function LabsPage() {
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-3">Research Focus</h4>
                       <div className="flex flex-wrap gap-2">
-                        {lab.focus.map((area) => (
+                        {lab.focus.map((area: string) => (
                           <Badge key={area} variant="secondary">{area}</Badge>
                         ))}
                       </div>
@@ -251,7 +200,7 @@ export default function LabsPage() {
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-3">Key Equipment</h4>
                       <ul className="list-disc list-inside text-gray-600 space-y-1">
-                        {lab.equipment.map((item) => (
+                        {lab.equipment.map((item: string) => (
                           <li key={item}>{item}</li>
                         ))}
                       </ul>

@@ -1,19 +1,12 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import { Search, Filter, Calendar, User, ArrowRight, ExternalLink, Github } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Link from 'next/link';
-
-
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-}
 
 interface Project {
   id: number;
@@ -37,34 +30,10 @@ export default function ProjectsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
-  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchProjects();
   }, []);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      gsap.utils.toArray('.project-card').forEach((element: any, index) => {
-        gsap.fromTo(element, 
-          { y: 100, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.8,
-            delay: index * 0.1,
-            ease: 'power2.out',
-            scrollTrigger: {
-              trigger: element,
-              start: 'top 80%',
-              end: 'bottom 20%',
-              toggleActions: 'play none none reverse'
-            }
-          }
-        );
-      });
-    }
-  }, [filteredProjects]);
 
   useEffect(() => {
     filterProjects();
@@ -119,7 +88,7 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-gray-50 pt-20">
+    <div className="min-h-screen bg-gray-50 pt-20">
       {/* Hero Section */}
       <section className="py-24 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
@@ -224,17 +193,24 @@ export default function ProjectsPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: index * 0.1 }}
                   viewport={{ once: true }}
-                  whileHover={{ y: -10 }}
+                  whileHover={{ y: -5 }}
                   className="project-card group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300"
                 >
-                  <div className="relative h-48 overflow-hidden">
+                  <div className="relative h-48 overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50">
+                    {project.image && project.image.trim() !== '' ? (
                     <motion.img
-                      whileHover={{ scale: 1.1 }}
+                      whileHover={{ scale: 1.05 }}
                       transition={{ duration: 0.4 }}
                       src={project.image}
                       alt={project.title}
                       className="w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                     />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg className="w-12 h-12 text-blue-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                      </div>
+                    )}
                     <div className="absolute top-4 left-4">
                       <span className="px-3 py-1 bg-blue-600 text-white text-sm font-medium rounded-full">
                         {project.category}

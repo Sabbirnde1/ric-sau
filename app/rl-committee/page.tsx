@@ -1,61 +1,75 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
+import { User } from 'lucide-react';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
 
+function MemberCard({ member }: { member: any }) {
+  const [imgError, setImgError] = useState(false);
+  const hasValidImage = member.image && member.image.trim() !== '' && !imgError;
+
+  return (
+    <motion.div
+      className="committee-card relative bg-card rounded-xl shadow-lg p-6 pt-8 hover:shadow-2xl transition-shadow duration-300 flex flex-col items-center"
+    >
+      {/* Role Badge */}
+      <div className="absolute -top-3 left-3 px-3 py-1 rounded-full font-semibold text-xs bg-green-600 text-white shadow-md">
+        {member.role}
+      </div>
+
+      {/* Image — always rendered for consistent layout */}
+      <div className="w-28 h-28 sm:w-32 sm:h-32 mx-auto mb-4 relative rounded-full overflow-hidden shadow-md bg-muted flex-shrink-0">
+        {hasValidImage ? (
+          <Image
+            src={member.image}
+            alt={member.name}
+            fill
+            sizes="128px"
+            className="object-cover"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/40 dark:to-purple-900/40">
+            <User className="w-12 h-12 text-muted-foreground/50" />
+          </div>
+        )}
+      </div>
+
+      <h3 className="text-xl font-semibold text-foreground mb-1 text-center">{member.name}</h3>
+      <p className="text-sm text-muted-foreground text-center">{member.department}</p>
+      {member.bio && (
+        <p className="text-sm text-muted-foreground mt-3 text-center line-clamp-3">{member.bio}</p>
+      )}
+    </motion.div>
+  );
+}
+
 export default function RLCommitteePage() {
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const committeeMembers = [
-    {
-      name: 'Professor Md. Abul Bashar',
-      role: 'Treasurer, SAU - Chair',
-      type: 'Chair',
-      img: '/committee/abul-bashar.jpg',
-    },
-    {
-      name: 'Professor Dr. Md. Mahbubul Alam',
-      role: 'Department of Agricultural Extension and Information System, SAU - Member',
-      type: 'Member',
-      img: '/committee/mahbubul-alam.jpg',
-    },
-    {
-      name: 'Professor Dr. Md. Abdul Masum',
-      role: 'Department of Anatomy, Histology and Physiology, SAU - Member',
-      type: 'Member',
-      img: '/committee/abdul-masum.jpg',
-    },
-    {
-      name: 'Mir Mohammad Ali',
-      role: 'Associate Professor, Aquaculture Department, SAU - Member',
-      type: 'Member',
-      img: '/committee/mir-mohammad-ali.jpg',
-    },
-    {
-      name: 'Professor Dr. Dr. Abul Hasnat M. Solaiman',
-      role: 'Department of Horticulture and Chief Coordinator, SAU - Focal Point',
-      type: 'Focal Point',
-      img: '/committee/abul-hasnat.jpg',
-    },
-  ];
-
-  const badgeColors: Record<string, string> = {
-    'Chair': 'bg-red-600 text-white',
-    'Member': 'bg-green-600 text-white',
-    'Focal Point': 'bg-yellow-500 text-white',
-  };
+  const [committeeMembers, setCommitteeMembers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    fetch('/api/content?type=rlCommittee')
+      .then(res => res.json())
+      .then(data => {
+        setCommitteeMembers(data.data || []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    if (!loading && committeeMembers.length > 0 && typeof window !== 'undefined') {
       gsap.utils.toArray('.committee-card').forEach((element: any, index) => {
         gsap.fromTo(
           element,
@@ -68,15 +82,14 @@ export default function RLCommitteePage() {
             ease: 'power2.out',
             scrollTrigger: {
               trigger: element,
-              start: 'top 80%',
-              end: 'bottom 20%',
-              toggleActions: 'play none none reverse',
+              start: 'top 85%',
+              toggleActions: 'play none none none',
             },
           }
         );
       });
     }
-  }, []);
+  }, [loading, committeeMembers]);
 
   return (
     <div ref={containerRef} className="min-h-screen bg-background pt-20">
@@ -112,30 +125,15 @@ export default function RLCommitteePage() {
           <h2 className="text-3xl font-bold text-foreground mb-12">Committee Members</h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
-            {committeeMembers.map((member, i) => (
-              <motion.div
-                key={i}
-                className="committee-card relative bg-card rounded-xl shadow-lg p-6 hover:shadow-2xl transition-transform transform hover:scale-105"
-              >
-                {/* Role Badge */}
-                <div
-                  className={`absolute -top-3 -left-3 px-3 py-1 rounded-tr-lg rounded-br-lg font-semibold text-sm ${badgeColors[member.type]}`}
-                >
-                  {member.type}
-                </div>
-
-                <div className="w-32 h-32 mx-auto mb-4 relative rounded-full overflow-hidden shadow-inner">
-                  <Image
-                    src={member.img}
-                    alt={member.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-2">{member.name}</h3>
-                <p className="text-muted-foreground text-center">{member.role}</p>
-              </motion.div>
-            ))}
+            {loading ? (
+              <div className="col-span-full flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>
+            ) : committeeMembers.length === 0 ? (
+              <p className="col-span-full text-center text-gray-500">No committee members yet.</p>
+            ) : (
+            committeeMembers.map((member, i) => (
+              <MemberCard key={member.id || i} member={member} />
+            ))
+            )}
           </div>
         </div>
       </section>

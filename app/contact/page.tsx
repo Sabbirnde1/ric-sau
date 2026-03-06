@@ -1,46 +1,24 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-}
-
 export default function ContactPage() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [contactData, setContactData] = useState<any>({});
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      gsap.utils.toArray('.contact-card').forEach((element: any, index) => {
-        gsap.fromTo(
-          element,
-          { y: 80, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.8,
-            delay: index * 0.2,
-            ease: 'power2.out',
-            scrollTrigger: {
-              trigger: element,
-              start: 'top 85%',
-              toggleActions: 'play none none reverse',
-            },
-          }
-        );
-      });
-    }
+    fetch('/api/content?type=contact')
+      .then(res => res.json())
+      .then(data => setContactData(data.data || {}))
+      .catch(() => {});
   }, []);
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-gray-50 pt-20">
+    <div className="min-h-screen bg-gray-50 pt-20">
       {/* Hero Section */}
       <section className="py-24 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
@@ -80,16 +58,16 @@ export default function ContactPage() {
               <div className="space-y-6 text-gray-700">
                 <div className="flex items-center space-x-4">
                   <Mail className="h-6 w-6 text-blue-600" />
-                  <span>info.sauric@gmail.com</span>
+                  <span>{contactData.email || 'info.sauric@gmail.com'}</span>
                 </div>
                 <div className="flex items-center space-x-4">
                   <Phone className="h-6 w-6 text-blue-600" />
-                  <span>+880 123 456 789</span>
+                  <span>{contactData.phone || '+880 123 456 789'}</span>
                 </div>
                 <div className="flex items-center space-x-4">
                   <MapPin className="h-10 w-10 text-blue-600" />
                   <span>
-                    4th Floor, Central Library, Sher-e-Bangla Agricultural University,Dhaka-1207, Bangladesh
+                    {contactData.address || '4th Floor, Central Library, Sher-e-Bangla Agricultural University, Dhaka-1207, Bangladesh'}
                   </span>
                 </div>
               </div>
@@ -106,8 +84,7 @@ export default function ContactPage() {
                 Office Hours
               </h2>
               <ul className="text-gray-700 space-y-2">
-                <li>Sunday – Thursday: 9:00 AM – 6:00 PM</li>
-                <li>Friday – Saturday: Closed</li>
+                <li>{contactData.officeHours || 'Sunday – Thursday: 9:00 AM – 6:00 PM'}</li>
               </ul>
             </motion.div>
           </div>

@@ -37,12 +37,15 @@ export default async function EventDetailsPage({ params }: { params: { slug: str
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
       {/* Hero */}
-      <section className="relative w-full h-[400px] overflow-hidden">
-        <img
-          src={event.image}
-          alt={event.title}
-          className="w-full h-full object-cover"
-        />
+      <section className="relative w-full h-[400px] overflow-hidden bg-gradient-to-br from-purple-600 to-blue-700">
+        {event.image && event.image.trim() !== '' && (
+          <img
+            src={event.image}
+            alt={event.title}
+            className="w-full h-full object-cover"
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+          />
+        )}
         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <h1 className="text-5xl font-bold text-white">{event.title}</h1>
         </div>

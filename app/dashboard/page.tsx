@@ -7,15 +7,17 @@ import DashboardContent from './DashboardContent'; // Your existing dashboard JS
 export default function Dashboard() {
   const router = useRouter();
   const [authorized, setAuthorized] = useState(false);
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
     if (token === 'loggedIn') {
       setAuthorized(true);
+      setChecking(false);
     } else {
-      router.push('/login'); // Redirect to login if not authorized
+      router.replace('/login'); // Use replace instead of push to prevent back button issues
     }
-  }, [router]);
+  }, []);
 
   if (!authorized) {
     return (

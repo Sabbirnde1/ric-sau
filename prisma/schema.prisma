@@ -1,0 +1,222 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User model for authentication
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  role      String   @default("admin") // admin or editor
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// News model
+model News {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  excerpt   String
+  date      String
+  category  String
+  author    String
+  image     String?
+  readTime  String   @default("3 min read")
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Event model
+model Event {
+  id          Int      @id @default(autoincrement())
+  slug        String   @unique
+  title       String
+  description String
+  date        String
+  time        String
+  location    String
+  category    String
+  image       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Project model
+model Project {
+  id           Int      @id @default(autoincrement())
+  title        String
+  description  String
+  category     String
+  status       String
+  lead         String
+  startDate    String
+  budget       Float
+  team         String?  // JSON stringified array
+  technologies String?  // JSON stringified array
+  publications Int      @default(0)
+  image        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Team model
+model Team {
+  id               Int      @id @default(autoincrement())
+  name             String
+  position         String
+  department       String
+  email            String
+  bio              String
+  image            String?
+  specializations  String?  // JSON stringified array
+  publications     Int      @default(0)
+  projects         String?  // JSON stringified array of numbers
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+// Innovator model
+model Innovator {
+  id             Int      @id @default(autoincrement())
+  name           String
+  title          String
+  bio            String
+  specialization String
+  image          String?
+  achievements   String   @default("")
+  ripd           String   @default("")
+  pi             String   @default("")
+  coPi           String   @default("")
+  category       String   @default("")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// RlCommittee model
+model RlCommittee {
+  id         Int      @id @default(autoincrement())
+  name       String
+  role       String
+  department String
+  email      String
+  bio        String
+  image      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// About model
+model About {
+  id           Int      @id @default(autoincrement())
+  mission      String
+  vision       String
+  description  String
+  established  String
+  image        String?
+  achievements String?  // JSON stringified array
+  heroTitle    String   @default("Research & Innovation Center (RIC - SAU)")
+  heroSubtitle String   @default("Fostering innovation, entrepreneurship, and agricultural technology for a sustainable future.")
+  heroImage    String?
+  identity     String   @default("") // rich text
+  funding      String   @default("[]") // JSON array [{label, value}]
+  fundingImage String?
+  whoCanApply  String   @default("[]") // JSON array of strings
+  whatYouGet   String   @default("[]") // JSON array of strings
+  focusAreas   String   @default("[]") // JSON array of strings
+  howToApply   String   @default("[]") // JSON array of strings
+  applyEmail   String   @default("info.sauric@gmail.com")
+  ctaTitle     String   @default("Innovate. Collaborate. Transform Agriculture.")
+  ctaSubtitle  String   @default("Join RIC–SAU to redefine agricultural innovation for a digital Bangladesh.")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Contact model
+model Contact {
+  id          Int      @id @default(autoincrement())
+  address     String
+  phone       String
+  email       String
+  officeHours String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Home model
+model Home {
+  id        Int      @id @default(autoincrement())
+  hero      String   // JSON stringified object {title, subtitle, description, videoUrl?, backgroundImage?}
+  stats     String   // JSON stringified array [{label, value, suffix?}]
+  features  String   @default("[]") // JSON array [{icon, title, description, color}]
+  cta       String   @default("{}") // JSON object {title, highlight, description}
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Publication model
+model Publication {
+  id        Int      @id @default(autoincrement())
+  title     String
+  authors   String   // JSON array of strings
+  journal   String
+  year      Int
+  category  String
+  type      String   @default("Journal Article")
+  citations Int      @default(0)
+  abstract  String
+  doi       String   @default("")
+  keywords  String   // JSON array of strings
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Lab model
+model Lab {
+  id           Int      @id @default(autoincrement())
+  name         String
+  director     String
+  location     String
+  established  Int
+  members      Int      @default(0)
+  focus        String   // JSON array of strings
+  description  String
+  equipment    String   // JSON array of strings
+  projects     Int      @default(0)
+  publications Int      @default(0)
+  image        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Resource model
+model Resource {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  image       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Settings model
+model Settings {
+  id        Int      @id @default(autoincrement())
+  general   String   // JSON stringified object
+  seo       String   // JSON stringified object
+  social    String   // JSON stringified object
+  theme     String   // JSON stringified object
+  features  String   // JSON stringified object
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -1,41 +1,44 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Brain, Code, Database, Shield, Zap, Users } from 'lucide-react';
 
-const features = [
+const iconMap: Record<string, any> = { Brain, Code, Database, Shield, Zap, Users };
+
+const defaultFeatures = [
   {
-    icon: Brain,
+    icon: 'Brain',
     title: 'Artificial Intelligence',
     description: 'Advanced AI research including machine learning, deep learning, and neural networks for innovative solutions.',
     color: 'bg-blue-500',
   },
   {
-    icon: Code,
+    icon: 'Code',
     title: 'Software Engineering',
     description: 'Cutting-edge software development methodologies, frameworks, and best practices for scalable applications.',
     color: 'bg-green-500',
   },
   {
-    icon: Database,
+    icon: 'Database',
     title: 'Data Science',
     description: 'Big data analytics, data mining, and statistical modeling to extract meaningful insights from complex datasets.',
     color: 'bg-purple-500',
   },
   {
-    icon: Shield,
+    icon: 'Shield',
     title: 'Cybersecurity',
     description: 'Advanced security research, threat detection, and protection mechanisms for digital infrastructure.',
     color: 'bg-red-500',
   },
   {
-    icon: Zap,
+    icon: 'Zap',
     title: 'IoT & Embedded Systems',
     description: 'Internet of Things solutions, embedded systems design, and smart device integration technologies.',
     color: 'bg-yellow-500',
   },
   {
-    icon: Users,
+    icon: 'Users',
     title: 'Human-Computer Interaction',
     description: 'User experience research, interface design, and accessibility solutions for better human-technology interaction.',
     color: 'bg-indigo-500',
@@ -43,6 +46,18 @@ const features = [
 ];
 
 export function FeaturesSection() {
+  const [features, setFeatures] = useState(defaultFeatures);
+
+  useEffect(() => {
+    fetch('/api/content?type=home')
+      .then(res => res.json())
+      .then(data => {
+        if (data.data?.features && data.data.features.length > 0) {
+          setFeatures(data.data.features);
+        }
+      })
+      .catch(() => {});
+  }, []);
   return (
     <section className="py-24 bg-white animate-on-scroll">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -70,15 +85,15 @@ export function FeaturesSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => {
-            const Icon = feature.icon;
+            const Icon = iconMap[feature.icon] || Brain;
             return (
               <motion.div
                 key={feature.title}
-                initial={{ opacity: 0, y: 50 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: index * 0.1 }}
+                transition={{ duration: 0.5, delay: index * 0.08 }}
                 viewport={{ once: true }}
-                whileHover={{ y: -10 }}
+                whileHover={{ y: -5 }}
                 className="group bg-white rounded-xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100"
               >
                 <div className={`w-14 h-14 ${feature.color} rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>

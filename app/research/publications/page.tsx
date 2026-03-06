@@ -1,20 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import { Search, Filter, Download, ExternalLink, Calendar, User, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-}
-
-const publications = [
+const defaultPublications = [
   {
     id: 1,
     title: 'Advanced Neural Network Architectures for Medical Image Analysis',
@@ -28,104 +22,41 @@ const publications = [
     doi: '10.1109/TMI.2024.001',
     keywords: ['Deep Learning', 'Medical Imaging', 'Neural Networks', 'Computer Vision']
   },
-  {
-    id: 2,
-    title: 'Quantum-Enhanced Cryptographic Protocols for Secure Communication',
-    authors: ['Prof. Michael Chen', 'Dr. Alex Kumar', 'Dr. Lisa Wang'],
-    journal: 'Nature Quantum Information',
-    year: 2024,
-    category: 'Cybersecurity',
-    type: 'Journal Article',
-    citations: 32,
-    abstract: 'We introduce quantum-enhanced cryptographic protocols that provide unprecedented security guarantees for digital communication systems.',
-    doi: '10.1038/s41534-024-001',
-    keywords: ['Quantum Cryptography', 'Security', 'Communication Protocols', 'Quantum Computing']
-  },
-  {
-    id: 3,
-    title: 'Energy-Efficient IoT Systems for Smart City Applications',
-    authors: ['Dr. Emily Rodriguez', 'Dr. James Liu', 'Prof. Maria Garcia'],
-    journal: 'ACM Transactions on Sensor Networks',
-    year: 2024,
-    category: 'IoT & Sustainability',
-    type: 'Journal Article',
-    citations: 28,
-    abstract: 'This work presents innovative approaches to designing energy-efficient IoT systems that can operate sustainably in smart city environments.',
-    doi: '10.1145/3580001',
-    keywords: ['Internet of Things', 'Smart Cities', 'Energy Efficiency', 'Sustainability']
-  },
-  {
-    id: 4,
-    title: 'Machine Learning Approaches for Predictive Analytics in Healthcare',
-    authors: ['Dr. Sarah Johnson', 'Dr. Robert Kim', 'Prof. David Wilson'],
-    journal: 'Journal of Biomedical Informatics',
-    year: 2023,
-    category: 'AI & Healthcare',
-    type: 'Journal Article',
-    citations: 67,
-    abstract: 'We explore various machine learning techniques for predictive analytics in healthcare, demonstrating significant improvements in patient outcome prediction.',
-    doi: '10.1016/j.jbi.2023.104',
-    keywords: ['Machine Learning', 'Healthcare Analytics', 'Predictive Modeling', 'Clinical Decision Support']
-  },
-  {
-    id: 5,
-    title: 'Blockchain-Based Identity Management Systems',
-    authors: ['Prof. Michael Chen', 'Dr. Jennifer Lee', 'Dr. Mark Thompson'],
-    journal: 'IEEE Security & Privacy',
-    year: 2023,
-    category: 'Cybersecurity',
-    type: 'Journal Article',
-    citations: 41,
-    abstract: 'This paper proposes a novel blockchain-based approach to identity management that ensures privacy, security, and decentralization.',
-    doi: '10.1109/MSEC.2023.001',
-    keywords: ['Blockchain', 'Identity Management', 'Privacy', 'Decentralization']
-  }
 ];
 
 export default function PublicationsPage() {
-  const [filteredPublications, setFilteredPublications] = useState(publications);
+  const [publications, setPublications] = useState<any[]>(defaultPublications);
+  const [filteredPublications, setFilteredPublications] = useState<any[]>(defaultPublications);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedYear, setSelectedYear] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
-  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      gsap.utils.toArray('.publication-card').forEach((element: any, index) => {
-        gsap.fromTo(element, 
-          { y: 100, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.8,
-            delay: index * 0.1,
-            ease: 'power2.out',
-            scrollTrigger: {
-              trigger: element,
-              start: 'top 80%',
-              end: 'bottom 20%',
-              toggleActions: 'play none none reverse'
-            }
-          }
-        );
-      });
-    }
-  }, [filteredPublications]);
+    fetch('/api/content?type=publications')
+      .then(res => res.json())
+      .then(res => {
+        if (res.data && res.data.length > 0) {
+          setPublications(res.data);
+          setFilteredPublications(res.data);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     filterPublications();
-  }, [searchTerm, selectedCategory, selectedYear, selectedType]);
+  }, [searchTerm, selectedCategory, selectedYear, selectedType, publications]);
 
   const filterPublications = () => {
     let filtered = publications;
 
     if (searchTerm) {
-      filtered = filtered.filter(pub =>
+      filtered = filtered.filter((pub: any) =>
         pub.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        pub.authors.some(author => author.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (pub.authors || []).some((author: string) => author.toLowerCase().includes(searchTerm.toLowerCase())) ||
         pub.journal.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        pub.keywords.some(keyword => keyword.toLowerCase().includes(searchTerm.toLowerCase()))
+        (pub.keywords || []).some((keyword: string) => keyword.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
@@ -149,7 +80,7 @@ export default function PublicationsPage() {
   const types = [...new Set(publications.map(p => p.type))];
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-gray-50 pt-20">
+    <div className="min-h-screen bg-gray-50 pt-20">
       {/* Hero Section */}
       <section className="py-24 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
@@ -326,7 +257,7 @@ export default function PublicationsPage() {
                       </p>
 
                       <div className="flex flex-wrap gap-2 mb-6">
-                        {publication.keywords.map((keyword) => (
+                        {publication.keywords.map((keyword: string) => (
                           <span key={keyword} className="px-3 py-1 bg-blue-50 text-blue-700 text-sm rounded-full">
                             {keyword}
                           </span>

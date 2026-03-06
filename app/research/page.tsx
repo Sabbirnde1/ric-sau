@@ -1,16 +1,9 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import { Brain, Code, Database, Shield, Zap, Users, ArrowRight, Calendar, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-}
 
 const researchAreas = [
   {
@@ -70,50 +63,12 @@ const researchAreas = [
 ];
 
 export default function ResearchPage() {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      gsap.utils.toArray('.research-card').forEach((element: any, index) => {
-        gsap.fromTo(element, 
-          { y: 100, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.8,
-            delay: index * 0.1,
-            ease: 'power2.out',
-            scrollTrigger: {
-              trigger: element,
-              start: 'top 80%',
-              end: 'bottom 20%',
-              toggleActions: 'play none none reverse'
-            }
-          }
-        );
-      });
-    }
-  }, []);
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-gray-50 pt-20">
+    <div className="min-h-screen bg-gray-50 pt-20">
       {/* Hero Section */}
       <section className="py-24 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
-        <motion.div
-          animate={{ 
-            backgroundPosition: ['0% 0%', '100% 100%'],
-          }}
-          transition={{ 
-            duration: 20, 
-            repeat: Infinity, 
-            ease: 'linear' 
-          }}
-          className="absolute inset-0 opacity-20"
-          style={{
-            background: 'radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%)',
-          }}
-        />
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div

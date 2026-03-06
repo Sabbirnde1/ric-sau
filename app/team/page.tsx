@@ -1,72 +1,64 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
-import { Linkedin, Twitter, Github } from 'lucide-react';
+import { Linkedin, Twitter, Github, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-const team = [
-  {
-    id: 1,
-    name: 'Dr. Sarah Johnson',
-    role: 'Director of Research',
-    bio: 'Sarah leads our research initiatives with a focus on artificial intelligence and machine learning. She has over 15 years of experience in the field.',
-    image: 'https://randomuser.me/api/portraits/women/44.jpg',
-    socials: {
-      linkedin: '#',
-      twitter: '#',
-      github: '#',
-    },
-  },
-  {
-    id: 2,
-    name: 'Prof. Michael Chen',
-    role: 'Cybersecurity Lead',
-    bio: 'Michael is an expert in cybersecurity and privacy protection, driving our mission to secure digital ecosystems worldwide.',
-    image: 'https://randomuser.me/api/portraits/men/46.jpg',
-    socials: {
-      linkedin: '#',
-      twitter: '#',
-      github: '#',
-    },
-  },
-  {
-    id: 3,
-    name: 'Dr. Emily Rodriguez',
-    role: 'IoT & Smart Systems Lead',
-    bio: 'Emily specializes in IoT and smart city solutions, with groundbreaking work in connected systems and embedded platforms.',
-    image: 'https://randomuser.me/api/portraits/women/68.jpg',
-    socials: {
-      linkedin: '#',
-      twitter: '#',
-      github: '#',
-    },
-  },
-  {
-    id: 4,
-    name: 'Prof. David Wilson',
-    role: 'Data Science & Analytics Lead',
-    bio: 'David has vast expertise in data analytics, helping organizations extract insights and make data-driven decisions.',
-    image: 'https://randomuser.me/api/portraits/men/32.jpg',
-    socials: {
-      linkedin: '#',
-      twitter: '#',
-      github: '#',
-    },
-  },
-];
+function TeamMemberCard({ member }: { member: any }) {
+  const [imgError, setImgError] = useState(false);
+  const hasValidImage = member.image && member.image.trim() !== '' && !imgError;
+
+  return (
+    <motion.div
+      className="team-card bg-white rounded-2xl shadow-lg p-6 text-center flex flex-col items-center"
+    >
+      <div className="w-32 h-32 rounded-full overflow-hidden mb-6 shadow-md bg-gradient-to-br from-blue-50 to-purple-50 flex-shrink-0">
+        {hasValidImage ? (
+          <motion.img
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.3 }}
+            src={member.image}
+            alt={member.name}
+            className="w-full h-full object-cover"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <User className="w-12 h-12 text-blue-200" />
+          </div>
+        )}
+      </div>
+      <h3 className="text-xl font-semibold text-gray-900">{member.name}</h3>
+      <p className="text-sm text-blue-600 mb-4">{member.position}</p>
+      <p className="text-sm text-gray-600 leading-relaxed mb-6 line-clamp-3">{member.bio}</p>
+    </motion.div>
+  );
+}
 
 export default function TeamPage() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [team, setTeam] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    fetch('/api/content?type=team')
+      .then(res => res.json())
+      .then(data => {
+        setTeam(data.data || []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    if (!loading && team.length > 0 && typeof window !== 'undefined') {
       gsap.utils.toArray('.team-card').forEach((element: any, index) => {
         gsap.fromTo(
           element,
@@ -80,13 +72,13 @@ export default function TeamPage() {
             scrollTrigger: {
               trigger: element,
               start: 'top 85%',
-              toggleActions: 'play none none reverse',
+              toggleActions: 'play none none none',
             },
           }
         );
       });
     }
-  }, []);
+  }, [loading, team]);
 
   return (
     <div ref={containerRef} className="min-h-screen bg-gray-50 pt-20">
@@ -131,59 +123,15 @@ export default function TeamPage() {
           </motion.div>
 
           <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
-            {team.map((member) => (
-              <motion.div
-                key={member.id}
-                className="team-card bg-white rounded-2xl shadow-lg p-6 text-center flex flex-col items-center"
-              >
-                <motion.img
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.3 }}
-                  src={member.image}
-                  alt={member.name}
-                  className="w-32 h-32 rounded-full object-cover mb-6 shadow-md"
-                />
-                <h3 className="text-xl font-semibold text-gray-900">
-                  {member.name}
-                </h3>
-                <p className="text-sm text-blue-600 mb-4">{member.role}</p>
-                <p className="text-sm text-gray-600 leading-relaxed mb-6">
-                  {member.bio}
-                </p>
-                <div className="flex space-x-4">
-                  {member.socials.linkedin && (
-                    <a
-                      href={member.socials.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-500 hover:text-blue-600"
-                    >
-                      <Linkedin className="h-5 w-5" />
-                    </a>
-                  )}
-                  {member.socials.twitter && (
-                    <a
-                      href={member.socials.twitter}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-500 hover:text-blue-400"
-                    >
-                      <Twitter className="h-5 w-5" />
-                    </a>
-                  )}
-                  {member.socials.github && (
-                    <a
-                      href={member.socials.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-500 hover:text-black"
-                    >
-                      <Github className="h-5 w-5" />
-                    </a>
-                  )}
-                </div>
-              </motion.div>
-            ))}
+            {loading ? (
+              <div className="col-span-full flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>
+            ) : team.length === 0 ? (
+              <p className="col-span-full text-center text-gray-500">No team members yet.</p>
+            ) : (
+            team.map((member) => (
+              <TeamMemberCard key={member.id} member={member} />
+            ))
+            )}
           </div>
         </div>
       </section>

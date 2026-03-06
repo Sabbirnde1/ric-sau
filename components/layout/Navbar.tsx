@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronDown, LayoutDashboard, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const navigation = [
@@ -32,6 +31,7 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [logoUrl, setLogoUrl] = useState('/RIC SAU logo.png');
   const pathname = usePathname();
   const router = useRouter();
 
@@ -54,6 +54,15 @@ export function Navbar() {
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
     setIsLoggedIn(token === 'loggedIn');
+  }, [pathname]);
+
+  useEffect(() => {
+    fetch('/api/settings?section=general')
+      .then(res => res.json())
+      .then(data => {
+        if (data.data?.logo) setLogoUrl(data.data.logo);
+      })
+      .catch(() => {});
   }, []);
 
   const handleLogout = () => {
@@ -66,12 +75,12 @@ export function Navbar() {
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className={`fixed p-2 w-full z-50 transition-all duration-300 ${
+      className={`fixed w-full z-50 transition-all duration-300 ${
         scrolled ? 'bg-white/95 backdrop-blur-md shadow-lg border-b' : 'bg-transparent'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-12">
           {/* Logo */}
           {/* <Link href="/" className="flex items-center space-x-2">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
@@ -84,16 +93,15 @@ export function Navbar() {
 
         <Link href="/" className="flex items-center space-x-2">
           {/* Logo Image */}
-          <Image
-            src="/RIC SAU logo.png"
+          <img
+            src={logoUrl}
             alt="Research & Innovation Logo"
-            width={20}
-            height={20}
-            className="w-20 h-20 object-cover"
-            priority
+            width={32}
+            height={32}
+            className="w-8 h-8 object-contain"
           />
           {/* Text */}
-          <span className="font-bold text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             RIC-SAU
           </span>
         </Link>
@@ -132,12 +140,22 @@ export function Navbar() {
               </div>
             ))}
 
-            {/* Login/Logout Button */}
+            {/* Login/Dashboard/Logout Buttons */}
             {isLoggedIn ? (
-              <Button onClick={handleLogout}>Logout</Button>
+              <div className="flex items-center space-x-2">
+                <Link href="/dashboard">
+                  <Button variant="outline" size="sm" className="flex items-center space-x-1">
+                    <LayoutDashboard className="h-4 w-4" />
+                    <span>Dashboard</span>
+                  </Button>
+                </Link>
+                <Button variant="ghost" size="sm" onClick={handleLogout} className="text-red-500 hover:text-red-600 hover:bg-red-50">
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
             ) : (
               <Link href="/login">
-                <Button>Login</Button>
+                <Button size="sm">Login</Button>
               </Link>
             )}
           </div>
@@ -193,17 +211,27 @@ export function Navbar() {
                 </div>
               ))}
 
-              {/* Mobile Login/Logout */}
+              {/* Mobile Login/Dashboard/Logout */}
               {isLoggedIn ? (
-                <Button
-                  className="w-full mt-2"
-                  onClick={() => {
-                    handleLogout();
-                    setIsOpen(false);
-                  }}
-                >
-                  Logout
-                </Button>
+                <div className="space-y-2 mt-2">
+                  <Link href="/dashboard" onClick={() => setIsOpen(false)}>
+                    <Button variant="outline" className="w-full flex items-center justify-center space-x-2">
+                      <LayoutDashboard className="h-4 w-4" />
+                      <span>Dashboard</span>
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    className="w-full text-red-500 hover:text-red-600 hover:bg-red-50 flex items-center justify-center space-x-2"
+                    onClick={() => {
+                      handleLogout();
+                      setIsOpen(false);
+                    }}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>Logout</span>
+                  </Button>
+                </div>
               ) : (
                 <Link href="/login" onClick={() => setIsOpen(false)}>
                   <Button className="w-full mt-2">Login</Button>

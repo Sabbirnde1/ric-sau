@@ -1,11 +1,12 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Calendar, User } from 'lucide-react';
+import { ArrowRight, Calendar, User, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
-const highlights = [
+const defaultHighlights = [
   {
     id: 1,
     title: 'Advanced Neural Network Architectures for Medical Diagnosis',
@@ -39,6 +40,27 @@ const highlights = [
 ];
 
 export function ResearchHighlights() {
+  const [highlights, setHighlights] = useState(defaultHighlights);
+
+  useEffect(() => {
+    fetch('/api/content?type=projects')
+      .then(res => res.json())
+      .then(data => {
+        if (data.data && data.data.length > 0) {
+          setHighlights(data.data.slice(0, 3).map((p: any) => ({
+            id: p.id,
+            title: p.title,
+            description: p.description,
+            category: p.category,
+            date: p.startDate || p.createdAt,
+            lead: p.lead,
+            image: p.image,
+            status: p.status,
+          })));
+        }
+      })
+      .catch(() => {});
+  }, []);
   return (
     <section className="py-24 bg-gray-50 animate-on-scroll">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -62,21 +84,28 @@ export function ResearchHighlights() {
           {highlights.map((project, index) => (
             <motion.article
               key={project.id}
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: index * 0.2 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
-              whileHover={{ y: -10 }}
+              whileHover={{ y: -5 }}
               className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300"
             >
-              <div className="relative h-48 overflow-hidden">
+              <div className="relative h-48 overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50">
+                {project.image && project.image.trim() !== '' ? (
                 <motion.img
-                  whileHover={{ scale: 1.1 }}
+                  whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.4 }}
                   src={project.image}
                   alt={project.title}
                   className="w-full h-full object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <FileText className="w-12 h-12 text-blue-200" />
+                  </div>
+                )}
                 <div className="absolute top-4 left-4">
                   <span className="px-3 py-1 bg-blue-600 text-white text-sm font-medium rounded-full">
                     {project.category}
