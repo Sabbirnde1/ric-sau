@@ -74,17 +74,6 @@ const event = await prisma.event.update({
 
 ---
 
-## Key Differences from MongoDB
-
-| MongoDB (Mongoose) | SQLite (Prisma) |
-|-------------------|-----------------|
-| `Model.find()` | `prisma.model.findMany()` |
-| `Model.findById(id)` | `prisma.model.findUnique({ where: { id } })` |
-| `Model.create(data)` | `prisma.model.create({ data })` |
-| `Model.findByIdAndUpdate()` | `prisma.model.update({ where: { id }, data })` |
-| `Model.findByIdAndDelete()` | `prisma.model.delete({ where: { id } })` |
-
----
 
 ## JSON Fields
 
@@ -103,23 +92,6 @@ await prisma.settings.create({
 // Read
 const settings = await prisma.settings.findFirst();
 const general = JSON.parse(settings.general);
-```
-
----
-
-## Migration from MongoDB
-
-To migrate your existing MongoDB data to SQLite:
-
-1. **Export from MongoDB** (using VS Code MongoDB extension)
-2. **Transform and import** into SQLite
-
-Or create a migration script:
-```typescript
-// scripts/migrate-from-mongodb.ts
-import prisma from '../lib/prisma';
-import mongoose from 'mongoose';
-// ... migration logic
 ```
 
 ---
@@ -159,4 +131,4 @@ Opens at http://localhost:5555 - View and edit data visually!
 
 ## Your Database is Ready! 🚀
 
-Start building with SQLite - no MongoDB Atlas issues, no SSL/TLS errors!
+Start building with SQLite - simple, fast, and easy to use!

@@ -283,7 +283,7 @@ The rich text editor supports:
    - Add image optimization pipeline
 
 3. **Database:**
-   - Replace mockData with real database (PostgreSQL, MongoDB)
+   - Replace mockData with real database (PostgreSQL)
    - Implement proper data validation
    - Add backup mechanisms
    - Use environment variables for sensitive data

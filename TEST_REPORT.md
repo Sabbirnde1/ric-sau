@@ -630,7 +630,7 @@ These are intentional limitations for the demo/development version:
 ### To Make Production-Ready:
 
 1. **Database Integration:**
-   - [ ] Set up PostgreSQL or MongoDB
+   - [ ] Set up PostgreSQL
    - [ ] Create Prisma schema
    - [ ] Migrate mock data to database
    - [ ] Implement database queries
