@@ -2,6 +2,8 @@
 
 A modern, high-performance research & innovation website built with **Next.js 13**, **TypeScript**, **Tailwind CSS**, **Framer Motion**, and **GSAP**. Features a comprehensive admin dashboard, news management, events system, and research project showcase.
 
+**Database:** Powered by **Neon PostgreSQL** (serverless, auto-scaling)
+
 **Live Demo:** [https://ric-sau.kallanroy.xyz](https://ric-sau.kallanroy.xyz)
 
 ---
@@ -109,9 +111,35 @@ npm run dev          # Start development server
 npm run build        # Create optimized production build
 npm run start        # Start production server
 
+# Database (Neon PostgreSQL)
+npm run db:push      # Push schema changes to database
+npm run db:migrate   # Create and run migrations
+npm run db:seed      # Seed database with initial data
+npm run db:studio    # Open Prisma Studio (visual database editor)
+npm run check:neon   # Verify Neon database configuration
+
 # Code Quality
 npm run lint         # Run ESLint
 ```
+
+### 🗄️ Database Setup (Neon)
+
+This project uses **Neon PostgreSQL** - a serverless, auto-scaling database perfect for Next.js on Netlify.
+
+**Quick Start:**
+
+1. **Get free database:** Visit [neon.tech](https://neon.tech) and create a project
+2. **Copy connection string:** Use the "Pooled" connection string
+3. **Add to .env.local:**
+   ```env
+   DATABASE_URL="postgresql://user:pass@ep-xxx.region.aws.neon.tech:5432/neondb?sslmode=require"
+   ```
+4. **Push schema:** `npm run db:push`
+5. **Seed data:** `npm run db:seed`
+
+**For detailed setup instructions, see:** [NEON_DATABASE_SETUP.md](./NEON_DATABASE_SETUP.md)
+
+**For Netlify deployment:** [NETLIFY_DEPLOYMENT.md](./NETLIFY_DEPLOYMENT.md)
 
 ---
 
