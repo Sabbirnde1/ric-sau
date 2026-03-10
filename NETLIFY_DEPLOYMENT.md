@@ -15,28 +15,53 @@ Before deploying to Netlify, ensure you have:
 
 ---
 
-## 🗄️ Step 1: Set Up PostgreSQL Database
+## 🗄️ Step 1: Set Up PostgreSQL Database (CRITICAL!)
 
-Choose one of these providers for your PostgreSQL database:
+⚠️ **IMPORTANT:** Without this, login and all features will fail!
 
-### Option A: Neon (Recommended - Free Tier)
+Your app REQUIRES a PostgreSQL database. SQLite does NOT work on Netlify.
+
+### Option A: Neon (Recommended - FREE ⭐)
+
+**Why Neon?**
+- ✅ Free forever (0.5 GB storage)
+- ✅ No credit card required
+- ✅ Works perfectly with Netlify
+- ✅ 2-minute setup
+
+**Steps:**
 1. Go to [neon.tech](https://neon.tech)
-2. Sign up and create a new project
-3. Copy the connection string (starts with `postgresql://`)
-4. Save it for environment variables
+2. Sign up (use GitHub for fastest setup)
+3. Click **Create Project**
+4. Name it `ric-sau`
+5. Copy the **full** connection string including `?sslmode=require`
+6. Example: `postgresql://user:pass@ep-xxx.region.neon.tech/neondb?sslmode=require`
+7. ⚠️ Must include `?sslmode=require` at the end!
+8. Save this string - you'll need it in Step 4
 
-### Option B: Supabase (Free Tier)
+### Option B: Supabase (FREE)
+
+**Steps:**
 1. Go to [supabase.com](https://supabase.com)
-2. Create a new project
-3. Go to Settings → Database → Connection String
-4. Copy the PostgreSQL connection string
-5. Save it for environment variables
+2. Sign up and create a new project
+3. Set database password (SAVE IT!)
+4. Wait 2 minutes for project setup
+5. Go to Settings → Database → Connection string
+6. Select **URI** format
+7. Copy connection string
+8. ⚠️ Replace `[YOUR-PASSWORD]` with your actual password
+9. Make sure it ends with `?sslmode=require`
 
-### Option C: Railway (Hobby Plan)
+### Option C: Railway ($5/month)
+
+**Steps:**
 1. Go to [railway.app](https://railway.app)
-2. Create a new project → Add PostgreSQL
-3. Copy the DATABASE_URL from variables
-4. Save it for environment variables
+2. Sign up with GitHub
+3. New Project → Provision PostgreSQL
+4. Click on PostgreSQL service
+5. Go to Variables tab
+6. Copy DATABASE_URL value
+7. Already includes SSL configuration ✅
 
 ---
 
