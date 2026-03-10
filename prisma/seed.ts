@@ -142,19 +142,21 @@ async function main() {
     data: {
       general: JSON.stringify({
         siteName: 'RIC-SAU',
-        tagline: 'Research & Innovation Centre - SUST',
-        description: 'Leading research and innovation at Shahjalal University',
-        footerText: '© 2026 Research & Innovation Centre, SUST. All rights reserved.',
+        tagline: 'Research & Innovation Centre - Sher-e-Bangla Agricultural University',
+        description: 'Leading research and innovation at Sher-e-Bangla Agricultural University',
+        footerText: '© 2026 Research & Innovation Centre, SAU. All rights reserved.',
+        logo: 'https://via.placeholder.com/150x50/3B82F6/ffffff?text=RIC-SAU', // Default placeholder logo
       }),
       seo: JSON.stringify({
         metaTitle: 'RIC-SAU | Research & Innovation Centre',
-        metaDescription: 'Fostering innovation and research excellence at SUST',
-        metaKeywords: 'research, innovation, SUST, university, technology',
+        metaDescription: 'Fostering innovation and research excellence at SAU',
+        metaKeywords: 'research, innovation, SAU, university, agriculture, technology',
       }),
       social: JSON.stringify({
-        facebook: 'https://facebook.com/ric-sust',
-        twitter: 'https://twitter.com/ric_sust',
-        linkedin: 'https://linkedin.com/company/ric-sust',
+        facebook: 'https://facebook.com/ric-sau',
+        twitter: 'https://twitter.com/ric_sau',
+        linkedin: 'https://linkedin.com/company/ric-sau',
+        youtube: 'https://youtube.com/@ric-sau',
       }),
       theme: JSON.stringify({
         primaryColor: '#3B82F6',
@@ -174,8 +176,13 @@ async function main() {
   console.log('✅ Created settings');
 
   console.log('\n🎉 Seeding completed successfully!\n');
+  console.log('Default Admin Credentials:');
+  console.log('  - Username: admin');
+  console.log('  - Email: admin@ric-sau.com');
+  console.log('  - Password: admin123');
+  console.log('  ⚠️  CHANGE PASSWORD IMMEDIATELY AFTER FIRST LOGIN!\n');
   console.log('You can now:');
-  console.log('  - Login with: admin@ric-sau.com / admin123');
+  console.log('  - Login at: http://localhost:3000/login');
   console.log('  - View data: npx prisma studio');
   console.log('  - Test API: curl http://localhost:3000/api/test-sqlite\n');
 }

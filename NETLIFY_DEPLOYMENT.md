@@ -176,23 +176,76 @@ Compress-Archive -Path "ric-sau\*" -DestinationPath "ric-sau-deploy.zip" -Force 
 
 ---
 
-## 🔄 Step 5: Initialize Database
+## �️ Step 5: Initialize Database (CRITICAL!)
 
-After successful deployment:
+**⚠️ IMPORTANT:** Without this step:
+- ❌ Admin login will NOT work (no users in database)
+- ❌ Logo will NOT show (no settings in database)
+- ❌ Pages will be empty (no content in database)
 
-1. **Run Prisma Migrations:**
-   - Go to Netlify dashboard → **Site settings** → **Build & deploy** → **Build hooks**
-   - Or use Netlify CLI:
-   ```bash
-   netlify dev
-   npx prisma migrate deploy
-   npx prisma db seed
+### Quick Setup (Recommended)
+
+1. **Add Setup Secret Environment Variable:**
+   - Go to Netlify → **Site settings** → **Environment variables**
+   - Add: `SETUP_SECRET` = `your-secret-key-123` (choose a strong random string)
+   - Save and trigger a new deploy
+
+2. **Run One-Click Setup:**
+   - After deployment completes, visit:
+   ```
+   https://your-site.netlify.app/api/setup-db?secret=your-secret-key-123
+   ```
+   - Replace `your-site.netlify.app` with your actual Netlify URL
+   - Replace `your-secret-key-123` with your `SETUP_SECRET` value
+
+3. **Success Response:**
+   ```json
+   {
+     "success": true,
+     "message": "✅ Database setup completed successfully!",
+     "data": {
+       "defaultCredentials": {
+         "username": "admin",
+         "password": "admin123"
+       }
+     }
+   }
    ```
 
-2. **Alternative: Manual Setup:**
-   - Connect to your PostgreSQL database using a client (TablePlus, DBeaver, psql)
-   - Run migrations manually
-   - Or use Prisma Studio locally with production DATABASE_URL
+4. **Login:**
+   - Go to: `https://your-site.netlify.app/login`
+   - Username: `admin`
+   - Password: `admin123`
+   - ✅ Your site is now fully functional!
+
+5. **Secure Your Site:**
+   - **IMMEDIATELY change the admin password** after first login
+   - Delete `app/api/setup-db/route.ts` or add authentication
+   - Redeploy
+
+### Default Admin Credentials
+
+After database initialization:
+```
+Username: admin
+Email: admin@ric-sau.com
+Password: admin123
+```
+
+**⚠️ CHANGE THIS PASSWORD IMMEDIATELY!**
+
+### Detailed Instructions
+
+For complete step-by-step instructions, troubleshooting, and manual setup options:
+
+📖 **See: [DATABASE_SETUP.md](./DATABASE_SETUP.md)**
+
+This guide covers:
+- Two initialization methods (API and manual)
+- Uploading your logo
+- Troubleshooting common issues
+- Security best practices
+- Verification steps
 
 ---
 
@@ -215,6 +268,39 @@ After successful deployment:
 ---
 
 ## 🔧 Common Issues & Solutions
+
+### ❌ Admin Login Doesn't Work
+**Problem:** Can't login with any credentials, get "Invalid username or password"
+
+**Root Cause:** Database is empty - no admin user exists
+
+**Solution:** 
+1. Initialize database using Step 5 above
+2. Visit: `https://your-site.netlify.app/api/setup-db?secret=YOUR_SETUP_SECRET`
+3. Login with default credentials: username `admin`, password `admin123`
+4. See [DATABASE_SETUP.md](./DATABASE_SETUP.md) for detailed instructions
+
+### ❌ Logo Doesn't Show / Header is Blank
+**Problem:** Logo is missing from navbar and site header
+
+**Root Cause:** Database has no settings record with logo configuration
+
+**Solution:**
+1. Initialize database (see Step 5)
+2. After login, go to Dashboard → Settings tab
+3. Upload your logo or paste logo URL
+4. Click Save Settings
+5. Logo will appear immediately
+
+### ❌ Pages Are Empty / No Content Shows
+**Problem:** News, events, team pages show no content
+
+**Root Cause:** Database is empty - no sample content
+
+**Solution:**
+1. Initialize database using Step 5
+2. Sample content will be created automatically
+3. Add your own content via Dashboard
 
 ### ❌ Build Fails with "Module not found"
 **Solution:** Ensure all dependencies are in `package.json`
