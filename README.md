@@ -71,8 +71,34 @@ A modern, high-performance research & innovation website built with **Next.js 13
 ### Prerequisites
 - Node.js 18+ 
 - npm, yarn, or pnpm
+- Free Neon PostgreSQL database (https://neon.tech)
 
-### Setup
+### ⚡ Automatic Setup (Recommended)
+
+**One command does everything:**
+
+```bash
+# Windows
+npm run setup
+
+# Mac/Linux
+bash auto-setup.sh
+```
+
+This will automatically:
+- ✅ Open Neon.tech for you to get database
+- ✅ Configure your .env.local file
+- ✅ Install dependencies
+- ✅ Generate Prisma Client
+- ✅ Create database tables
+- ✅ Seed initial data
+- ✅ Start development server
+
+**Just paste your Neon connection string when prompted!**
+
+---
+
+### Manual Setup
 
 ```bash
 # 1. Clone the repository
@@ -81,18 +107,21 @@ cd ric-sau
 
 # 2. Install dependencies
 npm install
-# or
-yarn install
-# or
-pnpm install
 
-# 3. Create environment file (optional)
-cp .env.example .env.local
+# 3. Get Neon database
+# Visit https://neon.tech and create a project named "ric-sau"
+# Copy the "Pooled" connection string
 
-# 4. Run development server
+# 4. Create .env.local
+cp .env.local.template .env.local
+# Edit .env.local and paste your DATABASE_URL
+
+# 5. Setup database
+npm run db:push      # Create tables
+npm run db:seed      # Add initial data
+
+# 6. Run development server
 npm run dev
-# or
-yarn dev
 # or
 pnpm dev
 ```
