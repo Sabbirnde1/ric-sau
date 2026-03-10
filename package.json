@@ -13,6 +13,8 @@
     "db:studio": "prisma studio",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
+    "db:test": "node test-db-connection.js",
+    "db:setup": "powershell -ExecutionPolicy Bypass -File ./setup-database.ps1",
     "check:neon": "powershell -ExecutionPolicy Bypass -File ./check-neon-config.ps1"
   },
   "prisma": {
