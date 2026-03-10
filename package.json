@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "NODE_ENV=production node server.js",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "start:custom": "NODE_ENV=production node server.js",
     "lint": "next lint",
-    "migrate": "tsx scripts/migrate.ts",
+    "postinstall": "prisma generate",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio"
   },

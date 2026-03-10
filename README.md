@@ -300,13 +300,36 @@ npm run build
 
 ## 🚢 Deployment
 
-### Vercel (Recommended)
+### ⚡ Netlify (Recommended for this project)
+
+This project is optimized for Netlify deployment with zero configuration.
+
+**Quick Deploy:**
+1. Create account at [netlify.com](https://netlify.com)
+2. Connect your GitHub repository or drag & drop ZIP file
+3. Configure environment variables (DATABASE_URL, JWT_SECRET, etc.)
+4. Deploy! ✨
+
+**📖 Complete Guide:** See [NETLIFY_DEPLOYMENT.md](./NETLIFY_DEPLOYMENT.md) for detailed step-by-step instructions including:
+- Database setup (PostgreSQL)
+- Environment variables configuration
+- ZIP file preparation
+- Manual and automated deployment options
+- Troubleshooting common issues
+
+### Vercel
+
 1. Push code to GitHub
 2. Import project in Vercel
-3. Configure environment variables
+3. Configure environment variables:
+   - `DATABASE_URL` - PostgreSQL connection string
+   - `JWT_SECRET` - JWT secret key
+   - `NEXT_PUBLIC_BASE_URL` - Your site URL
+   - `NEXT_PUBLIC_SITE_URL` - Your site URL
 4. Deploy automatically
 
-### Other Platforms
+### Railway / Render
+
 ```bash
 # Build for production
 npm run build
@@ -314,6 +337,14 @@ npm run build
 # Start production server
 npm run start
 ```
+
+**Required Environment Variables:**
+- `DATABASE_URL` - PostgreSQL database connection string
+- `JWT_SECRET` - Secret key for JWT authentication
+- `NEXT_PUBLIC_BASE_URL` - Your site URL
+- `NEXT_PUBLIC_SITE_URL` - Your site URL
+
+See `.env.example` for all available configuration options.
 
 ---
 
