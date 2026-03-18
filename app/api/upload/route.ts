@@ -5,6 +5,15 @@ import path from 'path';
 
 export async function POST(request: NextRequest) {
   try {
+    // Netlify functions use ephemeral/read-only file systems for deployment assets.
+    // Writing to /public/uploads is not durable in production.
+    if (process.env.NETLIFY) {
+      return NextResponse.json({
+        success: false,
+        error: 'File upload is not supported on Netlify local storage. Use an external image URL in Settings.'
+      }, { status: 501 });
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
     

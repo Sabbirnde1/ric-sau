@@ -7,6 +7,7 @@ import SocialIcons from '../SocialIcons';
 
 export function Footer() {
   const [logoUrl, setLogoUrl] = useState('/RIC SAU logo.png');
+  const fallbackLogo = '/RIC SAU logo.png';
 
   useEffect(() => {
     fetch('/api/settings?section=general')
@@ -29,6 +30,7 @@ export function Footer() {
                 width={40}
                 height={40}
                 className="w-10 h-10 object-contain"
+                onError={() => setLogoUrl(fallbackLogo)}
               />
               <span className="font-bold text-xl">RIC-SAU</span>
             </div>

@@ -71,6 +71,8 @@ export function Navbar() {
     router.push('/login');
   };
 
+  const fallbackLogo = '/RIC SAU logo.png';
+
   return (
     <motion.nav
       initial={{ y: -100 }}
@@ -99,6 +101,7 @@ export function Navbar() {
             width={32}
             height={32}
             className="w-8 h-8 object-contain"
+            onError={() => setLogoUrl(fallbackLogo)}
           />
           {/* Text */}
           <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">

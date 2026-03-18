@@ -63,7 +63,13 @@ export default function ImageUpload({
         setPreview(result.url);
         onChange(result.url);
       } else {
-        setError(result.error || 'Upload failed');
+        const errorMessage = result.error || 'Upload failed';
+        setError(errorMessage);
+
+        // Guide users to URL mode when local disk upload is unavailable in production.
+        if (response.status === 501) {
+          setUseUrl(true);
+        }
       }
     } catch (err) {
       setError('Failed to upload image');
