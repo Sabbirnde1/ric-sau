@@ -32,14 +32,44 @@ export async function POST(request: NextRequest) {
 
     const bytes = await file.arrayBuffer();
 
-    // Serverless providers have ephemeral local disk. Return an inline data URL fallback
-    // so uploads still work for small branding/media images.
+    // Serverless providers have ephemeral local disk.
+    // Use Cloudinary if configured, otherwise return an inline data URL fallback.
     if (process.env.NETLIFY || process.env.VERCEL) {
+      const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+      const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
+
+      if (cloudName && uploadPreset) {
+        const cloudinaryFormData = new FormData();
+        const blob = new Blob([bytes], { type: file.type });
+        cloudinaryFormData.append('file', blob, file.name);
+        cloudinaryFormData.append('upload_preset', uploadPreset);
+
+        const cloudinaryResponse = await fetch(
+          `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+          {
+            method: 'POST',
+            body: cloudinaryFormData,
+          }
+        );
+
+        if (cloudinaryResponse.ok) {
+          const cloudinaryResult = await cloudinaryResponse.json();
+          return NextResponse.json({
+            success: true,
+            url: cloudinaryResult.secure_url,
+            filename: file.name,
+            size: file.size,
+            type: file.type,
+            storage: 'cloudinary'
+          });
+        }
+      }
+
       const inlineMaxSize = 1 * 1024 * 1024; // 1MB
       if (file.size > inlineMaxSize) {
         return NextResponse.json({
           success: false,
-          error: 'On serverless deployment, inline upload supports up to 1MB. Please compress the image or use an external image URL.'
+          error: 'Upload failed on serverless storage for files above 1MB. Configure CLOUDINARY_CLOUD_NAME and CLOUDINARY_UPLOAD_PRESET for persistent uploads, or use an external image URL.'
         }, { status: 400 });
       }
 
