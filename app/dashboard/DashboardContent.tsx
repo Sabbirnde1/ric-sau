@@ -146,6 +146,7 @@ export default function DashboardContent() {
     image: '',
     imagePlacement: 'top'
   });
+  const [editingRlCommitteeId, setEditingRlCommitteeId] = useState<number | null>(null);
   
   const [publicationForm, setPublicationForm] = useState({
     title: '',
@@ -384,6 +385,31 @@ export default function DashboardContent() {
       }
     } catch (error) {
       console.error(`Error adding ${type}:`, error);
+    }
+  };
+
+  const handleSaveRlCommittee = async () => {
+    try {
+      const isEditing = editingRlCommitteeId !== null;
+      const response = await fetch('/api/content', {
+        method: isEditing ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(
+          isEditing
+            ? { type: 'rlCommittee', id: editingRlCommitteeId, data: rlCommitteeForm }
+            : { type: 'rlCommittee', data: rlCommitteeForm }
+        )
+      });
+
+      if (response.ok) {
+        fetchAllData();
+        resetRlCommitteeForm();
+        setEditingRlCommitteeId(null);
+        setDialogStates({ ...dialogStates, rlCommittee: false });
+        alert(isEditing ? 'Member updated successfully!' : 'Member added successfully!');
+      }
+    } catch (error) {
+      console.error('Error saving rlCommittee:', error);
     }
   };
 
@@ -1493,9 +1519,18 @@ export default function DashboardContent() {
                   <div className="flex items-center justify-between">
                     <div><CardTitle>RL Committee</CardTitle><CardDescription>Manage Research & Learning Committee members</CardDescription></div>
                     <Dialog open={dialogStates.rlCommittee} onOpenChange={(open) => setDialogStates({ ...dialogStates, rlCommittee: open })}>
-                      <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />Add Member</Button></DialogTrigger>
+                      <DialogTrigger asChild>
+                        <Button
+                          onClick={() => {
+                            setEditingRlCommitteeId(null);
+                            resetRlCommitteeForm();
+                          }}
+                        >
+                          <Plus className="h-4 w-4 mr-2" />Add Member
+                        </Button>
+                      </DialogTrigger>
                       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                        <DialogHeader><DialogTitle>Add Committee Member</DialogTitle></DialogHeader>
+                        <DialogHeader><DialogTitle>{editingRlCommitteeId ? 'Edit Committee Member' : 'Add Committee Member'}</DialogTitle></DialogHeader>
                         <div className="space-y-4">
                           <div><Label>Name</Label><Input value={rlCommitteeForm.name} onChange={(e) => setRlCommitteeForm({ ...rlCommitteeForm, name: e.target.value })} placeholder="Prof. Dr. Ahmed Hassan" /></div>
                           <div className="grid grid-cols-2 gap-4">
@@ -1523,7 +1558,7 @@ export default function DashboardContent() {
                             value={rlCommitteeForm.image} 
                             onChange={(url) => setRlCommitteeForm({ ...rlCommitteeForm, image: url })}
                           />
-                          <Button onClick={() => handleAdd('rlCommittee', rlCommitteeForm, resetRlCommitteeForm)} className="w-full">Add Member</Button>
+                          <Button onClick={handleSaveRlCommittee} className="w-full">{editingRlCommitteeId ? 'Update Member' : 'Add Member'}</Button>
                         </div>
                       </DialogContent>
                     </Dialog>
@@ -1542,7 +1577,28 @@ export default function DashboardContent() {
                           <p className="text-xs text-gray-500 mt-1">{member.department}</p>
                           <p className="text-xs text-gray-400 mt-1">Image: {member.imagePlacement || 'top'}</p>
                         </div>
-                        <Button variant="destructive" size="sm" onClick={() => handleDelete('rlCommittee', member.id)}><Trash2 className="h-4 w-4" /></Button>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setEditingRlCommitteeId(member.id);
+                              setRlCommitteeForm({
+                                name: member.name || '',
+                                role: member.role || '',
+                                department: member.department || '',
+                                email: member.email || '',
+                                bio: member.bio || '',
+                                image: member.image || '',
+                                imagePlacement: member.imagePlacement || 'top',
+                              });
+                              setDialogStates({ ...dialogStates, rlCommittee: true });
+                            }}
+                          >
+                            <Edit3 className="h-4 w-4" />
+                          </Button>
+                          <Button variant="destructive" size="sm" onClick={() => handleDelete('rlCommittee', member.id)}><Trash2 className="h-4 w-4" /></Button>
+                        </div>
                       </div>
                     ))}
                     {rlCommittee.length === 0 && <p className="text-center text-gray-500 py-8">No committee members yet. Add your first member!</p>}

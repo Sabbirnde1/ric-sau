@@ -494,7 +494,25 @@ export async function PUT(request: Request) {
         break;
       }
       case 'rlCommittee': {
-        result = await prisma.rlCommittee.update({ where: { id: numericId }, data });
+        const placement = ['top', 'left', 'right'].includes(data.imagePlacement)
+          ? data.imagePlacement
+          : 'top';
+
+        const updateData: any = {
+          name: data.name,
+          role: data.role,
+          department: data.department,
+          email: data.email,
+          image: data.image,
+          bio: JSON.stringify({ text: data.bio || '', imagePlacement: placement }),
+        };
+
+        const cleanUpdateData = Object.fromEntries(
+          Object.entries(updateData).filter(([_, v]) => v !== undefined)
+        );
+
+        result = await prisma.rlCommittee.update({ where: { id: numericId }, data: cleanUpdateData });
+        result = formatRlCommitteeMember(result);
         break;
       }
       case 'publication': {
