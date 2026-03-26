@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Edit3, Trash2, Users, FileText, Briefcase, Calendar, Award, Mail, Home, Info, Settings, Image as ImageIcon, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,13 +12,20 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useRouter } from 'next/navigation';
+import { ToastAction } from '@/components/ui/toast';
 import ImageUpload from '@/components/ui/image-upload';
 import RichTextEditor from '@/components/ui/rich-text-editor';
+import { useToast } from '@/hooks/use-toast';
 
 export default function DashboardContent() {
   const router = useRouter();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [listSearch, setListSearch] = useState('');
+  const [quickEditItem, setQuickEditItem] = useState<{ type: 'project' | 'news' | 'event'; id: number } | null>(null);
+  const [quickEditData, setQuickEditData] = useState<Record<string, any>>({});
+  const pendingDeleteRef = useRef<Record<string, { timeoutId: ReturnType<typeof setTimeout>; item: any; type: string }>>({});
   
   // Data states
   const [homeData, setHomeData] = useState<any>({});
@@ -206,6 +213,143 @@ export default function DashboardContent() {
     fetchAllData();
   }, []);
 
+  useEffect(() => {
+    const raw = localStorage.getItem('dashboard-drafts-v1');
+    if (!raw) return;
+    try {
+      const draft = JSON.parse(raw);
+      if (draft.homeForm) setHomeForm(draft.homeForm);
+      if (draft.statsForm) setStatsForm(draft.statsForm);
+      if (draft.featuresForm) setFeaturesForm(draft.featuresForm);
+      if (draft.ctaForm) setCtaForm(draft.ctaForm);
+      if (draft.aboutForm) setAboutForm(draft.aboutForm);
+      if (draft.aboutFundingForm) setAboutFundingForm(draft.aboutFundingForm);
+      if (draft.aboutWhoCanApplyForm) setAboutWhoCanApplyForm(draft.aboutWhoCanApplyForm);
+      if (draft.aboutWhatYouGetForm) setAboutWhatYouGetForm(draft.aboutWhatYouGetForm);
+      if (draft.aboutFocusAreasForm) setAboutFocusAreasForm(draft.aboutFocusAreasForm);
+      if (draft.aboutHowToApplyForm) setAboutHowToApplyForm(draft.aboutHowToApplyForm);
+      if (draft.newsForm) setNewsForm(draft.newsForm);
+    } catch (error) {
+      console.error('Failed to load dashboard drafts:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    const draft = {
+      homeForm,
+      statsForm,
+      featuresForm,
+      ctaForm,
+      aboutForm,
+      aboutFundingForm,
+      aboutWhoCanApplyForm,
+      aboutWhatYouGetForm,
+      aboutFocusAreasForm,
+      aboutHowToApplyForm,
+      newsForm,
+    };
+    localStorage.setItem('dashboard-drafts-v1', JSON.stringify(draft));
+  }, [
+    homeForm,
+    statsForm,
+    featuresForm,
+    ctaForm,
+    aboutForm,
+    aboutFundingForm,
+    aboutWhoCanApplyForm,
+    aboutWhatYouGetForm,
+    aboutFocusAreasForm,
+    aboutHowToApplyForm,
+    newsForm,
+  ]);
+
+  useEffect(() => {
+    return () => {
+      Object.values(pendingDeleteRef.current).forEach((entry) => {
+        clearTimeout(entry.timeoutId);
+      });
+      pendingDeleteRef.current = {};
+    };
+  }, []);
+
+  const clearDashboardDrafts = (keys: Array<'home' | 'about' | 'news'>) => {
+    const raw = localStorage.getItem('dashboard-drafts-v1');
+    if (!raw) return;
+
+    try {
+      const draft = JSON.parse(raw);
+      if (keys.includes('home')) {
+        delete draft.homeForm;
+        delete draft.statsForm;
+        delete draft.featuresForm;
+        delete draft.ctaForm;
+      }
+      if (keys.includes('about')) {
+        delete draft.aboutForm;
+        delete draft.aboutFundingForm;
+        delete draft.aboutWhoCanApplyForm;
+        delete draft.aboutWhatYouGetForm;
+        delete draft.aboutFocusAreasForm;
+        delete draft.aboutHowToApplyForm;
+      }
+      if (keys.includes('news')) {
+        delete draft.newsForm;
+      }
+      localStorage.setItem('dashboard-drafts-v1', JSON.stringify(draft));
+    } catch (error) {
+      console.error('Failed to clear dashboard drafts:', error);
+    }
+  };
+
+  const getItemsByType = (type: string) => {
+    switch (type) {
+      case 'project': return projects;
+      case 'news': return news;
+      case 'event': return events;
+      case 'team': return team;
+      case 'innovator': return innovators;
+      case 'rlCommittee': return rlCommittee;
+      case 'publication': return publications;
+      case 'lab': return labs;
+      case 'resource': return resources;
+      default: return [];
+    }
+  };
+
+  const setItemsByType = (type: string, updater: (prev: any[]) => any[]) => {
+    switch (type) {
+      case 'project':
+        setProjects((prev) => updater(prev));
+        break;
+      case 'news':
+        setNews((prev) => updater(prev));
+        break;
+      case 'event':
+        setEvents((prev) => updater(prev));
+        break;
+      case 'team':
+        setTeam((prev) => updater(prev));
+        break;
+      case 'innovator':
+        setInnovators((prev) => updater(prev));
+        break;
+      case 'rlCommittee':
+        setRlCommittee((prev) => updater(prev));
+        break;
+      case 'publication':
+        setPublications((prev) => updater(prev));
+        break;
+      case 'lab':
+        setLabs((prev) => updater(prev));
+        break;
+      case 'resource':
+        setResources((prev) => updater(prev));
+        break;
+      default:
+        break;
+    }
+  };
+
   const fetchAllData = async () => {
     try {
       const [homeRes, aboutRes, projectsRes, newsRes, eventsRes, teamRes, innovatorsRes, rlCommitteeRes, contactRes, settingsRes, pubRes, labsRes, resourcesRes] = await Promise.all([
@@ -282,9 +426,12 @@ export default function DashboardContent() {
       if (response.ok) {
         fetchAllData();
         setDialogStates({ ...dialogStates, home: false });
+        clearDashboardDrafts(['home']);
+        toast({ title: 'Home content updated', description: 'All Home section changes were saved.' });
       }
     } catch (error) {
       console.error('Error updating home:', error);
+      toast({ title: 'Update failed', description: 'Could not update Home content.', variant: 'destructive' });
     }
   };
 
@@ -308,9 +455,12 @@ export default function DashboardContent() {
       if (response.ok) {
         fetchAllData();
         setDialogStates({ ...dialogStates, about: false });
+        clearDashboardDrafts(['about']);
+        toast({ title: 'About content updated', description: 'All About section changes were saved.' });
       }
     } catch (error) {
       console.error('Error updating about:', error);
+      toast({ title: 'Update failed', description: 'Could not update About content.', variant: 'destructive' });
     }
   };
 
@@ -324,9 +474,11 @@ export default function DashboardContent() {
       if (response.ok) {
         fetchAllData();
         setDialogStates({ ...dialogStates, contact: false });
+        toast({ title: 'Contact updated', description: 'Contact information was saved.' });
       }
     } catch (error) {
       console.error('Error updating contact:', error);
+      toast({ title: 'Update failed', description: 'Could not update contact information.', variant: 'destructive' });
     }
   };
 
@@ -364,9 +516,10 @@ export default function DashboardContent() {
 
       fetchAllData();
       setDialogStates({ ...dialogStates, settings: false });
-      alert('Settings updated successfully!');
+      toast({ title: 'Settings updated', description: 'Site settings were saved successfully.' });
     } catch (error) {
       console.error('Error updating settings:', error);
+      toast({ title: 'Update failed', description: 'Could not update site settings.', variant: 'destructive' });
     }
   };
 
@@ -381,10 +534,14 @@ export default function DashboardContent() {
         fetchAllData();
         resetForm();
         setDialogStates({ ...dialogStates, [type]: false });
-        alert('Item added successfully!');
+        if (type === 'news') {
+          clearDashboardDrafts(['news']);
+        }
+        toast({ title: 'Item added', description: 'New content item created successfully.' });
       }
     } catch (error) {
       console.error(`Error adding ${type}:`, error);
+      toast({ title: 'Create failed', description: `Could not add ${type}.`, variant: 'destructive' });
     }
   };
 
@@ -406,25 +563,143 @@ export default function DashboardContent() {
         resetRlCommitteeForm();
         setEditingRlCommitteeId(null);
         setDialogStates({ ...dialogStates, rlCommittee: false });
-        alert(isEditing ? 'Member updated successfully!' : 'Member added successfully!');
+        toast({
+          title: isEditing ? 'Member updated' : 'Member added',
+          description: isEditing
+            ? 'Committee member information was updated.'
+            : 'Committee member was created successfully.',
+        });
       }
     } catch (error) {
       console.error('Error saving rlCommittee:', error);
+      toast({ title: 'Save failed', description: 'Could not save committee member.', variant: 'destructive' });
     }
   };
 
-  const handleDelete = async (type: string, id: number) => {
-    if (!confirm('Are you sure you want to delete this item?')) return;
+  const confirmDeleteNow = async (type: string, id: number, key: string) => {
     try {
       const response = await fetch(`/api/content?type=${type}&id=${id}`, {
         method: 'DELETE'
       });
-      if (response.ok) {
-        fetchAllData();
-        alert('Item deleted successfully!');
+
+      if (!response.ok) {
+        const pending = pendingDeleteRef.current[key];
+        if (pending) {
+          setItemsByType(type, (prev) => [pending.item, ...prev]);
+          delete pendingDeleteRef.current[key];
+        }
+        toast({ title: 'Delete failed', description: `Could not delete ${type}.`, variant: 'destructive' });
+        return;
       }
+
+      delete pendingDeleteRef.current[key];
     } catch (error) {
       console.error(`Error deleting ${type}:`, error);
+      const pending = pendingDeleteRef.current[key];
+      if (pending) {
+        setItemsByType(type, (prev) => [pending.item, ...prev]);
+        delete pendingDeleteRef.current[key];
+      }
+      toast({ title: 'Delete failed', description: `Could not delete ${type}.`, variant: 'destructive' });
+    }
+  };
+
+  const undoDelete = (key: string) => {
+    const pending = pendingDeleteRef.current[key];
+    if (!pending) return;
+
+    clearTimeout(pending.timeoutId);
+    setItemsByType(pending.type, (prev) => [pending.item, ...prev]);
+    delete pendingDeleteRef.current[key];
+    toast({ title: 'Delete undone', description: 'Item restoration complete.' });
+  };
+
+  const handleDelete = async (type: string, id: number) => {
+    const item = getItemsByType(type).find((entry: any) => entry.id === id);
+    if (!item) return;
+
+    const key = `${type}-${id}`;
+    const existing = pendingDeleteRef.current[key];
+    if (existing) {
+      clearTimeout(existing.timeoutId);
+    }
+
+    setItemsByType(type, (prev) => prev.filter((entry: any) => entry.id !== id));
+
+    const timeoutId = setTimeout(() => {
+      void confirmDeleteNow(type, id, key);
+    }, 5000);
+
+    pendingDeleteRef.current[key] = { timeoutId, item, type };
+
+    toast({
+      title: 'Item moved to pending delete',
+      description: 'Item will be deleted in 5 seconds.',
+      action: (
+        <ToastAction altText="Undo delete" onClick={() => undoDelete(key)}>
+          Undo
+        </ToastAction>
+      ),
+    });
+  };
+
+  const startQuickEdit = (type: 'project' | 'news' | 'event', item: any) => {
+    setQuickEditItem({ type, id: item.id });
+    if (type === 'project') {
+      setQuickEditData({
+        title: item.title || '',
+        category: item.category || '',
+        lead: item.lead || '',
+      });
+      return;
+    }
+
+    if (type === 'news') {
+      setQuickEditData({
+        title: item.title || '',
+        category: item.category || '',
+        date: item.date || '',
+      });
+      return;
+    }
+
+    setQuickEditData({
+      title: item.title || '',
+      category: item.category || '',
+      date: item.date || '',
+      location: item.location || '',
+    });
+  };
+
+  const cancelQuickEdit = () => {
+    setQuickEditItem(null);
+    setQuickEditData({});
+  };
+
+  const saveQuickEdit = async () => {
+    if (!quickEditItem) return;
+
+    try {
+      const response = await fetch('/api/content', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: quickEditItem.type,
+          id: quickEditItem.id,
+          data: quickEditData,
+        }),
+      });
+
+      if (response.ok) {
+        toast({ title: 'Quick edit saved', description: 'Item updated successfully.' });
+        cancelQuickEdit();
+        fetchAllData();
+      } else {
+        toast({ title: 'Quick edit failed', description: 'Could not save inline changes.', variant: 'destructive' });
+      }
+    } catch (error) {
+      console.error('Error saving quick edit:', error);
+      toast({ title: 'Quick edit failed', description: 'Could not save inline changes.', variant: 'destructive' });
     }
   };
 
@@ -437,6 +712,135 @@ export default function DashboardContent() {
   const resetPublicationForm = () => setPublicationForm({ title: '', authors: '', journal: '', year: new Date().getFullYear(), category: '', type: 'Journal Article', citations: 0, abstract: '', doi: '', keywords: '' });
   const resetLabForm = () => setLabForm({ name: '', director: '', location: '', established: new Date().getFullYear(), members: 0, focus: '', description: '', equipment: '', projects: 0, publications: 0, image: '' });
   const resetResourceForm = () => setResourceForm({ title: '', description: '', image: '' });
+
+  const searchableTabs = new Set([
+    'projects',
+    'publications',
+    'labs',
+    'resources',
+    'news',
+    'events',
+    'team',
+    'innovators',
+    'rl-committee',
+  ]);
+
+  const matchesSearch = (value: unknown) => {
+    if (!listSearch.trim()) return true;
+    return String(value ?? '').toLowerCase().includes(listSearch.toLowerCase().trim());
+  };
+
+  const filteredProjects = useMemo(() => {
+    return projects.filter((item) =>
+      matchesSearch(item.title) ||
+      matchesSearch(item.description) ||
+      matchesSearch(item.category) ||
+      matchesSearch(item.lead)
+    );
+  }, [projects, listSearch]);
+
+  const filteredPublications = useMemo(() => {
+    return publications.filter((item) =>
+      matchesSearch(item.title) ||
+      matchesSearch((item.authors || []).join(' ')) ||
+      matchesSearch(item.journal) ||
+      matchesSearch(item.category)
+    );
+  }, [publications, listSearch]);
+
+  const filteredLabs = useMemo(() => {
+    return labs.filter((item) =>
+      matchesSearch(item.name) ||
+      matchesSearch(item.description) ||
+      matchesSearch(item.director) ||
+      matchesSearch(item.location)
+    );
+  }, [labs, listSearch]);
+
+  const filteredResources = useMemo(() => {
+    return resources.filter((item) => matchesSearch(item.title) || matchesSearch(item.description));
+  }, [resources, listSearch]);
+
+  const filteredNews = useMemo(() => {
+    return news.filter((item) =>
+      matchesSearch(item.title) ||
+      matchesSearch(item.excerpt) ||
+      matchesSearch(item.category)
+    );
+  }, [news, listSearch]);
+
+  const filteredEvents = useMemo(() => {
+    return events.filter((item) =>
+      matchesSearch(item.title) ||
+      matchesSearch(item.description) ||
+      matchesSearch(item.category) ||
+      matchesSearch(item.location)
+    );
+  }, [events, listSearch]);
+
+  const filteredTeam = useMemo(() => {
+    return team.filter((item) =>
+      matchesSearch(item.name) ||
+      matchesSearch(item.position) ||
+      matchesSearch(item.department) ||
+      matchesSearch(item.email)
+    );
+  }, [team, listSearch]);
+
+  const filteredInnovators = useMemo(() => {
+    return innovators.filter((item) =>
+      matchesSearch(item.name) ||
+      matchesSearch(item.title) ||
+      matchesSearch(item.category) ||
+      matchesSearch(item.ripd) ||
+      matchesSearch(item.pi) ||
+      matchesSearch(item.coPi)
+    );
+  }, [innovators, listSearch]);
+
+  const filteredRlCommittee = useMemo(() => {
+    return rlCommittee.filter((item) =>
+      matchesSearch(item.name) ||
+      matchesSearch(item.role) ||
+      matchesSearch(item.department) ||
+      matchesSearch(item.email)
+    );
+  }, [rlCommittee, listSearch]);
+
+  const activeTabCount = useMemo(() => {
+    switch (activeTab) {
+      case 'projects': return { total: projects.length, filtered: filteredProjects.length };
+      case 'publications': return { total: publications.length, filtered: filteredPublications.length };
+      case 'labs': return { total: labs.length, filtered: filteredLabs.length };
+      case 'resources': return { total: resources.length, filtered: filteredResources.length };
+      case 'news': return { total: news.length, filtered: filteredNews.length };
+      case 'events': return { total: events.length, filtered: filteredEvents.length };
+      case 'team': return { total: team.length, filtered: filteredTeam.length };
+      case 'innovators': return { total: innovators.length, filtered: filteredInnovators.length };
+      case 'rl-committee': return { total: rlCommittee.length, filtered: filteredRlCommittee.length };
+      default: return { total: 0, filtered: 0 };
+    }
+  }, [
+    activeTab,
+    projects.length,
+    publications.length,
+    labs.length,
+    resources.length,
+    news.length,
+    events.length,
+    team.length,
+    innovators.length,
+    rlCommittee.length,
+    filteredProjects.length,
+    filteredPublications.length,
+    filteredLabs.length,
+    filteredResources.length,
+    filteredNews.length,
+    filteredEvents.length,
+    filteredTeam.length,
+    filteredInnovators.length,
+    filteredRlCommittee.length,
+  ]);
 
   if (loading) {
     return (
@@ -549,6 +953,32 @@ export default function DashboardContent() {
               </TabsList>
             </div>
 
+            {searchableTabs.has(activeTab) && (
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <Input
+                  placeholder="Search current tab..."
+                  value={listSearch}
+                  onChange={(e) => setListSearch(e.target.value)}
+                  className="sm:max-w-md"
+                />
+                <div className="text-sm text-gray-600">
+                  Showing {activeTabCount.filtered} of {activeTabCount.total}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setListSearch('');
+                    fetchAllData();
+                  }}
+                  className="sm:ml-auto"
+                >
+                  Refresh
+                </Button>
+              </div>
+            )}
+
             {/* Overview Tab */}
             <TabsContent value="overview">
               <div className="grid gap-6">
@@ -580,7 +1010,7 @@ export default function DashboardContent() {
                         <span className="text-2xl font-bold text-pink-600">{innovators.length}</span>
                       </div>
                       <div className="flex justify-between items-center p-3 bg-indigo-50 rounded-lg">
-                        <span className="font-medium">RL Committee Members</span>
+                        <span className="font-medium">RLC committee members</span>
                         <span className="text-2xl font-bold text-indigo-600">{rlCommittee.length}</span>
                       </div>
                     </div>
@@ -1107,23 +1537,60 @@ export default function DashboardContent() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {projects.map((project) => (
+                    {filteredProjects.map((project) => (
                       <div key={project.id} className="flex items-start gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow">
                         {project.image && (
                           <img src={project.image} alt={project.title} className="w-20 h-20 object-cover rounded" />
                         )}
                         <div className="flex-1">
-                          <h4 className="font-semibold">{project.title}</h4>
-                          <p className="text-sm text-gray-600 mt-1">{project.description?.substring(0, 100)}...</p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{project.category}</span>
-                            <span className="text-xs text-gray-500">Lead: {project.lead}</span>
-                          </div>
+                          {quickEditItem?.type === 'project' && quickEditItem.id === project.id ? (
+                            <div className="space-y-2">
+                              <Input
+                                value={quickEditData.title || ''}
+                                onChange={(e) => setQuickEditData({ ...quickEditData, title: e.target.value })}
+                                placeholder="Project title"
+                              />
+                              <div className="grid grid-cols-2 gap-2">
+                                <Input
+                                  value={quickEditData.category || ''}
+                                  onChange={(e) => setQuickEditData({ ...quickEditData, category: e.target.value })}
+                                  placeholder="Category"
+                                />
+                                <Input
+                                  value={quickEditData.lead || ''}
+                                  onChange={(e) => setQuickEditData({ ...quickEditData, lead: e.target.value })}
+                                  placeholder="Project lead"
+                                />
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <h4 className="font-semibold">{project.title}</h4>
+                              <p className="text-sm text-gray-600 mt-1">{project.description?.substring(0, 100)}...</p>
+                              <div className="flex items-center gap-2 mt-2">
+                                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{project.category}</span>
+                                <span className="text-xs text-gray-500">Lead: {project.lead}</span>
+                              </div>
+                            </>
+                          )}
                         </div>
-                        <Button variant="destructive" size="sm" onClick={() => handleDelete('project', project.id)}><Trash2 className="h-4 w-4" /></Button>
+                        <div className="flex items-center gap-2">
+                          {quickEditItem?.type === 'project' && quickEditItem.id === project.id ? (
+                            <>
+                              <Button variant="outline" size="sm" onClick={saveQuickEdit}>Save</Button>
+                              <Button variant="ghost" size="sm" onClick={cancelQuickEdit}>Cancel</Button>
+                            </>
+                          ) : (
+                            <Button variant="outline" size="sm" onClick={() => startQuickEdit('project', project)}>
+                              <Edit3 className="h-4 w-4" />
+                            </Button>
+                          )}
+                          <Button variant="destructive" size="sm" onClick={() => handleDelete('project', project.id)}><Trash2 className="h-4 w-4" /></Button>
+                        </div>
                       </div>
                     ))}
                     {projects.length === 0 && <p className="text-center text-gray-500 py-8">No projects yet. Add your first project!</p>}
+                    {projects.length > 0 && filteredProjects.length === 0 && <p className="text-center text-gray-500 py-8">No projects match your search.</p>}
                   </div>
                 </CardContent>
               </Card>
@@ -1169,7 +1636,7 @@ export default function DashboardContent() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {publications.map((pub: any) => (
+                    {filteredPublications.map((pub: any) => (
                       <div key={pub.id} className="flex items-start gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow">
                         <div className="flex-1">
                           <h4 className="font-semibold">{pub.title}</h4>
@@ -1184,6 +1651,7 @@ export default function DashboardContent() {
                       </div>
                     ))}
                     {publications.length === 0 && <p className="text-center text-gray-500 py-8">No publications yet. Add your first publication!</p>}
+                    {publications.length > 0 && filteredPublications.length === 0 && <p className="text-center text-gray-500 py-8">No publications match your search.</p>}
                   </div>
                 </CardContent>
               </Card>
@@ -1230,7 +1698,7 @@ export default function DashboardContent() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {labs.map((lab: any) => (
+                    {filteredLabs.map((lab: any) => (
                       <div key={lab.id} className="flex items-start gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow">
                         {lab.image && (
                           <img src={lab.image} alt={lab.name} className="w-20 h-20 object-cover rounded" />
@@ -1247,6 +1715,7 @@ export default function DashboardContent() {
                       </div>
                     ))}
                     {labs.length === 0 && <p className="text-center text-gray-500 py-8">No labs yet. Add your first lab!</p>}
+                    {labs.length > 0 && filteredLabs.length === 0 && <p className="text-center text-gray-500 py-8">No labs match your search.</p>}
                   </div>
                 </CardContent>
               </Card>
@@ -1274,7 +1743,7 @@ export default function DashboardContent() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {resources.map((resource: any) => (
+                    {filteredResources.map((resource: any) => (
                       <div key={resource.id} className="flex items-start gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow">
                         {resource.image && (
                           <img src={resource.image} alt={resource.title} className="w-20 h-20 object-cover rounded" />
@@ -1287,6 +1756,7 @@ export default function DashboardContent() {
                       </div>
                     ))}
                     {resources.length === 0 && <p className="text-center text-gray-500 py-8">No resources yet. Add your first resource!</p>}
+                    {resources.length > 0 && filteredResources.length === 0 && <p className="text-center text-gray-500 py-8">No resources match your search.</p>}
                   </div>
                 </CardContent>
               </Card>
@@ -1330,23 +1800,60 @@ export default function DashboardContent() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {news.map((item) => (
+                    {filteredNews.map((item) => (
                       <div key={item.id} className="flex items-start gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow">
                         {item.image && (
                           <img src={item.image} alt={item.title} className="w-20 h-20 object-cover rounded" />
                         )}
                         <div className="flex-1">
-                          <h4 className="font-semibold">{item.title}</h4>
-                          <p className="text-sm text-gray-600 mt-1">{item.excerpt?.substring(0, 100)}...</p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">{item.category}</span>
-                            <span className="text-xs text-gray-500">{item.date}</span>
-                          </div>
+                          {quickEditItem?.type === 'news' && quickEditItem.id === item.id ? (
+                            <div className="space-y-2">
+                              <Input
+                                value={quickEditData.title || ''}
+                                onChange={(e) => setQuickEditData({ ...quickEditData, title: e.target.value })}
+                                placeholder="News title"
+                              />
+                              <div className="grid grid-cols-2 gap-2">
+                                <Input
+                                  value={quickEditData.category || ''}
+                                  onChange={(e) => setQuickEditData({ ...quickEditData, category: e.target.value })}
+                                  placeholder="Category"
+                                />
+                                <Input
+                                  value={quickEditData.date || ''}
+                                  onChange={(e) => setQuickEditData({ ...quickEditData, date: e.target.value })}
+                                  placeholder="Date"
+                                />
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <h4 className="font-semibold">{item.title}</h4>
+                              <p className="text-sm text-gray-600 mt-1">{item.excerpt?.substring(0, 100)}...</p>
+                              <div className="flex items-center gap-2 mt-2">
+                                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">{item.category}</span>
+                                <span className="text-xs text-gray-500">{item.date}</span>
+                              </div>
+                            </>
+                          )}
                         </div>
-                        <Button variant="destructive" size="sm" onClick={() => handleDelete('news', item.id)}><Trash2 className="h-4 w-4" /></Button>
+                        <div className="flex items-center gap-2">
+                          {quickEditItem?.type === 'news' && quickEditItem.id === item.id ? (
+                            <>
+                              <Button variant="outline" size="sm" onClick={saveQuickEdit}>Save</Button>
+                              <Button variant="ghost" size="sm" onClick={cancelQuickEdit}>Cancel</Button>
+                            </>
+                          ) : (
+                            <Button variant="outline" size="sm" onClick={() => startQuickEdit('news', item)}>
+                              <Edit3 className="h-4 w-4" />
+                            </Button>
+                          )}
+                          <Button variant="destructive" size="sm" onClick={() => handleDelete('news', item.id)}><Trash2 className="h-4 w-4" /></Button>
+                        </div>
                       </div>
                     ))}
                     {news.length === 0 && <p className="text-center text-gray-500 py-8">No news articles yet. Add your first article!</p>}
+                    {news.length > 0 && filteredNews.length === 0 && <p className="text-center text-gray-500 py-8">No news items match your search.</p>}
                   </div>
                 </CardContent>
               </Card>
@@ -1385,23 +1892,65 @@ export default function DashboardContent() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {events.map((event) => (
+                    {filteredEvents.map((event) => (
                       <div key={event.id} className="flex items-start gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow">
                         {event.image && (
                           <img src={event.image} alt={event.title} className="w-20 h-20 object-cover rounded" />
                         )}
                         <div className="flex-1">
-                          <h4 className="font-semibold">{event.title}</h4>
-                          <p className="text-sm text-gray-600 mt-1">{event.description?.substring(0, 100)}...</p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">{event.category}</span>
-                            <span className="text-xs text-gray-500">{event.date} • {event.location}</span>
-                          </div>
+                          {quickEditItem?.type === 'event' && quickEditItem.id === event.id ? (
+                            <div className="space-y-2">
+                              <Input
+                                value={quickEditData.title || ''}
+                                onChange={(e) => setQuickEditData({ ...quickEditData, title: e.target.value })}
+                                placeholder="Event title"
+                              />
+                              <div className="grid grid-cols-3 gap-2">
+                                <Input
+                                  value={quickEditData.category || ''}
+                                  onChange={(e) => setQuickEditData({ ...quickEditData, category: e.target.value })}
+                                  placeholder="Category"
+                                />
+                                <Input
+                                  value={quickEditData.date || ''}
+                                  onChange={(e) => setQuickEditData({ ...quickEditData, date: e.target.value })}
+                                  placeholder="Date"
+                                />
+                                <Input
+                                  value={quickEditData.location || ''}
+                                  onChange={(e) => setQuickEditData({ ...quickEditData, location: e.target.value })}
+                                  placeholder="Location"
+                                />
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <h4 className="font-semibold">{event.title}</h4>
+                              <p className="text-sm text-gray-600 mt-1">{event.description?.substring(0, 100)}...</p>
+                              <div className="flex items-center gap-2 mt-2">
+                                <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">{event.category}</span>
+                                <span className="text-xs text-gray-500">{event.date} • {event.location}</span>
+                              </div>
+                            </>
+                          )}
                         </div>
-                        <Button variant="destructive" size="sm" onClick={() => handleDelete('event', event.id)}><Trash2 className="h-4 w-4" /></Button>
+                        <div className="flex items-center gap-2">
+                          {quickEditItem?.type === 'event' && quickEditItem.id === event.id ? (
+                            <>
+                              <Button variant="outline" size="sm" onClick={saveQuickEdit}>Save</Button>
+                              <Button variant="ghost" size="sm" onClick={cancelQuickEdit}>Cancel</Button>
+                            </>
+                          ) : (
+                            <Button variant="outline" size="sm" onClick={() => startQuickEdit('event', event)}>
+                              <Edit3 className="h-4 w-4" />
+                            </Button>
+                          )}
+                          <Button variant="destructive" size="sm" onClick={() => handleDelete('event', event.id)}><Trash2 className="h-4 w-4" /></Button>
+                        </div>
                       </div>
                     ))}
                     {events.length === 0 && <p className="text-center text-gray-500 py-8">No events yet. Add your first event!</p>}
+                    {events.length > 0 && filteredEvents.length === 0 && <p className="text-center text-gray-500 py-8">No events match your search.</p>}
                   </div>
                 </CardContent>
               </Card>
@@ -1442,7 +1991,7 @@ export default function DashboardContent() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {team.map((member) => (
+                    {filteredTeam.map((member) => (
                       <div key={member.id} className="flex items-start gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow">
                         {member.image && (
                           <img src={member.image} alt={member.name} className="w-16 h-16 object-cover rounded-full" />
@@ -1456,6 +2005,7 @@ export default function DashboardContent() {
                       </div>
                     ))}
                     {team.length === 0 && <p className="text-center text-gray-500 py-8">No team members yet. Add your first member!</p>}
+                    {team.length > 0 && filteredTeam.length === 0 && <p className="text-center text-gray-500 py-8">No team members match your search.</p>}
                   </div>
                 </CardContent>
               </Card>
@@ -1499,7 +2049,7 @@ export default function DashboardContent() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {innovators.map((innovator) => (
+                    {filteredInnovators.map((innovator) => (
                       <div key={innovator.id} className="flex items-start gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow">
                         {innovator.image && (
                           <img src={innovator.image} alt={innovator.title || innovator.name} className="w-16 h-16 object-cover rounded-lg" />
@@ -1515,6 +2065,7 @@ export default function DashboardContent() {
                       </div>
                     ))}
                     {innovators.length === 0 && <p className="text-center text-gray-500 py-8">No innovations yet. Add your first innovation!</p>}
+                    {innovators.length > 0 && filteredInnovators.length === 0 && <p className="text-center text-gray-500 py-8">No innovations match your search.</p>}
                   </div>
                 </CardContent>
               </Card>
@@ -1578,7 +2129,7 @@ export default function DashboardContent() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {rlCommittee.map((member) => (
+                    {filteredRlCommittee.map((member) => (
                       <div key={member.id} className="flex items-start gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow">
                         {member.image && (
                           <img src={member.image} alt={member.name} className="w-16 h-16 object-cover rounded-full" />
@@ -1614,6 +2165,7 @@ export default function DashboardContent() {
                       </div>
                     ))}
                     {rlCommittee.length === 0 && <p className="text-center text-gray-500 py-8">No committee members yet. Add your first member!</p>}
+                    {rlCommittee.length > 0 && filteredRlCommittee.length === 0 && <p className="text-center text-gray-500 py-8">No committee members match your search.</p>}
                   </div>
                 </CardContent>
               </Card>
