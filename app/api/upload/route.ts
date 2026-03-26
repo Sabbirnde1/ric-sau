@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { put } from '@vercel/blob';
 import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
@@ -33,11 +34,29 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
 
     // Serverless providers have ephemeral local disk.
-    // Use Cloudinary if configured, otherwise return an inline data URL fallback.
+    // Use Vercel Blob if configured, then Cloudinary, otherwise inline fallback.
     if (process.env.NETLIFY || process.env.VERCEL) {
+      const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
       const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
       const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
       let cloudinaryError: string | null = null;
+
+      if (blobToken) {
+        const blobFileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+        const blob = await put(`uploads/${blobFileName}`, file, {
+          access: 'public',
+          addRandomSuffix: false,
+        });
+
+        return NextResponse.json({
+          success: true,
+          url: blob.url,
+          filename: blobFileName,
+          size: file.size,
+          type: file.type,
+          storage: 'blob'
+        });
+      }
 
       if (cloudName && uploadPreset) {
         const cloudinaryFormData = new FormData();
@@ -75,7 +94,7 @@ export async function POST(request: NextRequest) {
       if (file.size > inlineMaxSize) {
         const message = cloudinaryError
           ? `Cloudinary upload failed: ${cloudinaryError}. Please fix CLOUDINARY_CLOUD_NAME and CLOUDINARY_UPLOAD_PRESET, then retry.`
-          : 'Upload failed on serverless storage for files above 1MB. Configure CLOUDINARY_CLOUD_NAME and CLOUDINARY_UPLOAD_PRESET for persistent uploads, or use an external image URL.';
+          : 'Upload failed on serverless storage for files above 1MB. Configure BLOB_READ_WRITE_TOKEN (recommended) or CLOUDINARY_CLOUD_NAME and CLOUDINARY_UPLOAD_PRESET for persistent uploads, or use an external image URL.';
 
         return NextResponse.json({
           success: false,

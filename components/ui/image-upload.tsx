@@ -66,6 +66,8 @@ export default function ImageUpload({
         onChange(result.url);
         if (result.storage === 'inline') {
           setInfo('Uploaded successfully using serverless inline storage. For larger images, use an external image URL.');
+        } else if (result.storage === 'blob') {
+          setInfo('Uploaded successfully to Vercel Blob storage.');
         } else if (result.storage === 'cloudinary') {
           setInfo('Uploaded successfully to cloud storage.');
         }

@@ -29,6 +29,8 @@ In Vercel Project Settings -> Environment Variables, add:
 
 Optional:
 - `NEXT_PUBLIC_BASE_URL` and `NEXT_PUBLIC_SITE_URL` can be your custom domain once attached.
+- `BLOB_READ_WRITE_TOKEN` = Vercel Blob token (recommended for image uploads)
+- `CLOUDINARY_CLOUD_NAME` + `CLOUDINARY_UPLOAD_PRESET` = optional alternative if not using Blob
 
 ## 3. Deploy
 
@@ -55,7 +57,8 @@ Expected response should include `"success": true`.
 ## Important Notes
 
 - Serverless file systems are ephemeral on Vercel. Local file uploads to `public/uploads` are not durable.
-- Use external image URLs for production logo/media in the admin settings.
+- Configure `BLOB_READ_WRITE_TOKEN` to enable persistent file uploads directly from Settings.
+- If Blob is not configured, the app falls back to inline uploads for small images (up to 1MB).
 - Prisma migrations in production should be applied with `npx prisma migrate deploy`.
 
 ## Troubleshooting
