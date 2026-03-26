@@ -20,8 +20,8 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      message: '✅ SQLite connected successfully!',
-      database: 'SQLite (dev.db)',
+      message: '✅ Database connected successfully!',
+      database: 'PostgreSQL',
       tableStats: {
         users: userCount,
         news: newsCount,

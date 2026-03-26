@@ -516,7 +516,7 @@ export default function DashboardContent() {
                 <TabsTrigger value="events">Events</TabsTrigger>
                 <TabsTrigger value="team">Team</TabsTrigger>
                 <TabsTrigger value="innovators">Innovators</TabsTrigger>
-                <TabsTrigger value="rl-committee">RL Committee</TabsTrigger>
+                <TabsTrigger value="rl-committee">RLC committee</TabsTrigger>
                 <TabsTrigger value="contact">Contact</TabsTrigger>
                 <TabsTrigger value="settings">Settings</TabsTrigger>
               </TabsList>

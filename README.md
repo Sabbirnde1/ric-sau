@@ -298,7 +298,7 @@ The admin dashboard now includes **comprehensive content management** with the f
 - **Events** - Event management with banner uploads
 - **Team** - Team profiles with photo uploads
 - **Innovators** - Innovator profiles with photo uploads
-- **RL-Committee** - Committee member profiles with photo uploads
+- **RLC committee** - Committee member profiles with photo uploads
 - **Contact** - Contact information management
 - **Settings** - Site-wide settings (logo, favicon, social media, branding)
 

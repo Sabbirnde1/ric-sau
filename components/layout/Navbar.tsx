@@ -21,7 +21,7 @@ const navigation = [
     ]
   },
   { name: 'Innovators', href: '/innovators' },
-  { name: 'RL-Committee', href: '/rl-committee' },
+  { name: 'RLC committee', href: '/rl-committee' },
   { name: 'Events', href: '/events' },
   { name: 'News', href: '/news' },
   { name: 'Contact', href: '/contact' },
