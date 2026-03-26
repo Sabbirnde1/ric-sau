@@ -1432,6 +1432,7 @@ export default function DashboardContent() {
                             enableCrop
                             cropShape="circle"
                             cropShapeOptions={['circle', 'rect']}
+                            optimizePreset="profile"
                           />
                           <Button onClick={() => handleAdd('team', teamForm, resetTeamForm)} className="w-full">Add Member</Button>
                         </div>
@@ -1567,6 +1568,7 @@ export default function DashboardContent() {
                             enableCrop
                             cropShape="circle"
                             cropShapeOptions={['circle', 'rect']}
+                            optimizePreset="profile"
                           />
                           <Button onClick={handleSaveRlCommittee} className="w-full">{editingRlCommitteeId ? 'Update Member' : 'Add Member'}</Button>
                         </div>
@@ -1708,12 +1710,14 @@ export default function DashboardContent() {
                                 value={settingsForm.logo} 
                                 onChange={(url) => setSettingsForm({ ...settingsForm, logo: url })}
                                 enableCrop
+                                optimizePreset="branding"
                               />
                               <ImageUpload 
                                 label="Favicon (Browser Icon)" 
                                 value={settingsForm.favicon} 
                                 onChange={(url) => setSettingsForm({ ...settingsForm, favicon: url })}
                                 enableCrop
+                                optimizePreset="branding"
                               />
                             </div>
 

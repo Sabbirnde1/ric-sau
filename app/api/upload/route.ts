@@ -7,6 +7,21 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
+    const optimized = formData.get('optimized') === 'true';
+    const originalSize = Number(formData.get('originalSize') || 0);
+    const outputSize = Number(formData.get('outputSize') || file?.size || 0);
+    const outputType = String(formData.get('outputType') || file?.type || '');
+    const optimizePreset = String(formData.get('optimizePreset') || '');
+    const cropShape = String(formData.get('cropShape') || '');
+
+    const optimizationMeta = {
+      optimized,
+      originalSize: originalSize > 0 ? originalSize : file?.size || 0,
+      outputSize: outputSize > 0 ? outputSize : file?.size || 0,
+      outputType: outputType || file?.type || '',
+      optimizePreset: optimizePreset || null,
+      cropShape: cropShape || null,
+    };
     
     if (!file) {
       return NextResponse.json({ success: false, error: 'No file provided' }, { status: 400 });
@@ -61,7 +76,8 @@ export async function POST(request: NextRequest) {
             filename: file.name,
             size: file.size,
             type: file.type,
-            storage: 'cloudinary'
+            storage: 'cloudinary',
+            optimization: optimizationMeta
           });
         }
 
@@ -79,7 +95,12 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
           success: false,
-          error: message
+          error: message,
+          storage: 'inline',
+          limits: {
+            inlineMaxSize: inlineMaxSize,
+            maxUploadSize: maxSize,
+          }
         }, { status: 400 });
       }
 
@@ -92,7 +113,8 @@ export async function POST(request: NextRequest) {
         filename: file.name,
         size: file.size,
         type: file.type,
-        storage: 'inline'
+        storage: 'inline',
+        optimization: optimizationMeta
       });
     }
 
@@ -121,7 +143,9 @@ export async function POST(request: NextRequest) {
       url,
       filename,
       size: file.size,
-      type: file.type
+      type: file.type,
+      storage: 'local',
+      optimization: optimizationMeta
     });
 
   } catch (error) {

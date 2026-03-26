@@ -16,6 +16,32 @@ interface ImageUploadProps {
   enableCrop?: boolean;
   cropShape?: 'circle' | 'rect';
   cropShapeOptions?: ('circle' | 'rect')[];
+  optimizePreset?: 'profile' | 'content' | 'branding';
+}
+
+interface UploadMeta {
+  optimized?: boolean;
+  originalSize?: number;
+  outputSize?: number;
+  outputType?: string;
+  optimizePreset?: 'profile' | 'content' | 'branding';
+  cropShape?: 'circle' | 'rect';
+}
+
+interface OptimizationResult {
+  blob: Blob;
+  outputType: string;
+  qualityUsed: number | null;
+  hitTargetSize: boolean;
+}
+
+interface OptimizationConfig {
+  maxBytes: number;
+  startQuality: number;
+  minQuality: number;
+  qualityStep: number;
+  preferredType: string;
+  fallbackType: string;
 }
 
 export default function ImageUpload({ 
@@ -26,7 +52,8 @@ export default function ImageUpload({
   maxSize = 5,
   enableCrop = false,
   cropShape = 'rect',
-  cropShapeOptions = ['rect', 'circle']
+  cropShapeOptions = ['rect', 'circle'],
+  optimizePreset = 'content'
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState(value);
@@ -49,6 +76,114 @@ export default function ImageUpload({
 
   const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
+  const optimizationByPreset: Record<'profile' | 'content' | 'branding', OptimizationConfig> = {
+    profile: {
+      maxBytes: 600 * 1024,
+      startQuality: 0.9,
+      minQuality: 0.6,
+      qualityStep: 0.08,
+      preferredType: 'image/webp',
+      fallbackType: 'image/jpeg'
+    },
+    content: {
+      maxBytes: 900 * 1024,
+      startQuality: 0.9,
+      minQuality: 0.6,
+      qualityStep: 0.08,
+      preferredType: 'image/webp',
+      fallbackType: 'image/jpeg'
+    },
+    branding: {
+      maxBytes: 450 * 1024,
+      startQuality: 0.92,
+      minQuality: 0.7,
+      qualityStep: 0.06,
+      preferredType: 'image/webp',
+      fallbackType: 'image/png'
+    }
+  };
+
+  const uniqueTypes = (types: string[]) => Array.from(new Set(types));
+
+  const toBlobAsync = (canvas: HTMLCanvasElement, type: string, quality?: number): Promise<Blob | null> => {
+    return new Promise((resolve) => {
+      canvas.toBlob(resolve, type, quality);
+    });
+  };
+
+  const optimizeCanvasBlob = async (
+    canvas: HTMLCanvasElement,
+    sourceType: string,
+    preset: 'profile' | 'content' | 'branding'
+  ): Promise<OptimizationResult> => {
+    const config = optimizationByPreset[preset];
+    const preferredType = sourceType === 'image/webp'
+      ? 'image/webp'
+      : (sourceType === 'image/png' && preset === 'branding')
+        ? 'image/png'
+        : config.preferredType;
+
+    const candidateTypes = uniqueTypes([
+      preferredType,
+      config.fallbackType,
+      'image/webp',
+      'image/jpeg',
+      'image/png'
+    ]);
+
+    let bestBlob: Blob | null = null;
+    let bestType = preferredType;
+    let bestQuality: number | null = null;
+
+    for (const candidateType of candidateTypes) {
+      const isLossy = candidateType === 'image/jpeg' || candidateType === 'image/webp';
+      let quality = config.startQuality;
+      const attempts = isLossy ? 6 : 1;
+
+      for (let i = 0; i < attempts; i++) {
+        const blob = await toBlobAsync(canvas, candidateType, isLossy ? quality : undefined);
+        if (!blob) {
+          if (isLossy) {
+            quality = Math.max(config.minQuality, Number((quality - config.qualityStep).toFixed(2)));
+          }
+          continue;
+        }
+
+        if (!bestBlob || blob.size < bestBlob.size) {
+          bestBlob = blob;
+          bestType = candidateType;
+          bestQuality = isLossy ? quality : null;
+        }
+
+        if (blob.size <= config.maxBytes) {
+          return {
+            blob,
+            outputType: candidateType,
+            qualityUsed: isLossy ? quality : null,
+            hitTargetSize: true,
+          };
+        }
+
+        if (!isLossy) break;
+
+        const nextQuality = Math.max(config.minQuality, Number((quality - config.qualityStep).toFixed(2)));
+        if (nextQuality === quality) break;
+        quality = nextQuality;
+      }
+    }
+
+    if (!bestBlob) {
+      throw new Error('Failed to optimize image output');
+    }
+
+    return {
+      blob: bestBlob,
+      outputType: bestType,
+      qualityUsed: bestQuality,
+      hitTargetSize: bestBlob.size <= optimizationByPreset[preset].maxBytes,
+    };
+  };
+
   const fileToDataUrl = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -58,7 +193,7 @@ export default function ImageUpload({
     });
   };
 
-  const uploadFile = async (file: File) => {
+  const uploadFile = async (file: File, meta?: UploadMeta) => {
     setError('');
     setInfo('');
     setUploading(true);
@@ -66,6 +201,14 @@ export default function ImageUpload({
     try {
       const formData = new FormData();
       formData.append('file', file);
+      if (meta) {
+        formData.append('optimized', String(Boolean(meta.optimized)));
+        if (typeof meta.originalSize === 'number') formData.append('originalSize', String(meta.originalSize));
+        if (typeof meta.outputSize === 'number') formData.append('outputSize', String(meta.outputSize));
+        if (meta.outputType) formData.append('outputType', meta.outputType);
+        if (meta.optimizePreset) formData.append('optimizePreset', meta.optimizePreset);
+        if (meta.cropShape) formData.append('cropShape', meta.cropShape);
+      }
 
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -77,12 +220,28 @@ export default function ImageUpload({
       if (result.success) {
         setPreview(result.url);
         onChange(result.url);
+        const messages: string[] = [];
+
+        if (result.optimization?.optimized) {
+          const beforeKb = result.optimization.originalSize ? Math.round(result.optimization.originalSize / 1024) : null;
+          const afterKb = result.optimization.outputSize ? Math.round(result.optimization.outputSize / 1024) : null;
+          const details = beforeKb && afterKb
+            ? ` (${beforeKb}KB -> ${afterKb}KB)`
+            : '';
+          messages.push(`Image optimized successfully${details}.`);
+        }
         if (result.storage === 'inline') {
-          setInfo('Uploaded successfully using serverless inline storage. For larger images, use an external image URL.');
+          messages.push('Uploaded successfully using serverless inline storage. For larger images, use an external image URL.');
         } else if (result.storage === 'blob') {
-          setInfo('Uploaded successfully to Vercel Blob storage.');
+          messages.push('Uploaded successfully to Vercel Blob storage.');
         } else if (result.storage === 'cloudinary') {
-          setInfo('Uploaded successfully to cloud storage.');
+          messages.push('Uploaded successfully to cloud storage.');
+        } else if (result.storage === 'local') {
+          messages.push('Uploaded successfully to local storage.');
+        }
+
+        if (messages.length > 0) {
+          setInfo(messages.join(' '));
         }
       } else {
         const errorMessage = result.error || 'Upload failed';
@@ -204,27 +363,36 @@ export default function ImageUpload({
       outputHeight
     );
 
-    const outputType = pendingFile.type === 'image/png' || pendingFile.type === 'image/webp'
-      ? pendingFile.type
-      : 'image/jpeg';
+    const optimizationResult = await optimizeCanvasBlob(canvas, pendingFile.type, optimizePreset).catch(() => null);
 
-    const croppedBlob = await new Promise<Blob | null>((resolve) => {
-      canvas.toBlob(resolve, outputType, 0.92);
-    });
-
-    if (!croppedBlob) {
+    if (!optimizationResult) {
       setError('Failed to create cropped image');
       return;
     }
 
-    const extension = outputType === 'image/png' ? 'png' : outputType === 'image/webp' ? 'webp' : 'jpg';
-    const croppedFile = new File([croppedBlob], `cropped-${Date.now()}.${extension}`, { type: outputType });
+    const extension = optimizationResult.outputType === 'image/png'
+      ? 'png'
+      : optimizationResult.outputType === 'image/webp'
+        ? 'webp'
+        : 'jpg';
+    const croppedFile = new File([optimizationResult.blob], `cropped-${Date.now()}.${extension}`, { type: optimizationResult.outputType });
+
+    if (!optimizationResult.hitTargetSize) {
+      setInfo('Applied best-effort compression. File remains larger than preferred target but was uploaded.');
+    }
 
     setShowCropEditor(false);
     setOriginalImage('');
     setPendingFile(null);
 
-    await uploadFile(croppedFile);
+    await uploadFile(croppedFile, {
+      optimized: true,
+      originalSize: pendingFile.size,
+      outputSize: croppedFile.size,
+      outputType: croppedFile.type,
+      optimizePreset,
+      cropShape: activeCropShape,
+    });
   };
 
   const resetCrop = () => {

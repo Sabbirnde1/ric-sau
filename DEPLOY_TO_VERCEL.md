@@ -59,6 +59,8 @@ Expected response should include `"success": true`.
 - Serverless file systems are ephemeral on Vercel. Local file uploads to `public/uploads` are not durable.
 - Configure `BLOB_READ_WRITE_TOKEN` to enable persistent file uploads directly from Settings.
 - If Blob is not configured, the app falls back to inline uploads for small images (up to 1MB).
+- Dashboard crop uploads now apply client-side optimization/compression before sending to `/api/upload`.
+- Upload responses include explicit `storage` (`local`, `inline`, or `cloudinary`) and optimization metadata for clearer admin feedback.
 - Prisma migrations in production should be applied with `npx prisma migrate deploy`.
 
 ## Troubleshooting
