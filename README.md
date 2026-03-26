@@ -4,7 +4,7 @@ A modern, high-performance research & innovation website built with **Next.js 13
 
 **Database:** Powered by **Neon PostgreSQL** (serverless, auto-scaling)
 
-**Live Demo:** [https://ric-sau.kallanroy.xyz](https://ric-sau.kallanroy.xyz)
+**🌐 Live Demo:** [https://ric-sau-five.vercel.app](https://ric-sau-five.vercel.app) (Deployed on Vercel)
 
 ---
 
@@ -357,9 +357,23 @@ npm run build
 
 ## 🚢 Deployment
 
-### ⚡ Netlify (Recommended for this project)
+### ⚡ Vercel (Recommended - Currently Live)
 
-This project is optimized for Netlify deployment with zero configuration.
+This project is fully optimized for Vercel serverless deployment with automatic deployments from GitHub.
+
+**Currently deployed at:** [https://ric-sau-five.vercel.app](https://ric-sau-five.vercel.app)
+
+**Quick Deploy:**
+1. Push code to GitHub
+2. Connect repository to Vercel (vercel.com)
+3. Add environment variables (DATABASE_URL, JWT_SECRET, etc.)
+4. Deploy automatically on every push!
+
+**📖 Complete Guide:** See [DEPLOY_TO_VERCEL.md](./DEPLOY_TO_VERCEL.md) for step-by-step setup, database initialization, and troubleshooting.
+
+---
+
+### 🏗️ Netlify (Alternative)
 
 **Quick Deploy:**
 1. Create account at [netlify.com](https://netlify.com)
@@ -374,18 +388,7 @@ This project is optimized for Netlify deployment with zero configuration.
 - Manual and automated deployment options
 - Troubleshooting common issues
 
-### Vercel
 
-1. Push code to GitHub
-2. Import project in Vercel
-3. Configure environment variables:
-   - `DATABASE_URL` - PostgreSQL connection string
-   - `JWT_SECRET` - JWT secret key
-   - `NEXT_PUBLIC_BASE_URL` - Your site URL
-   - `NEXT_PUBLIC_SITE_URL` - Your site URL
-4. Deploy automatically
-
-**📖 Complete Guide:** See [DEPLOY_TO_VERCEL.md](./DEPLOY_TO_VERCEL.md) for step-by-step setup, database initialization, and troubleshooting.
 
 ### Railway / Render
 
@@ -434,12 +437,23 @@ This project is private and proprietary.
 
 ---
 
+## � Recent Improvements
+
+- ✅ **Vercel Deployment** - Fully serverless, auto-deploying from GitHub
+- ✅ **Logo Optimization** - Fixed rendering for all screen sizes with fallback handling
+- ✅ **Mobile Animations** - Added responsive orbit rings and pulse animations on mobile
+- ✅ **PostgreSQL Integration** - Production-ready database with Neon
+- ✅ **Security Hardening** - Environment-specific configurations for Vercel and Netlify
+
+---
+
 ## 🙏 Acknowledgments
 
 - Built with [Next.js](https://nextjs.org/)
 - UI components from [shadcn/ui](https://ui.shadcn.com/)
 - Icons from [Lucide](https://lucide.dev/)
 - Animations powered by [Framer Motion](https://www.framer.com/motion/) and [GSAP](https://greensock.com/gsap/)
+- Deployed on [Vercel](https://vercel.com/)
 
 ---
 
