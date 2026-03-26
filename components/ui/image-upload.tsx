@@ -84,6 +84,10 @@ export default function ImageUpload({
   const handleUrlChange = (url: string) => {
     setPreview(url);
     onChange(url);
+    // Clear the serverless flag once they enter a URL successfully
+    if (url && isServerless) {
+      setIsServerless(false);
+    }
   };
 
   const handleRemove = () => {
@@ -102,7 +106,10 @@ export default function ImageUpload({
           type="button" 
           variant="ghost" 
           size="sm" 
-          onClick={() => setUseUrl(!useUrl)}
+          onClick={() => {
+            setUseUrl(!useUrl);
+            setError(''); // Clear error when switching modes
+          }}
           className="text-xs"
         >
           {useUrl ? 'Upload File' : 'Use URL Instead'}
@@ -117,7 +124,7 @@ export default function ImageUpload({
             value={preview}
             onChange={(e) => handleUrlChange(e.target.value)}
           />
-          {isServerless && (
+          {isServerless && !preview && (
             <div className="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
               <strong>Serverless Deployment:</strong> File uploads are not supported. Please use external image URLs instead.
             </div>
@@ -160,7 +167,7 @@ export default function ImageUpload({
         </div>
       )}
 
-      {error && (
+      {error && !useUrl && (
         <p className="text-sm text-red-600">{error}</p>
       )}
 
