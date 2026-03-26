@@ -29,6 +29,15 @@ export default function ImageUpload({
   const [useUrl, setUseUrl] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const fileToDataUrl = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -73,6 +82,25 @@ export default function ImageUpload({
         }
       } else {
         const errorMessage = result.error || 'Upload failed';
+
+        const isLegacyServerlessError =
+          response.status === 501 ||
+          /serverless local storage|external image url in settings/i.test(errorMessage);
+
+        if (isLegacyServerlessError) {
+          const inlineMaxBytes = 1 * 1024 * 1024;
+          if (file.size <= inlineMaxBytes) {
+            const dataUrl = await fileToDataUrl(file);
+            setPreview(dataUrl);
+            onChange(dataUrl);
+            setInfo('Uploaded using client-side inline fallback. Configure latest deployment settings for persistent storage.');
+            return;
+          }
+
+          setError('This deployment returned a legacy serverless upload error. Please use an image under 1MB or configure Vercel Blob token.');
+          return;
+        }
+
         setError(errorMessage);
       }
     } catch (err) {
