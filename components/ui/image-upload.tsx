@@ -37,7 +37,12 @@ export default function ImageUpload({
   const [cropZoom, setCropZoom] = useState(1);
   const [showCropEditor, setShowCropEditor] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState<{ x: number; y: number; startX: number; startY: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cropViewportRef = useRef<HTMLDivElement>(null);
+
+  const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
   const fileToDataUrl = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -209,6 +214,39 @@ export default function ImageUpload({
     await uploadFile(croppedFile);
   };
 
+  const resetCrop = () => {
+    setCropX(0);
+    setCropY(0);
+    setCropZoom(1);
+  };
+
+  const handleDragStart = (clientX: number, clientY: number) => {
+    setIsDragging(true);
+    setDragStart({ x: clientX, y: clientY, startX: cropX, startY: cropY });
+  };
+
+  const handleDragMove = (clientX: number, clientY: number) => {
+    if (!isDragging || !dragStart || !cropViewportRef.current) return;
+
+    const rect = cropViewportRef.current.getBoundingClientRect();
+    const deltaXPct = ((clientX - dragStart.x) / rect.width) * 100;
+    const deltaYPct = ((clientY - dragStart.y) / rect.height) * 100;
+
+    setCropX(clamp(dragStart.startX + deltaXPct, -100, 100));
+    setCropY(clamp(dragStart.startY + deltaYPct, -100, 100));
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+    setDragStart(null);
+  };
+
+  const handleWheelZoom = (e: React.WheelEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const delta = e.deltaY < 0 ? 0.1 : -0.1;
+    setCropZoom((current) => clamp(Number((current + delta).toFixed(2)), 1, 3));
+  };
+
   const handleUrlChange = (url: string) => {
     setPreview(url);
     onChange(url);
@@ -254,7 +292,25 @@ export default function ImageUpload({
       ) : showCropEditor && originalImage ? (
         <div className="space-y-3 border rounded-lg p-3 bg-gray-50">
           <p className="text-sm font-medium">Crop Preview</p>
-          <div className={`relative overflow-hidden border bg-black ${cropShape === 'circle' ? 'w-64 h-64 mx-auto rounded-full' : 'w-full h-64 rounded-md'}`}>
+          <div
+            ref={cropViewportRef}
+            className={`relative overflow-hidden border bg-black select-none ${cropShape === 'circle' ? 'w-64 h-64 mx-auto rounded-full' : 'w-full h-64 rounded-md'} ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+            onMouseDown={(e) => handleDragStart(e.clientX, e.clientY)}
+            onMouseMove={(e) => handleDragMove(e.clientX, e.clientY)}
+            onMouseUp={handleDragEnd}
+            onMouseLeave={handleDragEnd}
+            onTouchStart={(e) => {
+              const touch = e.touches[0];
+              if (touch) handleDragStart(touch.clientX, touch.clientY);
+            }}
+            onTouchMove={(e) => {
+              const touch = e.touches[0];
+              if (touch) handleDragMove(touch.clientX, touch.clientY);
+            }}
+            onTouchEnd={handleDragEnd}
+            onWheel={handleWheelZoom}
+            onDoubleClick={resetCrop}
+          >
             <img
               src={originalImage}
               alt="Crop preview"
@@ -264,7 +320,10 @@ export default function ImageUpload({
                 transformOrigin: 'center center',
               }}
             />
+            <div className="absolute inset-0 pointer-events-none border-2 border-white/40" />
           </div>
+
+          <p className="text-xs text-gray-600">Tip: Drag image to reposition • Scroll to zoom • Double-click to reset</p>
 
           <div>
             <Label className="text-xs">Zoom: {cropZoom.toFixed(1)}x</Label>
@@ -277,6 +336,24 @@ export default function ImageUpload({
           <div>
             <Label className="text-xs">Vertical Position</Label>
             <input type="range" min="-100" max="100" step="1" value={cropY} onChange={(e) => setCropY(Number(e.target.value))} className="w-full" />
+          </div>
+
+          <div className="flex gap-2">
+            <Button type="button" variant="secondary" onClick={() => setCropZoom((z) => clamp(Number((z + 0.1).toFixed(2)), 1, 3))}>
+              Zoom +
+            </Button>
+            <Button type="button" variant="secondary" onClick={() => setCropZoom((z) => clamp(Number((z - 0.1).toFixed(2)), 1, 3))}>
+              Zoom -
+            </Button>
+            <Button type="button" variant="secondary" onClick={() => {
+              setCropX(0);
+              setCropY(0);
+            }}>
+              Center
+            </Button>
+            <Button type="button" variant="secondary" onClick={resetCrop}>
+              Reset
+            </Button>
           </div>
 
           <div className="flex gap-2">
