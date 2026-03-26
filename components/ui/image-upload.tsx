@@ -26,6 +26,7 @@ export default function ImageUpload({
   const [preview, setPreview] = useState(value);
   const [error, setError] = useState('');
   const [useUrl, setUseUrl] = useState(false);
+  const [isServerless, setIsServerless] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,6 +69,7 @@ export default function ImageUpload({
 
         // Guide users to URL mode when local disk upload is unavailable in production.
         if (response.status === 501) {
+          setIsServerless(true);
           setUseUrl(true);
         }
       }
@@ -108,12 +110,19 @@ export default function ImageUpload({
       </div>
 
       {useUrl ? (
-        <Input
-          type="text"
-          placeholder="Enter image URL"
-          value={preview}
-          onChange={(e) => handleUrlChange(e.target.value)}
-        />
+        <div className="space-y-2">
+          <Input
+            type="text"
+            placeholder="Enter image URL (e.g., https://example.com/image.png)"
+            value={preview}
+            onChange={(e) => handleUrlChange(e.target.value)}
+          />
+          {isServerless && (
+            <div className="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
+              <strong>Serverless Deployment:</strong> File uploads are not supported. Please use external image URLs instead.
+            </div>
+          )}
+        </div>
       ) : (
         <div className="space-y-2">
           <input

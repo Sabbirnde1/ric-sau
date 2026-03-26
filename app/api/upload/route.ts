@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     if (process.env.NETLIFY || process.env.VERCEL) {
       return NextResponse.json({
         success: false,
-        error: 'File upload is not supported on serverless local storage. Use an external image URL in Settings.'
+        error: 'File upload is not supported on serverless platforms (Netlify/Vercel) due to ephemeral storage. Please use external image URLs in Settings instead. You can host images on services like Imgbb, Cloudinary, or AWS S3.'
       }, { status: 501 });
     }
 
