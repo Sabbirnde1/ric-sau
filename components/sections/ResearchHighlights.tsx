@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Calendar, User, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const defaultHighlights = [
   {
@@ -93,13 +94,13 @@ export function ResearchHighlights() {
             >
               <div className="relative h-48 overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50">
                 {project.image && project.image.trim() !== '' ? (
-                <motion.img
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.4 }}
+                <Image
                   src={project.image}
                   alt={project.title}
-                  className="w-full h-full object-cover"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 33vw"
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  unoptimized={project.image.startsWith('data:') || (project.image.startsWith('http') && !project.image.includes('images.pexels.com'))}
                 />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">

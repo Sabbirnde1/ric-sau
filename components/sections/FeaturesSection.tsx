@@ -79,7 +79,7 @@ export function FeaturesSection() {
             className="text-lg text-gray-600 max-w-3xl mx-auto"
           >
             We specialize in multiple cutting-edge research domains, pushing the boundaries 
-            of technology and innovation to create solutions for tomorrow's challenges.
+            of technology and innovation to create solutions for tomorrow&apos;s challenges.
           </motion.p>
         </div>
 

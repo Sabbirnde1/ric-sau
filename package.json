@@ -9,6 +9,7 @@
     "start": "next start",
     "start:custom": "NODE_ENV=production node server.js",
     "lint": "next lint",
+    "validate:phase7": "powershell -ExecutionPolicy Bypass -File ./scripts/phase7-regression.ps1",
     "postinstall": "prisma generate",
     "db:init": "node scripts/setup-db-complete.js",
     "db:seed": "tsx prisma/seed.ts",

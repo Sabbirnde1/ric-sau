@@ -68,6 +68,7 @@ export default function NewsDetailsPage({ params }: { params: { slug: string } }
               className="object-cover"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
               priority
+              unoptimized={article.image.startsWith('data:') || (article.image.startsWith('http') && !article.image.includes('images.pexels.com'))}
             />
           </div>
           <div

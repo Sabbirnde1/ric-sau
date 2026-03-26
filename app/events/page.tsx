@@ -1,7 +1,7 @@
-'use client';
-
-import { useEffect, useState } from 'react';
+import prisma from '@/lib/prisma';
 import EventCard from '@/components/sections/EventCard';
+
+export const revalidate = 300;
 
 interface Event {
   id: number;
@@ -12,20 +12,25 @@ interface Event {
   time: string;
   location: string;
   category: string;
-  image: string;
+  image: string | null;
 }
 
-export default function EventsPage() {
-  const [events, setEvents] = useState<Event[]>([]);
-
-  useEffect(() => {
-    async function fetchEvents() {
-      const res = await fetch('/api/content?type=events');
-      const json = await res.json();
-      setEvents(json.data || []);
-    }
-    fetchEvents();
-  }, []);
+export default async function EventsPage() {
+  const events = await prisma.event.findMany({
+    take: 24,
+    orderBy: { date: 'desc' },
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      description: true,
+      date: true,
+      time: true,
+      location: true,
+      category: true,
+      image: true,
+    },
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
@@ -40,7 +45,7 @@ export default function EventsPage() {
       {/* Events Grid */}
       <section className="py-16 max-w-7xl mx-auto px-6 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
         {events.map((event) => (
-          <EventCard key={event.id} event={event} />
+          <EventCard key={event.id} event={{ ...event, image: event.image || '' }} />
         ))}
       </section>
     </div>

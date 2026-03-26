@@ -1,4 +1,6 @@
 import { notFound } from "next/navigation";
+import prisma from '@/lib/prisma';
+import Image from 'next/image';
 
 interface Event {
   id: number;
@@ -9,19 +11,14 @@ interface Event {
   time: string;
   location: string;
   category: string;
-  image: string;
+  image: string | null;
 }
 
 async function getEvent(slug: string): Promise<Event | null> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/content?type=events`, {
-      cache: "no-store",
+    const event = await prisma.event.findUnique({
+      where: { slug },
     });
-    const json = await res.json();
-
-    if (!json.success) return null;
-
-    const event = json.data.find((e: Event) => e.slug === slug);
     return event || null;
   } catch (error) {
     console.error("Error fetching event:", error);
@@ -39,11 +36,13 @@ export default async function EventDetailsPage({ params }: { params: { slug: str
       {/* Hero */}
       <section className="relative w-full h-[400px] overflow-hidden bg-gradient-to-br from-purple-600 to-blue-700">
         {event.image && event.image.trim() !== '' && (
-          <img
+          <Image
             src={event.image}
             alt={event.title}
-            className="w-full h-full object-cover"
-            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            fill
+            sizes="100vw"
+            className="object-cover"
+            unoptimized={event.image.startsWith('data:') || (event.image.startsWith('http') && !event.image.includes('images.pexels.com'))}
           />
         )}
         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">

@@ -1,21 +1,37 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import MotionWrapper from '@/components/MotionWrapper';
+import prisma from '@/lib/prisma';
 
-export default function ContactPage() {
-  const [contactData, setContactData] = useState<any>({});
+export const revalidate = 300;
 
-  useEffect(() => {
-    fetch('/api/content?type=contact')
-      .then(res => res.json())
-      .then(data => setContactData(data.data || {}))
-      .catch(() => {});
-  }, []);
+type ContactData = {
+  address?: string;
+  phone?: string;
+  email?: string;
+  officeHours?: string;
+};
+
+async function getContactData() {
+  try {
+    return await prisma.contact.findFirst({
+      select: {
+        address: true,
+        phone: true,
+        email: true,
+        officeHours: true,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching contact data:', error);
+    return null;
+  }
+}
+
+export default async function ContactPage() {
+  const contactData: ContactData = (await getContactData()) || {};
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
@@ -24,11 +40,7 @@ export default function ContactPage() {
         <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
 
         <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-8 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
+          <MotionWrapper>
             <h1 className="text-4xl lg:text-6xl font-bold mb-6">
               Get in Touch
             </h1>
@@ -36,7 +48,7 @@ export default function ContactPage() {
               Have questions, collaborations, or just want to say hello? Reach
               out to us today.
             </p>
-          </motion.div>
+          </MotionWrapper>
         </div>
       </section>
 
@@ -45,12 +57,8 @@ export default function ContactPage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8 grid lg:grid-cols-2 gap-16">
           {/* Contact Info */}
           <div className="space-y-8">
-            <motion.div
+            <MotionWrapper
               className="contact-card bg-white p-8 rounded-2xl shadow-lg"
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
             >
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
                 Contact Information
@@ -71,14 +79,10 @@ export default function ContactPage() {
                   </span>
                 </div>
               </div>
-            </motion.div>
+            </MotionWrapper>
 
-            <motion.div
+            <MotionWrapper
               className="contact-card bg-white p-8 rounded-2xl shadow-lg"
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              viewport={{ once: true }}
             >
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
                 Office Hours
@@ -86,16 +90,12 @@ export default function ContactPage() {
               <ul className="text-gray-700 space-y-2">
                 <li>{contactData.officeHours || 'Sunday – Thursday: 9:00 AM – 6:00 PM'}</li>
               </ul>
-            </motion.div>
+            </MotionWrapper>
           </div>
 
           {/* Contact Form */}
-          <motion.div
+          <MotionWrapper
             className="contact-card bg-white p-8 rounded-2xl shadow-lg"
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
           >
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
               Send us a Message
@@ -114,20 +114,14 @@ export default function ContactPage() {
                 Send Message <Send className="ml-2 h-5 w-5" />
               </Button>
             </form>
-          </motion.div>
+          </MotionWrapper>
         </div>
       </section>
 
       {/* Map Section */}
       <section className="py-24 bg-gray-100">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="rounded-2xl overflow-hidden shadow-lg"
-          >
+          <MotionWrapper className="rounded-2xl overflow-hidden shadow-lg">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3651.324029265097!2d90.3741832760517!3d23.77147308796556!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c75306d7c739%3A0x8a214dc0432cb930!2z4KaV4KeH4Kao4KeN4Kam4KeN4Kaw4KeA4KefIOCml-CnjeCmsOCmqOCnjeCmpeCmvuCml-CmvuCmsCAo4Ka24KeH4KaV4KeD4Kas4Ka_KQ!5e0!3m2!1sbn!2sbd!4v1759830599627!5m2!1sbn!2sbd"
               width="100%"
@@ -137,7 +131,7 @@ export default function ContactPage() {
               allowFullScreen
               referrerPolicy="no-referrer-when-downgrade"
             ></iframe>
-          </motion.div>
+          </MotionWrapper>
         </div>
       </section>
     </div>

@@ -1,24 +1,36 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Calendar, User, ArrowRight, Newspaper } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MotionWrapper from '@/components/MotionWrapper';
+import Image from 'next/image';
+import prisma from '@/lib/prisma';
 
-export default function NewsPage() {
-  const [newsArticles, setNewsArticles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+export const revalidate = 300;
 
-  useEffect(() => {
-    fetch('/api/content?type=news')
-      .then(res => res.json())
-      .then(data => {
-        setNewsArticles(data.data || []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
+async function getNewsArticles() {
+  try {
+    return await prisma.news.findMany({
+      take: 24,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        excerpt: true,
+        content: true,
+        date: true,
+        author: true,
+        image: true,
+        slug: true,
+      },
+    });
+  } catch (error) {
+    console.error('Error loading news page data:', error);
+    return [];
+  }
+}
+
+export default async function NewsPage() {
+  const newsArticles = await getNewsArticles();
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
@@ -35,9 +47,7 @@ export default function NewsPage() {
       {/* News List */}
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          {loading ? (
-            <div className="flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>
-          ) : newsArticles.length === 0 ? (
+          {newsArticles.length === 0 ? (
             <p className="text-center text-gray-500">No news articles yet.</p>
           ) : (
             <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
@@ -46,11 +56,13 @@ export default function NewsPage() {
                   <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col">
                     <div className="w-full h-52 relative overflow-hidden bg-gradient-to-br from-blue-50 to-purple-50">
                       {article.image && article.image.trim() !== '' ? (
-                        <img
+                        <Image
                           src={article.image}
                           alt={article.title}
-                          className="w-full h-full object-cover"
-                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden'); }}
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          className="object-cover"
+                          unoptimized={article.image.startsWith('data:') || (article.image.startsWith('http') && !article.image.includes('images.pexels.com'))}
                         />
                       ) : null}
                       <div className={`w-full h-full flex items-center justify-center ${article.image && article.image.trim() !== '' ? 'hidden' : ''}`}>

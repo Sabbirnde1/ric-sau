@@ -7,6 +7,7 @@ import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import { Users, Target, Award, BookOpen, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import Image from 'next/image';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
@@ -66,13 +67,15 @@ export default function AboutPage() {
       {/* Mission / Vision Section */}
       <section className="py-24">
         <div className="max-w-6xl mx-auto px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center about-section">
-          <motion.img
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.4 }}
-            src="https://images.pexels.com/photos/3183173/pexels-photo-3183173.jpeg?auto=compress&cs=tinysrgb&w=800"
-            alt="Our Team"
-            className="w-full h-96 object-cover rounded-2xl shadow-2xl"
-          />
+          <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.4 }} className="relative w-full h-96 rounded-2xl shadow-2xl overflow-hidden">
+            <Image
+              src="https://images.pexels.com/photos/3183173/pexels-photo-3183173.jpeg?auto=compress&cs=tinysrgb&w=800"
+              alt="Our Team"
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+            />
+          </motion.div>
 
           <div>
             <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Mission & Vision</h2>

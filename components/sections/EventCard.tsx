@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from "next/link";
 import { Calendar as CalendarIcon } from 'lucide-react';
+import Image from 'next/image';
 
 interface Event {
   id: number;
@@ -18,13 +19,24 @@ interface Event {
 
 export default function EventCard({ event }: { event: Event }) {
   const [imgError, setImgError] = useState(false);
-  const hasValidImage = event.image && event.image.trim() !== '' && !imgError;
+  const hasValidImage = Boolean(event.image && event.image.trim() !== '' && !imgError);
+  const useUnoptimized =
+    hasValidImage &&
+    (event.image.startsWith('data:') || (event.image.startsWith('http') && !event.image.includes('images.pexels.com')));
 
   return (
     <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition">
       <div className="w-full h-48 relative overflow-hidden bg-gradient-to-br from-purple-50 to-blue-50">
         {hasValidImage ? (
-          <img src={event.image} alt={event.title} className="w-full h-full object-cover" onError={() => setImgError(true)} />
+          <Image
+            src={event.image}
+            alt={event.title}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover"
+            unoptimized={useUnoptimized}
+            onError={() => setImgError(true)}
+          />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <CalendarIcon className="w-12 h-12 text-purple-200" />

@@ -35,6 +35,8 @@ model News {
   slug      String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
 }
 
 // Event model
@@ -50,6 +52,9 @@ model Event {
   image       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([date])
+  @@index([createdAt])
 }
 
 // Project model
@@ -68,6 +73,8 @@ model Project {
   image        String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  @@index([createdAt])
 }
 
 // Team model
@@ -84,6 +91,8 @@ model Team {
   projects         String?  // JSON stringified array of numbers
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+
+  @@index([createdAt])
 }
 
 // Innovator model
@@ -101,6 +110,9 @@ model Innovator {
   category       String   @default("")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([ripd])
 }
 
 // RlCommittee model
@@ -114,6 +126,8 @@ model RlCommittee {
   image      String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  @@index([createdAt])
 }
 
 // About model
@@ -179,6 +193,9 @@ model Publication {
   keywords  String   // JSON array of strings
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([year])
 }
 
 // Lab model
@@ -197,6 +214,8 @@ model Lab {
   image        String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  @@index([createdAt])
 }
 
 // Resource model
@@ -207,6 +226,8 @@ model Resource {
   image       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([createdAt])
 }
 
 // Settings model

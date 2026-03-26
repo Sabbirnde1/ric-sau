@@ -1,9 +1,7 @@
-'use client';
-
-import { motion } from 'framer-motion';
 import { Brain, Code, Database, Shield, Zap, Users, ArrowRight, Calendar, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import MotionWrapper from '@/components/MotionWrapper';
 
 const researchAreas = [
   {
@@ -71,11 +69,7 @@ export default function ResearchPage() {
         <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
+          <MotionWrapper>
             <h1 className="text-4xl lg:text-6xl font-bold mb-6">
               Research Areas & Focus
             </h1>
@@ -83,14 +77,9 @@ export default function ResearchPage() {
               Exploring cutting-edge technologies and methodologies to solve tomorrow&#39;s challenges 
               through innovative research and development initiatives.
             </p>
-          </motion.div>
+          </MotionWrapper>
 
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="grid grid-cols-2 lg:grid-cols-4 gap-8 mt-16"
-          >
+          <MotionWrapper className="grid grid-cols-2 lg:grid-cols-4 gap-8 mt-16">
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
               <div className="text-3xl font-bold text-yellow-300 mb-2">50+</div>
               <div className="text-blue-100">Active Projects</div>
@@ -107,20 +96,14 @@ export default function ResearchPage() {
               <div className="text-3xl font-bold text-yellow-300 mb-2">15+</div>
               <div className="text-blue-100">Awards</div>
             </div>
-          </motion.div>
+          </MotionWrapper>
         </div>
       </section>
 
       {/* Research Areas */}
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
+          <MotionWrapper className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
               Our Research Focus Areas
             </h2>
@@ -128,18 +111,14 @@ export default function ResearchPage() {
               We conduct research across multiple domains, pushing the boundaries of technology 
               and innovation to create impactful solutions for real-world challenges.
             </p>
-          </motion.div>
+          </MotionWrapper>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {researchAreas.map((area, index) => {
               const Icon = area.icon;
               return (
-                <motion.div
+                <MotionWrapper
                   key={area.title}
-                  initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: index * 0.1 }}
-                  viewport={{ once: true }}
                   className="research-card group bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100"
                 >
                   <div className="flex items-start space-x-6">
@@ -179,7 +158,7 @@ export default function ResearchPage() {
                       </Link>
                     </div>
                   </div>
-                </motion.div>
+                </MotionWrapper>
               );
             })}
           </div>
@@ -189,12 +168,7 @@ export default function ResearchPage() {
       {/* CTA Section */}
       <section className="py-24 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
+          <MotionWrapper>
             <h2 className="text-3xl lg:text-4xl font-bold mb-6">
               Interested in Collaboration?
             </h2>
@@ -216,7 +190,7 @@ export default function ResearchPage() {
                 </Button>
               </Link>
             </div>
-          </motion.div>
+          </MotionWrapper>
         </div>
       </section>
     </div>

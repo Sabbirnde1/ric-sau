@@ -2,12 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
-
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-}
+import Image from 'next/image';
 
 const defaultResources = [
   { title: 'Lab Space', description: 'State-of-the-art laboratory space for research and development projects.' },
@@ -32,7 +27,20 @@ export default function ResourcesPage() {
   }, []);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window === 'undefined') return;
+
+    let disposed = false;
+
+    const runAnimations = async () => {
+      const [{ default: gsap }, { ScrollTrigger }] = await Promise.all([
+        import('gsap'),
+        import('gsap/dist/ScrollTrigger')
+      ]);
+
+      if (disposed) return;
+
+      gsap.registerPlugin(ScrollTrigger);
+
       gsap.utils.toArray('.resource-card').forEach((element: any, index) => {
         gsap.fromTo(
           element,
@@ -51,7 +59,13 @@ export default function ResourcesPage() {
           }
         );
       });
-    }
+    };
+
+    void runAnimations();
+
+    return () => {
+      disposed = true;
+    };
   }, []);
 
   return (
@@ -81,7 +95,14 @@ export default function ResourcesPage() {
             >
               <div className="w-full h-40 relative overflow-hidden rounded-lg mb-4 bg-gradient-to-br from-purple-50 to-blue-50">
                 {item.image && item.image.trim() !== '' ? (
-                  <img src={item.image} alt={item.title} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover"
+                    unoptimized={item.image.startsWith('data:') || (item.image.startsWith('http') && !item.image.includes('images.pexels.com'))}
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <svg className="w-10 h-10 text-purple-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" /></svg>

@@ -119,6 +119,61 @@ Netlify auto-deploys! ⚡
 
 ---
 
+## 🧪 Phase 7 Validation Gate
+
+Run this before promoting any deployment:
+
+```bash
+# Full regression gate
+npm run validate:phase7
+
+# Optional: include live smoke checks against current production
+powershell -ExecutionPolicy Bypass -File ./scripts/phase7-regression.ps1 -BaseUrl "https://your-site.netlify.app"
+```
+
+Required pass criteria:
+- `npm run lint` has no errors.
+- `npm run db:test` passes all checks.
+- `npm run build` completes successfully.
+- Live smoke checks return `success: true` for `/api/diagnose` and `/api/content?type=projects&limit=5&offset=0`.
+
+---
+
+## 🚦 Controlled Staged Rollout
+
+Deploy in increments and promote only when each stage is stable.
+
+Platform note:
+- Vercel `%` traffic rolling releases require a supported paid plan.
+- If unavailable, use fallback flow: run `npm run validate:phase7`, deploy candidate, run smoke checks, then manually `vercel promote <deployment>` only when clean.
+
+1. Canary (`10%` traffic, 15-30 min)
+- Monitor 5xx rate, auth failures, upload failures, and median API latency.
+- Abort if any critical endpoint exceeds baseline by `>20%` error rate.
+
+2. Early Ramp (`25%` traffic, 30-60 min)
+- Re-run smoke checks and validate dashboard CRUD paths.
+- Compare error and latency trends against canary.
+
+3. Broad Ramp (`50%` traffic, 60-120 min)
+- Validate peak-hour behavior: dashboard list pagination, saves, and public route loads.
+- Keep previous stable deployment ready for immediate rollback.
+
+4. Full Rollout (`100%` traffic)
+- Promote only after all stage gates pass.
+- Continue elevated monitoring for first 24 hours.
+
+Rollback triggers:
+- Login, dashboard save, or upload critical path failures.
+- Sustained 5xx/error spikes above stage threshold.
+- Data integrity issues (missing/incorrect persisted records).
+
+Rollback action:
+- Revert to the last healthy deployment immediately.
+- Run `/api/diagnose` and `npm run db:test` to confirm platform and DB health before retrying.
+
+---
+
 ## 🆘 Quick Fixes
 
 ### "Build failed"

@@ -2,8 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import {
   Users,
   Target,
@@ -16,10 +14,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-}
+import Image from 'next/image';
 
 const defaultFunding = [
   { label: 'Financier', value: 'The World Bank' },
@@ -70,7 +65,20 @@ export default function RicSauAboutPage() {
   }, []);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window === 'undefined') return;
+
+    let disposed = false;
+
+    const runAnimations = async () => {
+      const [{ default: gsap }, { ScrollTrigger }] = await Promise.all([
+        import('gsap'),
+        import('gsap/dist/ScrollTrigger')
+      ]);
+
+      if (disposed) return;
+
+      gsap.registerPlugin(ScrollTrigger);
+
       gsap.utils.toArray('.about-section').forEach((element: any) => {
         gsap.fromTo(
           element,
@@ -88,7 +96,13 @@ export default function RicSauAboutPage() {
           }
         );
       });
-    }
+    };
+
+    void runAnimations();
+
+    return () => {
+      disposed = true;
+    };
   }, [about]);
 
   const heroTitle = about?.heroTitle || 'Research & Innovation Center (RIC - SAU)';
@@ -109,10 +123,14 @@ export default function RicSauAboutPage() {
     <div ref={containerRef} className="min-h-screen bg-gray-50 pt-20">
       {/* Hero Section */}
       <section className="relative h-[80vh] flex items-center justify-center text-white overflow-hidden">
-        <img
+        <Image
           src={heroImage}
           alt="SAU Campus"
-          className="absolute inset-0 w-full h-full object-cover brightness-50"
+          fill
+          sizes="100vw"
+          priority
+          className="object-cover brightness-50"
+          unoptimized={heroImage.startsWith('data:') || (heroImage.startsWith('http') && !heroImage.includes('images.pexels.com'))}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-blue-600/70 via-purple-600/60 to-blue-800/80"></div>
 
@@ -128,10 +146,14 @@ export default function RicSauAboutPage() {
             transition={{ duration: 1, delay: 0.3 }}
             className="mx-auto mb-6 w-28 h-28 rounded-full shadow-lg bg-white p-2 overflow-hidden"
           >
-            <img
+            <Image
               src={logoUrl}
               alt="RIC SAU Logo"
+              width={112}
+              height={112}
+              sizes="112px"
               className="w-full h-full object-contain p-1"
+              unoptimized={logoUrl.startsWith('data:') || (logoUrl.startsWith('http') && !logoUrl.includes('images.pexels.com'))}
               onError={() => setLogoUrl(fallbackLogo)}
             />
           </motion.div>
@@ -163,13 +185,16 @@ export default function RicSauAboutPage() {
       {/* Funding & Governance */}
       <section className="py-24 bg-gray-100 about-section">
         <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          <motion.img
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.4 }}
-            src={fundingImage}
-            alt="Innovation Governance"
-            className="w-full h-96 object-cover rounded-2xl shadow-2xl"
-          />
+          <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.4 }} className="relative w-full h-96 rounded-2xl shadow-2xl overflow-hidden">
+            <Image
+              src={fundingImage}
+              alt="Innovation Governance"
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+              unoptimized={fundingImage.startsWith('data:') || (fundingImage.startsWith('http') && !fundingImage.includes('images.pexels.com'))}
+            />
+          </motion.div>
           <div>
             <h2 className="text-3xl font-bold text-gray-900 mb-6">Funding & Governance</h2>
             <ul className="space-y-3 text-lg text-gray-600">
@@ -221,13 +246,19 @@ export default function RicSauAboutPage() {
             </ul>
           </div>
 
-          <motion.img
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.4 }}
-            src={about?.image || 'https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=800'}
-            alt="Innovation Labs"
-            className="w-full h-96 object-cover rounded-2xl shadow-2xl"
-          />
+          <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.4 }} className="relative w-full h-96 rounded-2xl shadow-2xl overflow-hidden">
+            <Image
+              src={about?.image || 'https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=800'}
+              alt="Innovation Labs"
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+              unoptimized={
+                (about?.image || '').startsWith('data:') ||
+                ((about?.image || '').startsWith('http') && !(about?.image || '').includes('images.pexels.com'))
+              }
+            />
+          </motion.div>
         </div>
       </section>
 

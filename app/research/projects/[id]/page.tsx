@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import gsap from 'gsap';
 import { ArrowLeft, Calendar, User, DollarSign, Users, FileText, Github, ExternalLink, Download,  } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import Image from 'next/image';
 
 interface Project {
   id: number;
@@ -36,12 +36,25 @@ export default function ProjectDetailPage() {
   }, [params.id]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && project) {
-      gsap.fromTo('.project-detail', 
+    if (typeof window === 'undefined' || !project) return;
+
+    let disposed = false;
+
+    const runAnimation = async () => {
+      const { default: gsap } = await import('gsap');
+      if (disposed) return;
+
+      gsap.fromTo('.project-detail',
         { y: 50, opacity: 0 },
         { y: 0, opacity: 1, duration: 1, ease: 'power2.out' }
       );
-    }
+    };
+
+    void runAnimation();
+
+    return () => {
+      disposed = true;
+    };
   }, [project]);
 
   const fetchProject = async () => {
@@ -170,13 +183,20 @@ export default function ProjectDetailPage() {
               </div>
 
               <div className="project-detail">
-                <motion.img
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.4 }}
-                  src={project.image}
-                  alt={project.title}
-                  className="w-full h-96 object-cover rounded-2xl shadow-2xl"
-                />
+                <div className="relative w-full h-96 rounded-2xl shadow-2xl overflow-hidden">
+                  {project.image && project.image.trim() !== '' ? (
+                    <Image
+                      src={project.image}
+                      alt={project.title}
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      className="object-cover transition-transform duration-300 hover:scale-105"
+                      unoptimized={project.image.startsWith('data:') || (project.image.startsWith('http') && !project.image.includes('images.pexels.com'))}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-50" />
+                  )}
+                </div>
               </div>
             </div>
           </motion.div>

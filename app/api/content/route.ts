@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
-// Force dynamic - no caching for real-time data
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 // Helper to safely parse JSON fields
 function parseJSON(value: string | null | undefined, fallback: any = null) {
@@ -86,8 +85,23 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
+    const rawLimit = parseInt(searchParams.get('limit') || '0', 10);
+    const rawOffset = parseInt(searchParams.get('offset') || '0', 10);
+    const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 100) : 0;
+    const offset = Number.isFinite(rawOffset) && rawOffset > 0 ? rawOffset : 0;
+    const usePagination = Number.isFinite(limit) && limit > 0;
+
+    const applyPagination = (query: any) => {
+      if (!usePagination) return query;
+      return {
+        ...query,
+        take: limit,
+        skip: Math.max(0, offset),
+      };
+    };
 
     let data;
+    let paginationMeta: { limit: number; offset: number } | null = null;
     switch (type) {
       case 'home': {
         const home = await prisma.home.findFirst();
@@ -100,48 +114,57 @@ export async function GET(request: Request) {
         break;
       }
       case 'projects': {
-        const projects = await prisma.project.findMany({ orderBy: { createdAt: 'desc' } });
+        const projects = await prisma.project.findMany(applyPagination({ orderBy: { createdAt: 'desc' } }));
         data = projects.map(formatProject);
+        if (usePagination) paginationMeta = { limit, offset };
         break;
       }
       case 'news': {
-        const news = await prisma.news.findMany({ orderBy: { createdAt: 'desc' } });
+        const news = await prisma.news.findMany(applyPagination({ orderBy: { createdAt: 'desc' } }));
         data = news;
+        if (usePagination) paginationMeta = { limit, offset };
         break;
       }
       case 'team': {
-        const team = await prisma.team.findMany({ orderBy: { createdAt: 'desc' } });
+        const team = await prisma.team.findMany(applyPagination({ orderBy: { createdAt: 'desc' } }));
         data = team.map(formatTeamMember);
+        if (usePagination) paginationMeta = { limit, offset };
         break;
       }
       case 'events': {
-        const events = await prisma.event.findMany({ orderBy: { date: 'desc' } });
+        const events = await prisma.event.findMany(applyPagination({ orderBy: { date: 'desc' } }));
         data = events;
+        if (usePagination) paginationMeta = { limit, offset };
         break;
       }
       case 'innovators': {
-        const innovators = await prisma.innovator.findMany({ orderBy: { createdAt: 'desc' } });
+        const innovators = await prisma.innovator.findMany(applyPagination({ orderBy: { createdAt: 'desc' } }));
         data = innovators.map(formatInnovator);
+        if (usePagination) paginationMeta = { limit, offset };
         break;
       }
       case 'rlCommittee': {
-        const committee = await prisma.rlCommittee.findMany({ orderBy: { createdAt: 'desc' } });
+        const committee = await prisma.rlCommittee.findMany(applyPagination({ orderBy: { createdAt: 'desc' } }));
         data = committee.map(formatRlCommitteeMember);
+        if (usePagination) paginationMeta = { limit, offset };
         break;
       }
       case 'publications': {
-        const publications = await prisma.publication.findMany({ orderBy: { createdAt: 'desc' } });
+        const publications = await prisma.publication.findMany(applyPagination({ orderBy: { createdAt: 'desc' } }));
         data = publications.map(formatPublication);
+        if (usePagination) paginationMeta = { limit, offset };
         break;
       }
       case 'labs': {
-        const labs = await prisma.lab.findMany({ orderBy: { createdAt: 'desc' } });
+        const labs = await prisma.lab.findMany(applyPagination({ orderBy: { createdAt: 'desc' } }));
         data = labs.map(formatLab);
+        if (usePagination) paginationMeta = { limit, offset };
         break;
       }
       case 'resources': {
-        const resources = await prisma.resource.findMany({ orderBy: { createdAt: 'desc' } });
+        const resources = await prisma.resource.findMany(applyPagination({ orderBy: { createdAt: 'desc' } }));
         data = resources;
+        if (usePagination) paginationMeta = { limit, offset };
         break;
       }
       case 'contact': {
@@ -151,6 +174,10 @@ export async function GET(request: Request) {
       }
       default:
         data = {};
+    }
+
+    if (paginationMeta) {
+      return NextResponse.json({ success: true, data, pagination: paginationMeta });
     }
 
     return NextResponse.json({ success: true, data });

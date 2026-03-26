@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
-// Force dynamic - no caching for real-time data
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
 
 // Helper to safely parse JSON fields
 function parseJSON(value: string | null | undefined, fallback: any = {}) {

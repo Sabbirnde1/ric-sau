@@ -2,14 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
-import { Linkedin, Twitter, Github, User } from 'lucide-react';
+import { User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-}
+import Image from 'next/image';
 
 function TeamMemberCard({ member }: { member: any }) {
   const [imgError, setImgError] = useState(false);
@@ -21,12 +16,14 @@ function TeamMemberCard({ member }: { member: any }) {
     >
       <div className="w-32 h-32 rounded-full overflow-hidden mb-6 shadow-md bg-gradient-to-br from-blue-50 to-purple-50 flex-shrink-0">
         {hasValidImage ? (
-          <motion.img
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.3 }}
+          <Image
             src={member.image}
             alt={member.name}
-            className="w-full h-full object-cover"
+            width={128}
+            height={128}
+            sizes="128px"
+            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+            unoptimized={member.image.startsWith('data:') || (member.image.startsWith('http') && !member.image.includes('images.pexels.com'))}
             onError={() => setImgError(true)}
           />
         ) : (
@@ -58,7 +55,20 @@ export default function TeamPage() {
   }, []);
 
   useEffect(() => {
-    if (!loading && team.length > 0 && typeof window !== 'undefined') {
+    if (loading || team.length === 0 || typeof window === 'undefined') return;
+
+    let disposed = false;
+
+    const runAnimations = async () => {
+      const [{ default: gsap }, { ScrollTrigger }] = await Promise.all([
+        import('gsap'),
+        import('gsap/dist/ScrollTrigger')
+      ]);
+
+      if (disposed) return;
+
+      gsap.registerPlugin(ScrollTrigger);
+
       gsap.utils.toArray('.team-card').forEach((element: any, index) => {
         gsap.fromTo(
           element,
@@ -77,7 +87,13 @@ export default function TeamPage() {
           }
         );
       });
-    }
+    };
+
+    void runAnimations();
+
+    return () => {
+      disposed = true;
+    };
   }, [loading, team]);
 
   return (

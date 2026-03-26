@@ -2,16 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
 import { User } from 'lucide-react';
-
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-}
 
 function MemberCard({ member }: { member: any }) {
   const [imgError, setImgError] = useState(false);
@@ -38,6 +32,7 @@ function MemberCard({ member }: { member: any }) {
             fill
             sizes="128px"
             className="object-cover"
+            unoptimized={member.image.startsWith('data:') || (member.image.startsWith('http') && !member.image.includes('images.pexels.com'))}
             onError={() => setImgError(true)}
           />
         ) : (
@@ -74,7 +69,20 @@ export default function RLCommitteePage() {
   }, []);
 
   useEffect(() => {
-    if (!loading && committeeMembers.length > 0 && typeof window !== 'undefined') {
+    if (loading || committeeMembers.length === 0 || typeof window === 'undefined') return;
+
+    let disposed = false;
+
+    const runAnimations = async () => {
+      const [{ default: gsap }, { ScrollTrigger }] = await Promise.all([
+        import('gsap'),
+        import('gsap/dist/ScrollTrigger')
+      ]);
+
+      if (disposed) return;
+
+      gsap.registerPlugin(ScrollTrigger);
+
       gsap.utils.toArray('.committee-card').forEach((element: any, index) => {
         gsap.fromTo(
           element,
@@ -93,7 +101,13 @@ export default function RLCommitteePage() {
           }
         );
       });
-    }
+    };
+
+    void runAnimations();
+
+    return () => {
+      disposed = true;
+    };
   }, [loading, committeeMembers]);
 
   return (

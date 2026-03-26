@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Edit3, Trash2, Users, FileText, Briefcase, Calendar, Award, Mail, Home, Info, Settings, Image as ImageIcon, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,10 +12,39 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import DashboardStatsGrid from '@/components/dashboard/DashboardStatsGrid';
 import { ToastAction } from '@/components/ui/toast';
 import ImageUpload from '@/components/ui/image-upload';
 import RichTextEditor from '@/components/ui/rich-text-editor';
 import { useToast } from '@/hooks/use-toast';
+
+const shouldUseUnoptimized = (src: string) =>
+  src.startsWith('data:') || (src.startsWith('http') && !src.includes('images.pexels.com'));
+
+const LIST_PAGE_SIZE = 10;
+type SearchableTab =
+  | 'projects'
+  | 'publications'
+  | 'labs'
+  | 'resources'
+  | 'news'
+  | 'events'
+  | 'team'
+  | 'innovators'
+  | 'rl-committee';
+
+const SEARCHABLE_TABS: ReadonlySet<SearchableTab> = new Set<SearchableTab>([
+  'projects',
+  'publications',
+  'labs',
+  'resources',
+  'news',
+  'events',
+  'team',
+  'innovators',
+  'rl-committee',
+]);
 
 export default function DashboardContent() {
   const router = useRouter();
@@ -26,6 +55,18 @@ export default function DashboardContent() {
   const [quickEditItem, setQuickEditItem] = useState<{ type: 'project' | 'news' | 'event'; id: number } | null>(null);
   const [quickEditData, setQuickEditData] = useState<Record<string, any>>({});
   const pendingDeleteRef = useRef<Record<string, { timeoutId: ReturnType<typeof setTimeout>; item: any; type: string }>>({});
+  const draftsSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [tabPage, setTabPage] = useState<Record<SearchableTab, number>>({
+    projects: 1,
+    publications: 1,
+    labs: 1,
+    resources: 1,
+    news: 1,
+    events: 1,
+    team: 1,
+    innovators: 1,
+    'rl-committee': 1,
+  });
   
   // Data states
   const [homeData, setHomeData] = useState<any>({});
@@ -235,20 +276,32 @@ export default function DashboardContent() {
   }, []);
 
   useEffect(() => {
-    const draft = {
-      homeForm,
-      statsForm,
-      featuresForm,
-      ctaForm,
-      aboutForm,
-      aboutFundingForm,
-      aboutWhoCanApplyForm,
-      aboutWhatYouGetForm,
-      aboutFocusAreasForm,
-      aboutHowToApplyForm,
-      newsForm,
+    if (draftsSaveTimeoutRef.current) {
+      clearTimeout(draftsSaveTimeoutRef.current);
+    }
+
+    draftsSaveTimeoutRef.current = setTimeout(() => {
+      const draft = {
+        homeForm,
+        statsForm,
+        featuresForm,
+        ctaForm,
+        aboutForm,
+        aboutFundingForm,
+        aboutWhoCanApplyForm,
+        aboutWhatYouGetForm,
+        aboutFocusAreasForm,
+        aboutHowToApplyForm,
+        newsForm,
+      };
+      localStorage.setItem('dashboard-drafts-v1', JSON.stringify(draft));
+    }, 600);
+
+    return () => {
+      if (draftsSaveTimeoutRef.current) {
+        clearTimeout(draftsSaveTimeoutRef.current);
+      }
     };
-    localStorage.setItem('dashboard-drafts-v1', JSON.stringify(draft));
   }, [
     homeForm,
     statsForm,
@@ -268,6 +321,9 @@ export default function DashboardContent() {
       Object.values(pendingDeleteRef.current).forEach((entry) => {
         clearTimeout(entry.timeoutId);
       });
+      if (draftsSaveTimeoutRef.current) {
+        clearTimeout(draftsSaveTimeoutRef.current);
+      }
       pendingDeleteRef.current = {};
     };
   }, []);
@@ -403,6 +459,77 @@ export default function DashboardContent() {
     }
   };
 
+  const fetchContentType = async (type: string) => {
+    const response = await fetch(`/api/content?type=${type}`);
+    const json = await response.json();
+    return json.data;
+  };
+
+  const refreshSection = async (section: string) => {
+    switch (section) {
+      case 'home':
+        setHomeData((await fetchContentType('home')) || {});
+        break;
+      case 'about':
+        setAboutData((await fetchContentType('about')) || {});
+        break;
+      case 'projects':
+      case 'project':
+        setProjects((await fetchContentType('projects')) || []);
+        break;
+      case 'publications':
+      case 'publication':
+        setPublications((await fetchContentType('publications')) || []);
+        break;
+      case 'labs':
+      case 'lab':
+        setLabs((await fetchContentType('labs')) || []);
+        break;
+      case 'resources':
+      case 'resource':
+        setResources((await fetchContentType('resources')) || []);
+        break;
+      case 'news':
+        setNews((await fetchContentType('news')) || []);
+        break;
+      case 'events':
+      case 'event':
+        setEvents((await fetchContentType('events')) || []);
+        break;
+      case 'team':
+        setTeam((await fetchContentType('team')) || []);
+        break;
+      case 'innovators':
+      case 'innovator':
+        setInnovators((await fetchContentType('innovators')) || []);
+        break;
+      case 'rl-committee':
+      case 'rlCommittee':
+        setRlCommittee((await fetchContentType('rlCommittee')) || []);
+        break;
+      case 'contact':
+        setContactData((await fetchContentType('contact')) || {});
+        break;
+      case 'settings': {
+        const settingsRes = await fetch('/api/settings');
+        const settingsJson = await settingsRes.json();
+        setSiteSettings(settingsJson.data || {});
+        break;
+      }
+      default:
+        await fetchAllData();
+        break;
+    }
+  };
+
+  const refreshActiveTab = async () => {
+    if (activeTab === 'overview') {
+      await fetchAllData();
+      return;
+    }
+    await refreshSection(activeTab);
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     router.push('/login');
@@ -424,7 +551,7 @@ export default function DashboardContent() {
         })
       });
       if (response.ok) {
-        fetchAllData();
+        await refreshSection('home');
         setDialogStates({ ...dialogStates, home: false });
         clearDashboardDrafts(['home']);
         toast({ title: 'Home content updated', description: 'All Home section changes were saved.' });
@@ -453,7 +580,7 @@ export default function DashboardContent() {
         })
       });
       if (response.ok) {
-        fetchAllData();
+        await refreshSection('about');
         setDialogStates({ ...dialogStates, about: false });
         clearDashboardDrafts(['about']);
         toast({ title: 'About content updated', description: 'All About section changes were saved.' });
@@ -472,7 +599,7 @@ export default function DashboardContent() {
         body: JSON.stringify({ type: 'contact', data: contactForm })
       });
       if (response.ok) {
-        fetchAllData();
+        await refreshSection('contact');
         setDialogStates({ ...dialogStates, contact: false });
         toast({ title: 'Contact updated', description: 'Contact information was saved.' });
       }
@@ -514,7 +641,7 @@ export default function DashboardContent() {
         })
       ]);
 
-      fetchAllData();
+      await refreshSection('settings');
       setDialogStates({ ...dialogStates, settings: false });
       toast({ title: 'Settings updated', description: 'Site settings were saved successfully.' });
     } catch (error) {
@@ -531,7 +658,7 @@ export default function DashboardContent() {
         body: JSON.stringify({ type, data: form })
       });
       if (response.ok) {
-        fetchAllData();
+        await refreshSection(type);
         resetForm();
         setDialogStates({ ...dialogStates, [type]: false });
         if (type === 'news') {
@@ -559,7 +686,7 @@ export default function DashboardContent() {
       });
 
       if (response.ok) {
-        fetchAllData();
+        await refreshSection('rlCommittee');
         resetRlCommitteeForm();
         setEditingRlCommitteeId(null);
         setDialogStates({ ...dialogStates, rlCommittee: false });
@@ -693,7 +820,7 @@ export default function DashboardContent() {
       if (response.ok) {
         toast({ title: 'Quick edit saved', description: 'Item updated successfully.' });
         cancelQuickEdit();
-        fetchAllData();
+        await refreshSection(quickEditItem.type);
       } else {
         toast({ title: 'Quick edit failed', description: 'Could not save inline changes.', variant: 'destructive' });
       }
@@ -713,22 +840,15 @@ export default function DashboardContent() {
   const resetLabForm = () => setLabForm({ name: '', director: '', location: '', established: new Date().getFullYear(), members: 0, focus: '', description: '', equipment: '', projects: 0, publications: 0, image: '' });
   const resetResourceForm = () => setResourceForm({ title: '', description: '', image: '' });
 
-  const searchableTabs = new Set([
-    'projects',
-    'publications',
-    'labs',
-    'resources',
-    'news',
-    'events',
-    'team',
-    'innovators',
-    'rl-committee',
-  ]);
+  useEffect(() => {
+    if (!SEARCHABLE_TABS.has(activeTab as SearchableTab)) return;
+    setTabPage((prev) => ({ ...prev, [activeTab as SearchableTab]: 1 }));
+  }, [activeTab, listSearch]);
 
-  const matchesSearch = (value: unknown) => {
+  const matchesSearch = useCallback((value: unknown) => {
     if (!listSearch.trim()) return true;
     return String(value ?? '').toLowerCase().includes(listSearch.toLowerCase().trim());
-  };
+  }, [listSearch]);
 
   const filteredProjects = useMemo(() => {
     return projects.filter((item) =>
@@ -737,7 +857,7 @@ export default function DashboardContent() {
       matchesSearch(item.category) ||
       matchesSearch(item.lead)
     );
-  }, [projects, listSearch]);
+  }, [projects, matchesSearch]);
 
   const filteredPublications = useMemo(() => {
     return publications.filter((item) =>
@@ -746,7 +866,7 @@ export default function DashboardContent() {
       matchesSearch(item.journal) ||
       matchesSearch(item.category)
     );
-  }, [publications, listSearch]);
+  }, [publications, matchesSearch]);
 
   const filteredLabs = useMemo(() => {
     return labs.filter((item) =>
@@ -755,11 +875,11 @@ export default function DashboardContent() {
       matchesSearch(item.director) ||
       matchesSearch(item.location)
     );
-  }, [labs, listSearch]);
+  }, [labs, matchesSearch]);
 
   const filteredResources = useMemo(() => {
     return resources.filter((item) => matchesSearch(item.title) || matchesSearch(item.description));
-  }, [resources, listSearch]);
+  }, [resources, matchesSearch]);
 
   const filteredNews = useMemo(() => {
     return news.filter((item) =>
@@ -767,7 +887,7 @@ export default function DashboardContent() {
       matchesSearch(item.excerpt) ||
       matchesSearch(item.category)
     );
-  }, [news, listSearch]);
+  }, [news, matchesSearch]);
 
   const filteredEvents = useMemo(() => {
     return events.filter((item) =>
@@ -776,7 +896,7 @@ export default function DashboardContent() {
       matchesSearch(item.category) ||
       matchesSearch(item.location)
     );
-  }, [events, listSearch]);
+  }, [events, matchesSearch]);
 
   const filteredTeam = useMemo(() => {
     return team.filter((item) =>
@@ -785,7 +905,7 @@ export default function DashboardContent() {
       matchesSearch(item.department) ||
       matchesSearch(item.email)
     );
-  }, [team, listSearch]);
+  }, [team, matchesSearch]);
 
   const filteredInnovators = useMemo(() => {
     return innovators.filter((item) =>
@@ -796,7 +916,7 @@ export default function DashboardContent() {
       matchesSearch(item.pi) ||
       matchesSearch(item.coPi)
     );
-  }, [innovators, listSearch]);
+  }, [innovators, matchesSearch]);
 
   const filteredRlCommittee = useMemo(() => {
     return rlCommittee.filter((item) =>
@@ -805,7 +925,23 @@ export default function DashboardContent() {
       matchesSearch(item.department) ||
       matchesSearch(item.email)
     );
-  }, [rlCommittee, listSearch]);
+  }, [rlCommittee, matchesSearch]);
+
+  const paginateItems = useCallback(<T,>(items: T[], tab: SearchableTab) => {
+    const page = tabPage[tab] || 1;
+    const start = (page - 1) * LIST_PAGE_SIZE;
+    return items.slice(start, start + LIST_PAGE_SIZE);
+  }, [tabPage]);
+
+  const pagedFilteredProjects = useMemo(() => paginateItems(filteredProjects, 'projects'), [filteredProjects, paginateItems]);
+  const pagedFilteredPublications = useMemo(() => paginateItems(filteredPublications, 'publications'), [filteredPublications, paginateItems]);
+  const pagedFilteredLabs = useMemo(() => paginateItems(filteredLabs, 'labs'), [filteredLabs, paginateItems]);
+  const pagedFilteredResources = useMemo(() => paginateItems(filteredResources, 'resources'), [filteredResources, paginateItems]);
+  const pagedFilteredNews = useMemo(() => paginateItems(filteredNews, 'news'), [filteredNews, paginateItems]);
+  const pagedFilteredEvents = useMemo(() => paginateItems(filteredEvents, 'events'), [filteredEvents, paginateItems]);
+  const pagedFilteredTeam = useMemo(() => paginateItems(filteredTeam, 'team'), [filteredTeam, paginateItems]);
+  const pagedFilteredInnovators = useMemo(() => paginateItems(filteredInnovators, 'innovators'), [filteredInnovators, paginateItems]);
+  const pagedFilteredRlCommittee = useMemo(() => paginateItems(filteredRlCommittee, 'rl-committee'), [filteredRlCommittee, paginateItems]);
 
   const activeTabCount = useMemo(() => {
     switch (activeTab) {
@@ -842,6 +978,23 @@ export default function DashboardContent() {
     filteredRlCommittee.length,
   ]);
 
+  const activePagination = useMemo(() => {
+    if (!SEARCHABLE_TABS.has(activeTab as SearchableTab)) return null;
+    const tab = activeTab as SearchableTab;
+    const filtered = activeTabCount.filtered;
+    const totalPages = Math.max(1, Math.ceil(filtered / LIST_PAGE_SIZE));
+    const page = Math.min(tabPage[tab] || 1, totalPages);
+    return { tab, page, totalPages };
+  }, [activeTab, activeTabCount.filtered, tabPage]);
+
+  useEffect(() => {
+    if (!activePagination) return;
+    const current = tabPage[activePagination.tab] || 1;
+    if (current > activePagination.totalPages) {
+      setTabPage((prev) => ({ ...prev, [activePagination.tab]: activePagination.totalPages }));
+    }
+  }, [activePagination, tabPage]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -865,72 +1018,15 @@ export default function DashboardContent() {
             </Button>
           </div>
 
-          {/* Stats Overview */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Projects</CardTitle>
-                <Briefcase className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{projects.length}</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Publications</CardTitle>
-                <FileText className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{publications.length}</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Labs</CardTitle>
-                <Briefcase className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{labs.length}</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">News</CardTitle>
-                <FileText className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{news.length}</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Events</CardTitle>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{events.length}</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Team</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{team.length}</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Innovators</CardTitle>
-                <Award className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{innovators.length}</div>
-              </CardContent>
-            </Card>
-          </div>
+          <DashboardStatsGrid
+            projects={projects.length}
+            publications={publications.length}
+            labs={labs.length}
+            news={news.length}
+            events={events.length}
+            team={team.length}
+            innovators={innovators.length}
+          />
 
           {/* Management Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -953,7 +1049,7 @@ export default function DashboardContent() {
               </TabsList>
             </div>
 
-            {searchableTabs.has(activeTab) && (
+            {SEARCHABLE_TABS.has(activeTab as SearchableTab) && (
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <Input
                   placeholder="Search current tab..."
@@ -964,15 +1060,49 @@ export default function DashboardContent() {
                 <div className="text-sm text-gray-600">
                   Showing {activeTabCount.filtered} of {activeTabCount.total}
                 </div>
+                {activePagination && (
+                  <div className="flex items-center gap-2 sm:ml-auto">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={activePagination.page <= 1}
+                      onClick={() =>
+                        setTabPage((prev) => ({
+                          ...prev,
+                          [activePagination.tab]: Math.max(1, activePagination.page - 1),
+                        }))
+                      }
+                    >
+                      Prev
+                    </Button>
+                    <span className="text-xs text-gray-600 min-w-[74px] text-center">
+                      Page {activePagination.page}/{activePagination.totalPages}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={activePagination.page >= activePagination.totalPages}
+                      onClick={() =>
+                        setTabPage((prev) => ({
+                          ...prev,
+                          [activePagination.tab]: Math.min(activePagination.totalPages, activePagination.page + 1),
+                        }))
+                      }
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => {
                     setListSearch('');
-                    fetchAllData();
+                    refreshActiveTab();
                   }}
-                  className="sm:ml-auto"
                 >
                   Refresh
                 </Button>
@@ -1176,7 +1306,16 @@ export default function DashboardContent() {
                         {homeData.hero?.backgroundImage && (
                           <div className="mt-2">
                             <strong>Background Image:</strong>
-                            <img src={homeData.hero.backgroundImage} alt="Hero" className="mt-2 w-full h-32 object-cover rounded" />
+                            <div className="mt-2 relative w-full h-32 rounded overflow-hidden">
+                              <Image
+                                src={homeData.hero.backgroundImage}
+                                alt="Hero"
+                                fill
+                                sizes="(max-width: 1024px) 100vw, 50vw"
+                                className="object-cover"
+                                unoptimized={shouldUseUnoptimized(homeData.hero.backgroundImage)}
+                              />
+                            </div>
                           </div>
                         )}
                       </div>
@@ -1537,10 +1676,12 @@ export default function DashboardContent() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {filteredProjects.map((project) => (
+                    {pagedFilteredProjects.map((project) => (
                       <div key={project.id} className="flex items-start gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow">
                         {project.image && (
-                          <img src={project.image} alt={project.title} className="w-20 h-20 object-cover rounded" />
+                          <div className="relative w-20 h-20 rounded overflow-hidden shrink-0">
+                            <Image src={project.image} alt={project.title} fill sizes="80px" className="object-cover" unoptimized={shouldUseUnoptimized(project.image)} />
+                          </div>
                         )}
                         <div className="flex-1">
                           {quickEditItem?.type === 'project' && quickEditItem.id === project.id ? (
@@ -1636,7 +1777,7 @@ export default function DashboardContent() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {filteredPublications.map((pub: any) => (
+                    {pagedFilteredPublications.map((pub: any) => (
                       <div key={pub.id} className="flex items-start gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow">
                         <div className="flex-1">
                           <h4 className="font-semibold">{pub.title}</h4>
@@ -1698,10 +1839,12 @@ export default function DashboardContent() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {filteredLabs.map((lab: any) => (
+                    {pagedFilteredLabs.map((lab: any) => (
                       <div key={lab.id} className="flex items-start gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow">
                         {lab.image && (
-                          <img src={lab.image} alt={lab.name} className="w-20 h-20 object-cover rounded" />
+                          <div className="relative w-20 h-20 rounded overflow-hidden shrink-0">
+                            <Image src={lab.image} alt={lab.name} fill sizes="80px" className="object-cover" unoptimized={shouldUseUnoptimized(lab.image)} />
+                          </div>
                         )}
                         <div className="flex-1">
                           <h4 className="font-semibold">{lab.name}</h4>
@@ -1743,10 +1886,12 @@ export default function DashboardContent() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {filteredResources.map((resource: any) => (
+                    {pagedFilteredResources.map((resource: any) => (
                       <div key={resource.id} className="flex items-start gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow">
                         {resource.image && (
-                          <img src={resource.image} alt={resource.title} className="w-20 h-20 object-cover rounded" />
+                          <div className="relative w-20 h-20 rounded overflow-hidden shrink-0">
+                            <Image src={resource.image} alt={resource.title} fill sizes="80px" className="object-cover" unoptimized={shouldUseUnoptimized(resource.image)} />
+                          </div>
                         )}
                         <div className="flex-1">
                           <h4 className="font-semibold">{resource.title}</h4>
@@ -1800,10 +1945,12 @@ export default function DashboardContent() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {filteredNews.map((item) => (
+                    {pagedFilteredNews.map((item) => (
                       <div key={item.id} className="flex items-start gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow">
                         {item.image && (
-                          <img src={item.image} alt={item.title} className="w-20 h-20 object-cover rounded" />
+                          <div className="relative w-20 h-20 rounded overflow-hidden shrink-0">
+                            <Image src={item.image} alt={item.title} fill sizes="80px" className="object-cover" unoptimized={shouldUseUnoptimized(item.image)} />
+                          </div>
                         )}
                         <div className="flex-1">
                           {quickEditItem?.type === 'news' && quickEditItem.id === item.id ? (
@@ -1892,10 +2039,12 @@ export default function DashboardContent() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {filteredEvents.map((event) => (
+                    {pagedFilteredEvents.map((event) => (
                       <div key={event.id} className="flex items-start gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow">
                         {event.image && (
-                          <img src={event.image} alt={event.title} className="w-20 h-20 object-cover rounded" />
+                          <div className="relative w-20 h-20 rounded overflow-hidden shrink-0">
+                            <Image src={event.image} alt={event.title} fill sizes="80px" className="object-cover" unoptimized={shouldUseUnoptimized(event.image)} />
+                          </div>
                         )}
                         <div className="flex-1">
                           {quickEditItem?.type === 'event' && quickEditItem.id === event.id ? (
@@ -1991,10 +2140,12 @@ export default function DashboardContent() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {filteredTeam.map((member) => (
+                    {pagedFilteredTeam.map((member) => (
                       <div key={member.id} className="flex items-start gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow">
                         {member.image && (
-                          <img src={member.image} alt={member.name} className="w-16 h-16 object-cover rounded-full" />
+                          <div className="relative w-16 h-16 rounded-full overflow-hidden shrink-0">
+                            <Image src={member.image} alt={member.name} fill sizes="64px" className="object-cover" unoptimized={shouldUseUnoptimized(member.image)} />
+                          </div>
                         )}
                         <div className="flex-1">
                           <h4 className="font-semibold">{member.name}</h4>
@@ -2049,10 +2200,19 @@ export default function DashboardContent() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {filteredInnovators.map((innovator) => (
+                    {pagedFilteredInnovators.map((innovator) => (
                       <div key={innovator.id} className="flex items-start gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow">
                         {innovator.image && (
-                          <img src={innovator.image} alt={innovator.title || innovator.name} className="w-16 h-16 object-cover rounded-lg" />
+                          <div className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0">
+                            <Image
+                              src={innovator.image}
+                              alt={innovator.title || innovator.name}
+                              fill
+                              sizes="64px"
+                              className="object-cover"
+                              unoptimized={shouldUseUnoptimized(innovator.image)}
+                            />
+                          </div>
                         )}
                         <div className="flex-1">
                           {innovator.ripd && <span className="text-xs font-mono text-primary bg-primary/10 px-2 py-0.5 rounded">{innovator.ripd}</span>}
@@ -2129,10 +2289,12 @@ export default function DashboardContent() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {filteredRlCommittee.map((member) => (
+                    {pagedFilteredRlCommittee.map((member) => (
                       <div key={member.id} className="flex items-start gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow">
                         {member.image && (
-                          <img src={member.image} alt={member.name} className="w-16 h-16 object-cover rounded-full" />
+                          <div className="relative w-16 h-16 rounded-full overflow-hidden shrink-0">
+                            <Image src={member.image} alt={member.name} fill sizes="64px" className="object-cover" unoptimized={shouldUseUnoptimized(member.image)} />
+                          </div>
                         )}
                         <div className="flex-1">
                           <h4 className="font-semibold">{member.name}</h4>
@@ -2304,13 +2466,17 @@ export default function DashboardContent() {
                           {siteSettings?.general?.logo && (
                             <div>
                               <p className="text-sm mb-2"><strong>Logo:</strong></p>
-                              <img src={siteSettings.general.logo} alt="Logo" className="h-16 w-auto border rounded p-2" />
+                              <div className="relative h-16 w-32 border rounded p-2 overflow-hidden">
+                                <Image src={siteSettings.general.logo} alt="Logo" fill sizes="128px" className="object-contain p-2" unoptimized={shouldUseUnoptimized(siteSettings.general.logo)} />
+                              </div>
                             </div>
                           )}
                           {siteSettings?.general?.favicon && (
                             <div>
                               <p className="text-sm mb-2"><strong>Favicon:</strong></p>
-                              <img src={siteSettings.general.favicon} alt="Favicon" className="h-16 w-16 border rounded p-2" />
+                              <div className="relative h-16 w-16 border rounded p-2 overflow-hidden">
+                                <Image src={siteSettings.general.favicon} alt="Favicon" fill sizes="64px" className="object-contain p-2" unoptimized={shouldUseUnoptimized(siteSettings.general.favicon)} />
+                              </div>
                             </div>
                           )}
                         </div>

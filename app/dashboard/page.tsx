@@ -17,7 +17,7 @@ export default function Dashboard() {
     } else {
       router.replace('/login'); // Use replace instead of push to prevent back button issues
     }
-  }, []);
+  }, [router]);
 
   if (!authorized) {
     return (
