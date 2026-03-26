@@ -5,15 +5,6 @@ import path from 'path';
 
 export async function POST(request: NextRequest) {
   try {
-    // Serverless providers use ephemeral/read-only file systems for deployment assets.
-    // Writing to /public/uploads is not durable in production.
-    if (process.env.NETLIFY || process.env.VERCEL) {
-      return NextResponse.json({
-        success: false,
-        error: 'File upload is not supported on serverless platforms (Netlify/Vercel) due to ephemeral storage. Please use external image URLs in Settings instead. You can host images on services like Imgbb, Cloudinary, or AWS S3.'
-      }, { status: 501 });
-    }
-
     const formData = await request.formData();
     const file = formData.get('file') as File;
     
@@ -40,6 +31,31 @@ export async function POST(request: NextRequest) {
     }
 
     const bytes = await file.arrayBuffer();
+
+    // Serverless providers have ephemeral local disk. Return an inline data URL fallback
+    // so uploads still work for small branding/media images.
+    if (process.env.NETLIFY || process.env.VERCEL) {
+      const inlineMaxSize = 1 * 1024 * 1024; // 1MB
+      if (file.size > inlineMaxSize) {
+        return NextResponse.json({
+          success: false,
+          error: 'On serverless deployment, inline upload supports up to 1MB. Please compress the image or use an external image URL.'
+        }, { status: 400 });
+      }
+
+      const base64 = Buffer.from(bytes).toString('base64');
+      const dataUrl = `data:${file.type};base64,${base64}`;
+
+      return NextResponse.json({
+        success: true,
+        url: dataUrl,
+        filename: file.name,
+        size: file.size,
+        type: file.type,
+        storage: 'inline'
+      });
+    }
+
     const buffer = new Uint8Array(bytes);
 
     // Create uploads directory if it doesn't exist

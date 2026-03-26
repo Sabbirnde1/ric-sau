@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -25,8 +25,8 @@ export default function ImageUpload({
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState(value);
   const [error, setError] = useState('');
+  const [info, setInfo] = useState('');
   const [useUrl, setUseUrl] = useState(false);
-  const [isServerless, setIsServerless] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,6 +47,7 @@ export default function ImageUpload({
     }
 
     setError('');
+    setInfo('');
     setUploading(true);
 
     try {
@@ -63,15 +64,12 @@ export default function ImageUpload({
       if (result.success) {
         setPreview(result.url);
         onChange(result.url);
+        if (result.storage === 'inline') {
+          setInfo('Uploaded successfully using serverless inline storage. For larger images, use an external image URL.');
+        }
       } else {
         const errorMessage = result.error || 'Upload failed';
         setError(errorMessage);
-
-        // Guide users to URL mode when local disk upload is unavailable in production.
-        if (response.status === 501) {
-          setIsServerless(true);
-          setUseUrl(true);
-        }
       }
     } catch (err) {
       setError('Failed to upload image');
@@ -84,10 +82,7 @@ export default function ImageUpload({
   const handleUrlChange = (url: string) => {
     setPreview(url);
     onChange(url);
-    // Clear the serverless flag once they enter a URL successfully
-    if (url && isServerless) {
-      setIsServerless(false);
-    }
+    setInfo('');
   };
 
   const handleRemove = () => {
@@ -109,6 +104,7 @@ export default function ImageUpload({
           onClick={() => {
             setUseUrl(!useUrl);
             setError(''); // Clear error when switching modes
+            setInfo('');
           }}
           className="text-xs"
         >
@@ -124,11 +120,6 @@ export default function ImageUpload({
             value={preview}
             onChange={(e) => handleUrlChange(e.target.value)}
           />
-          {isServerless && !preview && (
-            <div className="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
-              <strong>Serverless Deployment:</strong> File uploads are not supported. Please use external image URLs instead.
-            </div>
-          )}
         </div>
       ) : (
         <div className="space-y-2">
@@ -169,6 +160,10 @@ export default function ImageUpload({
 
       {error && !useUrl && (
         <p className="text-sm text-red-600">{error}</p>
+      )}
+
+      {info && !useUrl && (
+        <p className="text-sm text-blue-700">{info}</p>
       )}
 
       {preview && (
