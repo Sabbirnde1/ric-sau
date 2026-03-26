@@ -37,6 +37,7 @@ export async function POST(request: NextRequest) {
     if (process.env.NETLIFY || process.env.VERCEL) {
       const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
       const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
+      let cloudinaryError: string | null = null;
 
       if (cloudName && uploadPreset) {
         const cloudinaryFormData = new FormData();
@@ -63,13 +64,22 @@ export async function POST(request: NextRequest) {
             storage: 'cloudinary'
           });
         }
+
+        const cloudinaryResult = await cloudinaryResponse.json().catch(() => ({}));
+        cloudinaryError =
+          cloudinaryResult?.error?.message ||
+          `Cloudinary upload failed with status ${cloudinaryResponse.status}`;
       }
 
       const inlineMaxSize = 1 * 1024 * 1024; // 1MB
       if (file.size > inlineMaxSize) {
+        const message = cloudinaryError
+          ? `Cloudinary upload failed: ${cloudinaryError}. Please fix CLOUDINARY_CLOUD_NAME and CLOUDINARY_UPLOAD_PRESET, then retry.`
+          : 'Upload failed on serverless storage for files above 1MB. Configure CLOUDINARY_CLOUD_NAME and CLOUDINARY_UPLOAD_PRESET for persistent uploads, or use an external image URL.';
+
         return NextResponse.json({
           success: false,
-          error: 'Upload failed on serverless storage for files above 1MB. Configure CLOUDINARY_CLOUD_NAME and CLOUDINARY_UPLOAD_PRESET for persistent uploads, or use an external image URL.'
+          error: message
         }, { status: 400 });
       }
 
