@@ -385,6 +385,8 @@ This project is optimized for Netlify deployment with zero configuration.
    - `NEXT_PUBLIC_SITE_URL` - Your site URL
 4. Deploy automatically
 
+**📖 Complete Guide:** See [DEPLOY_TO_VERCEL.md](./DEPLOY_TO_VERCEL.md) for step-by-step setup, database initialization, and troubleshooting.
+
 ### Railway / Render
 
 ```bash

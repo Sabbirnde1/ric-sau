@@ -16,7 +16,7 @@ const defaultSettings = {
     siteName: 'Research & Innovation Center - SAU',
     tagline: 'Pioneering Agricultural Research & Technology Innovation',
     description: 'The Research & Innovation Center (RIC-SAU) is dedicated to advancing agricultural research and technology innovation.',
-    logo: '/logo.png',
+    logo: '/RIC SAU logo.png',
     favicon: '/favicon.ico',
     footerText: 'Made with ❤️ for Research & Innovation'
   },

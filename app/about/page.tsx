@@ -56,6 +56,7 @@ export default function RicSauAboutPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [about, setAbout] = useState<any>(null);
   const [logoUrl, setLogoUrl] = useState('/RIC SAU logo.png');
+  const fallbackLogo = '/RIC SAU logo.png';
 
   useEffect(() => {
     fetch('/api/content?type=about')
@@ -130,7 +131,8 @@ export default function RicSauAboutPage() {
             <img
               src={logoUrl}
               alt="RIC SAU Logo"
-              className="w-full h-full object-contain rounded-full"
+              className="w-full h-full object-contain p-1"
+              onError={() => setLogoUrl(fallbackLogo)}
             />
           </motion.div>
           <h1 className="text-4xl lg:text-6xl font-bold mb-4">

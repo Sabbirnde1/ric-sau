@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
 /**
- * Diagnostic Route for Netlify Login Issues
+ * Diagnostic Route for Deployed Login Issues
  * 
- * This route helps identify why login is not working on Netlify.
- * Visit: https://your-site.netlify.app/api/diagnose
+ * This route helps identify why login is not working in production.
+ * Visit: https://your-site.example.com/api/diagnose
  * 
  * After identifying the issue, you can delete this file.
  */
@@ -30,12 +30,12 @@ export async function GET(request: NextRequest) {
 
     if (!process.env.DATABASE_URL) {
       diagnostics.issues.push('DATABASE_URL environment variable is not set');
-      diagnostics.solutions.push('Go to Netlify → Site settings → Environment variables → Add DATABASE_URL');
+      diagnostics.solutions.push('Go to your hosting provider environment variables and add DATABASE_URL');
     }
 
     if (!process.env.JWT_SECRET) {
       diagnostics.issues.push('JWT_SECRET environment variable is not set');
-      diagnostics.solutions.push('Go to Netlify → Site settings → Environment variables → Add JWT_SECRET');
+      diagnostics.solutions.push('Go to your hosting provider environment variables and add JWT_SECRET');
     }
 
     // Check 2: Database Connection
@@ -138,7 +138,7 @@ export async function GET(request: NextRequest) {
     // Final Assessment
     if (diagnostics.issues.length === 0) {
       diagnostics.status = '✅ All checks passed! Login should work.';
-      diagnostics.note = 'If login still fails, check browser console and Netlify function logs';
+      diagnostics.note = 'If login still fails, check browser console and deployment function logs';
     } else {
       diagnostics.status = `❌ Found ${diagnostics.issues.length} issue(s) preventing login`;
     }
@@ -159,7 +159,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: false,
       ...diagnostics,
-      hint: 'Check Netlify function logs for detailed error information'
+      hint: 'Check deployment function logs for detailed error information'
     }, { status: 500 });
   }
 }

@@ -14,9 +14,9 @@ import bcrypt from 'bcryptjs';
  * After setup, you should disable this route or add authentication.
  * 
  * How to use:
- * 1. Deploy to Netlify
- * 2. Visit: https://your-site.netlify.app/api/setup-db?secret=YOUR_SETUP_SECRET
- * 3. Set SETUP_SECRET in Netlify environment variables
+ * 1. Deploy to your hosting provider (Vercel/Netlify)
+ * 2. Visit: https://your-site.example.com/api/setup-db?secret=YOUR_SETUP_SECRET
+ * 3. Set SETUP_SECRET in your deployment environment variables
  */
 
 export async function GET(request: NextRequest) {
@@ -210,7 +210,7 @@ export async function GET(request: NextRequest) {
         success: false,
         error: 'Database tables not created. Please run migrations first.',
         solution: 'Run: npx prisma migrate deploy',
-        documentation: 'See NETLIFY_DEPLOYMENT.md for detailed instructions'
+        documentation: 'See deployment documentation for detailed instructions'
       }, { status: 500 });
     }
     
@@ -218,7 +218,7 @@ export async function GET(request: NextRequest) {
       success: false,
       error: 'Database setup failed',
       details: error.message,
-      solution: 'Check Netlify logs for detailed error information'
+      solution: 'Check deployment function logs for detailed error information'
     }, { status: 500 });
   }
 }

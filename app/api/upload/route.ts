@@ -5,12 +5,12 @@ import path from 'path';
 
 export async function POST(request: NextRequest) {
   try {
-    // Netlify functions use ephemeral/read-only file systems for deployment assets.
+    // Serverless providers use ephemeral/read-only file systems for deployment assets.
     // Writing to /public/uploads is not durable in production.
-    if (process.env.NETLIFY) {
+    if (process.env.NETLIFY || process.env.VERCEL) {
       return NextResponse.json({
         success: false,
-        error: 'File upload is not supported on Netlify local storage. Use an external image URL in Settings.'
+        error: 'File upload is not supported on serverless local storage. Use an external image URL in Settings.'
       }, { status: 501 });
     }
 

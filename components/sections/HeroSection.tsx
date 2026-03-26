@@ -319,6 +319,7 @@ function StatIcon({ type, className }: { type: string; className?: string }) {
 export function HeroSection() {
   const heroRef = useRef<HTMLDivElement>(null);
   const [logoUrl, setLogoUrl] = useState('/RIC SAU logo.png');
+  const fallbackLogo = '/RIC SAU logo.png';
   const [heroData, setHeroData] = useState<any>({});
   const [heroStats, setHeroStats] = useState(defaultHeroStats);
 
@@ -428,7 +429,13 @@ export function HeroSection() {
         {/* Logo with orbiting rings */}
         <motion.div variants={scaleIn} className="mb-6 sm:mb-10 flex flex-col items-center justify-center">
           <div className="relative" style={{ width: 'fit-content' }}>
-            {/* Orbiting rings — desktop only */}
+            {/* Orbiting rings — mobile optimized */}
+            <div className="sm:hidden">
+              <OrbitRing radius={62} duration={14} dotCount={6} color="99,102,241" />
+              <OrbitRing radius={78} duration={18} dotCount={5} color="6,182,212" reverse />
+            </div>
+
+            {/* Orbiting rings — desktop */}
             <div className="hidden sm:block">
               <OrbitRing radius={110} duration={20} dotCount={8} color="99,102,241" />
               <OrbitRing radius={135} duration={28} dotCount={6} color="6,182,212" reverse />
@@ -438,13 +445,19 @@ export function HeroSection() {
             <div className="absolute -inset-2 rounded-full bg-gradient-to-r from-cyan-500 via-blue-500 to-violet-500 opacity-50 blur-lg hero-glow-ring" />
 
             {/* Logo image */}
-            <div className="relative w-28 h-28 sm:w-40 sm:h-40 lg:w-48 lg:h-48 rounded-full overflow-hidden ring-2 ring-white/10 bg-slate-900/60 backdrop-blur-md shadow-2xl shadow-indigo-500/20">
+            <motion.div
+              className="relative w-28 h-28 sm:w-40 sm:h-40 lg:w-48 lg:h-48 rounded-full overflow-hidden ring-2 ring-white/10 bg-slate-900/60 backdrop-blur-md shadow-2xl shadow-indigo-500/20"
+              animate={{ scale: [1, 1.03, 1] }}
+              transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <div className="absolute inset-2 rounded-full bg-slate-900/90" />
               <img
                 src={logoUrl}
                 alt="Research & Innovation Logo"
-                className="w-full h-full object-cover"
+                className="relative z-10 w-full h-full object-contain p-3 sm:p-4"
+                onError={() => setLogoUrl(fallbackLogo)}
               />
-            </div>
+            </motion.div>
           </div>
         </motion.div>
 
