@@ -1426,6 +1426,8 @@ export default function DashboardContent() {
                             label="Profile Photo" 
                             value={teamForm.image} 
                             onChange={(url) => setTeamForm({ ...teamForm, image: url })}
+                            enableCrop
+                            cropShape="circle"
                           />
                           <Button onClick={() => handleAdd('team', teamForm, resetTeamForm)} className="w-full">Add Member</Button>
                         </div>
@@ -1557,6 +1559,8 @@ export default function DashboardContent() {
                             label="Profile Photo" 
                             value={rlCommitteeForm.image} 
                             onChange={(url) => setRlCommitteeForm({ ...rlCommitteeForm, image: url })}
+                            enableCrop
+                            cropShape="circle"
                           />
                           <Button onClick={handleSaveRlCommittee} className="w-full">{editingRlCommitteeId ? 'Update Member' : 'Add Member'}</Button>
                         </div>
