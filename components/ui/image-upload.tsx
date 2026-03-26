@@ -254,7 +254,7 @@ export default function ImageUpload({
       ) : showCropEditor && originalImage ? (
         <div className="space-y-3 border rounded-lg p-3 bg-gray-50">
           <p className="text-sm font-medium">Crop Preview</p>
-          <div className={`relative w-full h-64 overflow-hidden border bg-black ${cropShape === 'circle' ? 'rounded-full max-w-64 mx-auto' : 'rounded-md'}`}>
+          <div className={`relative overflow-hidden border bg-black ${cropShape === 'circle' ? 'w-64 h-64 mx-auto rounded-full' : 'w-full h-64 rounded-md'}`}>
             <img
               src={originalImage}
               alt="Crop preview"
@@ -339,7 +339,7 @@ export default function ImageUpload({
       )}
 
       {preview && (
-        <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden border">
+        <div className={`relative bg-gray-100 overflow-hidden border ${cropShape === 'circle' ? 'w-40 h-40 mx-auto rounded-full' : 'w-full h-48 rounded-lg'}`}>
           <Image
             src={preview}
             alt="Preview"
