@@ -15,6 +15,7 @@ interface ImageUploadProps {
   maxSize?: number; // in MB
   enableCrop?: boolean;
   cropShape?: 'circle' | 'rect';
+  cropShapeOptions?: ('circle' | 'rect')[];
 }
 
 export default function ImageUpload({ 
@@ -24,7 +25,8 @@ export default function ImageUpload({
   aspectRatio = 'auto',
   maxSize = 5,
   enableCrop = false,
-  cropShape = 'rect'
+  cropShape = 'rect',
+  cropShapeOptions = ['rect', 'circle']
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState(value);
@@ -35,6 +37,9 @@ export default function ImageUpload({
   const [cropX, setCropX] = useState(0);
   const [cropY, setCropY] = useState(0);
   const [cropZoom, setCropZoom] = useState(1);
+  const [activeCropShape, setActiveCropShape] = useState<'circle' | 'rect'>(
+    cropShapeOptions.includes(cropShape) ? cropShape : (cropShapeOptions[0] || 'rect')
+  );
   const [showCropEditor, setShowCropEditor] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -134,6 +139,7 @@ export default function ImageUpload({
       setCropX(0);
       setCropY(0);
       setCropZoom(1);
+      setActiveCropShape(cropShapeOptions.includes(cropShape) ? cropShape : (cropShapeOptions[0] || 'rect'));
       setShowCropEditor(true);
       setError('');
       setInfo('Adjust crop and click Apply Crop');
@@ -156,22 +162,29 @@ export default function ImageUpload({
 
     const sourceWidth = sourceImage.naturalWidth;
     const sourceHeight = sourceImage.naturalHeight;
-    const baseCropSize = Math.min(sourceWidth, sourceHeight);
-    const sourceCropSize = baseCropSize / cropZoom;
+    const viewportRatio =
+      activeCropShape === 'circle'
+        ? 1
+        : ((cropViewportRef.current?.clientWidth || 1) / (cropViewportRef.current?.clientHeight || 1));
 
-    const maxOffsetX = (sourceWidth - sourceCropSize) / 2;
-    const maxOffsetY = (sourceHeight - sourceCropSize) / 2;
+    const baseCropHeight = Math.min(sourceHeight, sourceWidth / viewportRatio);
+    const sourceCropHeight = baseCropHeight / cropZoom;
+    const sourceCropWidth = sourceCropHeight * viewportRatio;
+
+    const maxOffsetX = (sourceWidth - sourceCropWidth) / 2;
+    const maxOffsetY = (sourceHeight - sourceCropHeight) / 2;
 
     const centerX = sourceWidth / 2 + (cropX / 100) * maxOffsetX;
     const centerY = sourceHeight / 2 + (cropY / 100) * maxOffsetY;
 
-    const sx = Math.max(0, Math.min(sourceWidth - sourceCropSize, centerX - sourceCropSize / 2));
-    const sy = Math.max(0, Math.min(sourceHeight - sourceCropSize, centerY - sourceCropSize / 2));
+    const sx = Math.max(0, Math.min(sourceWidth - sourceCropWidth, centerX - sourceCropWidth / 2));
+    const sy = Math.max(0, Math.min(sourceHeight - sourceCropHeight, centerY - sourceCropHeight / 2));
 
-    const outputSize = 800;
+    const outputWidth = activeCropShape === 'circle' ? 800 : 1200;
+    const outputHeight = activeCropShape === 'circle' ? 800 : Math.round(outputWidth / viewportRatio);
     const canvas = document.createElement('canvas');
-    canvas.width = outputSize;
-    canvas.height = outputSize;
+    canvas.width = outputWidth;
+    canvas.height = outputHeight;
     const ctx = canvas.getContext('2d');
 
     if (!ctx) {
@@ -183,12 +196,12 @@ export default function ImageUpload({
       sourceImage,
       sx,
       sy,
-      sourceCropSize,
-      sourceCropSize,
+      sourceCropWidth,
+      sourceCropHeight,
       0,
       0,
-      outputSize,
-      outputSize
+      outputWidth,
+      outputHeight
     );
 
     const outputType = pendingFile.type === 'image/png' || pendingFile.type === 'image/webp'
@@ -294,7 +307,7 @@ export default function ImageUpload({
           <p className="text-sm font-medium">Crop Preview</p>
           <div
             ref={cropViewportRef}
-            className={`relative overflow-hidden border bg-black select-none ${cropShape === 'circle' ? 'w-64 h-64 mx-auto rounded-full' : 'w-full h-64 rounded-md'} ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+            className={`relative overflow-hidden border bg-black select-none ${activeCropShape === 'circle' ? 'w-64 h-64 mx-auto rounded-full' : 'w-full h-64 rounded-md'} ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
             onMouseDown={(e) => handleDragStart(e.clientX, e.clientY)}
             onMouseMove={(e) => handleDragMove(e.clientX, e.clientY)}
             onMouseUp={handleDragEnd}
@@ -322,6 +335,30 @@ export default function ImageUpload({
             />
             <div className="absolute inset-0 pointer-events-none border-2 border-white/40" />
           </div>
+
+          {cropShapeOptions.length > 1 && (
+            <div>
+              <Label className="text-xs">Crop Shape</Label>
+              <div className="flex gap-2 mt-1">
+                <Button
+                  type="button"
+                  variant={activeCropShape === 'circle' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setActiveCropShape('circle')}
+                >
+                  Circle
+                </Button>
+                <Button
+                  type="button"
+                  variant={activeCropShape === 'rect' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setActiveCropShape('rect')}
+                >
+                  Rectangle
+                </Button>
+              </div>
+            </div>
+          )}
 
           <p className="text-xs text-gray-600">Tip: Drag image to reposition • Scroll to zoom • Double-click to reset</p>
 
@@ -416,7 +453,7 @@ export default function ImageUpload({
       )}
 
       {preview && (
-        <div className={`relative bg-gray-100 overflow-hidden border ${cropShape === 'circle' ? 'w-40 h-40 mx-auto rounded-full' : 'w-full h-48 rounded-lg'}`}>
+        <div className={`relative bg-gray-100 overflow-hidden border ${activeCropShape === 'circle' ? 'w-40 h-40 mx-auto rounded-full' : 'w-full h-48 rounded-lg'}`}>
           <Image
             src={preview}
             alt="Preview"

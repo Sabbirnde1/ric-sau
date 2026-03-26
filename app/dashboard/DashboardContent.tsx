@@ -660,7 +660,7 @@ export default function DashboardContent() {
                               <div><Label>Subtitle</Label><Textarea value={homeForm.subtitle} onChange={(e) => setHomeForm({ ...homeForm, subtitle: e.target.value })} rows={2} /></div>
                               <div><Label>Description</Label><Textarea value={homeForm.description} onChange={(e) => setHomeForm({ ...homeForm, description: e.target.value })} rows={3} /></div>
                               <div><Label>Video URL (YouTube)</Label><Input value={homeForm.videoUrl} onChange={(e) => setHomeForm({ ...homeForm, videoUrl: e.target.value })} placeholder="https://www.youtube.com/watch?v=..." /></div>
-                              <ImageUpload label="Background Image" value={homeForm.backgroundImage} onChange={(url) => setHomeForm({ ...homeForm, backgroundImage: url })} />
+                              <ImageUpload label="Background Image" value={homeForm.backgroundImage} onChange={(url) => setHomeForm({ ...homeForm, backgroundImage: url })} enableCrop />
                             </div>
 
                             {/* Stats */}
@@ -884,7 +884,7 @@ export default function DashboardContent() {
                               <h3 className="font-semibold text-lg border-b pb-2">Hero Section</h3>
                               <div><Label>Hero Title</Label><Input value={aboutForm.heroTitle} onChange={(e) => setAboutForm({ ...aboutForm, heroTitle: e.target.value })} /></div>
                               <div><Label>Hero Subtitle</Label><Textarea value={aboutForm.heroSubtitle} onChange={(e) => setAboutForm({ ...aboutForm, heroSubtitle: e.target.value })} rows={2} /></div>
-                              <ImageUpload label="Hero Background Image" value={aboutForm.heroImage} onChange={(url) => setAboutForm({ ...aboutForm, heroImage: url })} />
+                              <ImageUpload label="Hero Background Image" value={aboutForm.heroImage} onChange={(url) => setAboutForm({ ...aboutForm, heroImage: url })} enableCrop />
                             </div>
 
                             {/* Identity */}
@@ -900,7 +900,7 @@ export default function DashboardContent() {
                               <div><Label>Vision</Label><Textarea value={aboutForm.vision} onChange={(e) => setAboutForm({ ...aboutForm, vision: e.target.value })} rows={3} /></div>
                               <RichTextEditor label="Description" value={aboutForm.description} onChange={(val) => setAboutForm({ ...aboutForm, description: val })} rows={4} />
                               <div><Label>Established Year</Label><Input value={aboutForm.established} onChange={(e) => setAboutForm({ ...aboutForm, established: e.target.value })} placeholder="2020" /></div>
-                              <ImageUpload label="About Page Image (What You Get section)" value={aboutForm.image} onChange={(url) => setAboutForm({ ...aboutForm, image: url })} />
+                              <ImageUpload label="About Page Image (What You Get section)" value={aboutForm.image} onChange={(url) => setAboutForm({ ...aboutForm, image: url })} enableCrop />
                             </div>
 
                             {/* Funding */}
@@ -909,7 +909,7 @@ export default function DashboardContent() {
                                 <h3 className="font-semibold text-lg">Funding & Governance</h3>
                                 <Button variant="outline" size="sm" onClick={() => setAboutFundingForm([...aboutFundingForm, { label: '', value: '' }])}><Plus className="h-3 w-3 mr-1" />Add</Button>
                               </div>
-                              <ImageUpload label="Funding Section Image" value={aboutForm.fundingImage} onChange={(url) => setAboutForm({ ...aboutForm, fundingImage: url })} />
+                              <ImageUpload label="Funding Section Image" value={aboutForm.fundingImage} onChange={(url) => setAboutForm({ ...aboutForm, fundingImage: url })} enableCrop />
                               {aboutFundingForm.map((item, i) => (
                                 <div key={i} className="flex gap-3 items-start">
                                   <div className="w-40"><Label>Label</Label><Input value={item.label} onChange={(e) => { const arr = [...aboutFundingForm]; arr[i] = { ...arr[i], label: e.target.value }; setAboutFundingForm(arr); }} placeholder="Financier" /></div>
@@ -1097,6 +1097,7 @@ export default function DashboardContent() {
                             label="Project Image" 
                             value={projectForm.image} 
                             onChange={(url) => setProjectForm({ ...projectForm, image: url })}
+                            enableCrop
                           />
                           <Button onClick={() => handleAdd('project', projectForm, resetProjectForm)} className="w-full">Add Project</Button>
                         </div>
@@ -1213,7 +1214,7 @@ export default function DashboardContent() {
                           <div><Label>Publications Count</Label><Input type="number" value={labForm.publications} onChange={(e) => setLabForm({ ...labForm, publications: Number(e.target.value) })} /></div>
                           <div><Label>Research Focus (comma-separated)</Label><Input value={labForm.focus} onChange={(e) => setLabForm({ ...labForm, focus: e.target.value })} placeholder="Machine Learning, Deep Learning, Computer Vision" /></div>
                           <div><Label>Equipment (comma-separated)</Label><Input value={labForm.equipment} onChange={(e) => setLabForm({ ...labForm, equipment: e.target.value })} placeholder="GPU Clusters, Workstations" /></div>
-                          <ImageUpload label="Lab Image" value={labForm.image} onChange={(url) => setLabForm({ ...labForm, image: url })} />
+                          <ImageUpload label="Lab Image" value={labForm.image} onChange={(url) => setLabForm({ ...labForm, image: url })} enableCrop />
                           <Button onClick={() => {
                             const formData = {
                               ...labForm,
@@ -1264,7 +1265,7 @@ export default function DashboardContent() {
                         <div className="space-y-4">
                           <div><Label>Title</Label><Input value={resourceForm.title} onChange={(e) => setResourceForm({ ...resourceForm, title: e.target.value })} placeholder="Lab Space" /></div>
                           <div><Label>Description</Label><Textarea value={resourceForm.description} onChange={(e) => setResourceForm({ ...resourceForm, description: e.target.value })} rows={4} placeholder="Resource description..." /></div>
-                          <ImageUpload label="Resource Image" value={resourceForm.image} onChange={(url) => setResourceForm({ ...resourceForm, image: url })} />
+                          <ImageUpload label="Resource Image" value={resourceForm.image} onChange={(url) => setResourceForm({ ...resourceForm, image: url })} enableCrop />
                           <Button onClick={() => handleAdd('resource', resourceForm, resetResourceForm)} className="w-full">Add Resource</Button>
                         </div>
                       </DialogContent>
@@ -1319,6 +1320,7 @@ export default function DashboardContent() {
                             label="News Image" 
                             value={newsForm.image} 
                             onChange={(url) => setNewsForm({ ...newsForm, image: url })}
+                            enableCrop
                           />
                           <Button onClick={() => handleAdd('news', newsForm, resetNewsForm)} className="w-full">Add News</Button>
                         </div>
@@ -1373,6 +1375,7 @@ export default function DashboardContent() {
                             label="Event Image" 
                             value={eventForm.image} 
                             onChange={(url) => setEventForm({ ...eventForm, image: url })}
+                            enableCrop
                           />
                           <Button onClick={() => handleAdd('event', eventForm, resetEventForm)} className="w-full">Add Event</Button>
                         </div>
@@ -1428,6 +1431,7 @@ export default function DashboardContent() {
                             onChange={(url) => setTeamForm({ ...teamForm, image: url })}
                             enableCrop
                             cropShape="circle"
+                            cropShapeOptions={['circle', 'rect']}
                           />
                           <Button onClick={() => handleAdd('team', teamForm, resetTeamForm)} className="w-full">Add Member</Button>
                         </div>
@@ -1484,6 +1488,7 @@ export default function DashboardContent() {
                             label="Innovation Image" 
                             value={innovatorForm.image} 
                             onChange={(url) => setInnovatorForm({ ...innovatorForm, image: url })}
+                            enableCrop
                           />
                           <Button onClick={() => handleAdd('innovator', innovatorForm, resetInnovatorForm)} className="w-full">Add Innovation</Button>
                         </div>
@@ -1561,6 +1566,7 @@ export default function DashboardContent() {
                             onChange={(url) => setRlCommitteeForm({ ...rlCommitteeForm, image: url })}
                             enableCrop
                             cropShape="circle"
+                            cropShapeOptions={['circle', 'rect']}
                           />
                           <Button onClick={handleSaveRlCommittee} className="w-full">{editingRlCommitteeId ? 'Update Member' : 'Add Member'}</Button>
                         </div>
@@ -1701,11 +1707,13 @@ export default function DashboardContent() {
                                 label="Site Logo (Header)" 
                                 value={settingsForm.logo} 
                                 onChange={(url) => setSettingsForm({ ...settingsForm, logo: url })}
+                                enableCrop
                               />
                               <ImageUpload 
                                 label="Favicon (Browser Icon)" 
                                 value={settingsForm.favicon} 
                                 onChange={(url) => setSettingsForm({ ...settingsForm, favicon: url })}
+                                enableCrop
                               />
                             </div>
 
