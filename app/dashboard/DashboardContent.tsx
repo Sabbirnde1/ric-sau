@@ -143,7 +143,8 @@ export default function DashboardContent() {
     department: '', 
     email: '', 
     bio: '', 
-    image: '' 
+    image: '',
+    imagePlacement: 'top'
   });
   
   const [publicationForm, setPublicationForm] = useState({
@@ -406,7 +407,7 @@ export default function DashboardContent() {
   const resetEventForm = () => setEventForm({ title: '', description: '', date: '', time: '', location: '', category: '', image: '' });
   const resetTeamForm = () => setTeamForm({ name: '', position: '', department: '', email: '', bio: '', image: '' });
   const resetInnovatorForm = () => setInnovatorForm({ name: '', title: '', bio: '', specialization: '', image: '', achievements: '', ripd: '', pi: '', coPi: '', category: '' });
-  const resetRlCommitteeForm = () => setRlCommitteeForm({ name: '', role: '', department: '', email: '', bio: '', image: '' });
+  const resetRlCommitteeForm = () => setRlCommitteeForm({ name: '', role: '', department: '', email: '', bio: '', image: '', imagePlacement: 'top' });
   const resetPublicationForm = () => setPublicationForm({ title: '', authors: '', journal: '', year: new Date().getFullYear(), category: '', type: 'Journal Article', citations: 0, abstract: '', doi: '', keywords: '' });
   const resetLabForm = () => setLabForm({ name: '', director: '', location: '', established: new Date().getFullYear(), members: 0, focus: '', description: '', equipment: '', projects: 0, publications: 0, image: '' });
   const resetResourceForm = () => setResourceForm({ title: '', description: '', image: '' });
@@ -1497,7 +1498,21 @@ export default function DashboardContent() {
                         <DialogHeader><DialogTitle>Add Committee Member</DialogTitle></DialogHeader>
                         <div className="space-y-4">
                           <div><Label>Name</Label><Input value={rlCommitteeForm.name} onChange={(e) => setRlCommitteeForm({ ...rlCommitteeForm, name: e.target.value })} placeholder="Prof. Dr. Ahmed Hassan" /></div>
-                          <div><Label>Role</Label><Input value={rlCommitteeForm.role} onChange={(e) => setRlCommitteeForm({ ...rlCommitteeForm, role: e.target.value })} placeholder="Committee Chairman" /></div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div><Label>Role</Label><Input value={rlCommitteeForm.role} onChange={(e) => setRlCommitteeForm({ ...rlCommitteeForm, role: e.target.value })} placeholder="Committee Chairman" /></div>
+                            <div>
+                              <Label>Image Placement</Label>
+                              <select
+                                value={rlCommitteeForm.imagePlacement}
+                                onChange={(e) => setRlCommitteeForm({ ...rlCommitteeForm, imagePlacement: e.target.value })}
+                                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                              >
+                                <option value="top">Top</option>
+                                <option value="left">Left</option>
+                                <option value="right">Right</option>
+                              </select>
+                            </div>
+                          </div>
                           <div className="grid grid-cols-2 gap-4">
                             <div><Label>Department</Label><Input value={rlCommitteeForm.department} onChange={(e) => setRlCommitteeForm({ ...rlCommitteeForm, department: e.target.value })} placeholder="Agricultural Research" /></div>
                             <div><Label>Email</Label><Input type="email" value={rlCommitteeForm.email} onChange={(e) => setRlCommitteeForm({ ...rlCommitteeForm, email: e.target.value })} /></div>
@@ -1525,6 +1540,7 @@ export default function DashboardContent() {
                           <h4 className="font-semibold">{member.name}</h4>
                           <p className="text-sm text-gray-600">{member.role}</p>
                           <p className="text-xs text-gray-500 mt-1">{member.department}</p>
+                          <p className="text-xs text-gray-400 mt-1">Image: {member.imagePlacement || 'top'}</p>
                         </div>
                         <Button variant="destructive" size="sm" onClick={() => handleDelete('rlCommittee', member.id)}><Trash2 className="h-4 w-4" /></Button>
                       </div>

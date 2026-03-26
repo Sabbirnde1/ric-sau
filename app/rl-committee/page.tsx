@@ -16,10 +16,13 @@ if (typeof window !== 'undefined') {
 function MemberCard({ member }: { member: any }) {
   const [imgError, setImgError] = useState(false);
   const hasValidImage = member.image && member.image.trim() !== '' && !imgError;
+  const imagePlacement = member.imagePlacement || 'top';
+  const isHorizontal = imagePlacement === 'left' || imagePlacement === 'right';
+  const rowDirection = imagePlacement === 'right' ? 'sm:flex-row-reverse' : 'sm:flex-row';
 
   return (
     <motion.div
-      className="committee-card relative bg-card rounded-xl shadow-lg p-6 pt-8 hover:shadow-2xl transition-shadow duration-300 flex flex-col items-center"
+      className={`committee-card relative bg-card rounded-xl shadow-lg p-6 pt-8 hover:shadow-2xl transition-shadow duration-300 flex flex-col ${isHorizontal ? `${rowDirection} sm:items-start sm:gap-4` : 'items-center'}`}
     >
       {/* Role Badge */}
       <div className="absolute -top-3 left-3 px-3 py-1 rounded-full font-semibold text-xs bg-green-600 text-white shadow-md">
@@ -27,7 +30,7 @@ function MemberCard({ member }: { member: any }) {
       </div>
 
       {/* Image — always rendered for consistent layout */}
-      <div className="w-28 h-28 sm:w-32 sm:h-32 mx-auto mb-4 relative rounded-full overflow-hidden shadow-md bg-muted flex-shrink-0">
+      <div className={`w-28 h-28 sm:w-32 sm:h-32 relative rounded-full overflow-hidden shadow-md bg-muted flex-shrink-0 ${isHorizontal ? 'mx-auto sm:mx-0 mb-4 sm:mb-0' : 'mx-auto mb-4'}`}>
         {hasValidImage ? (
           <Image
             src={member.image}
@@ -44,11 +47,13 @@ function MemberCard({ member }: { member: any }) {
         )}
       </div>
 
-      <h3 className="text-xl font-semibold text-foreground mb-1 text-center">{member.name}</h3>
-      <p className="text-sm text-muted-foreground text-center">{member.department}</p>
-      {member.bio && (
-        <p className="text-sm text-muted-foreground mt-3 text-center line-clamp-3">{member.bio}</p>
-      )}
+      <div className={`${isHorizontal ? 'sm:flex-1 sm:text-left' : 'text-center'}`}>
+        <h3 className={`text-xl font-semibold text-foreground mb-1 ${isHorizontal ? 'text-center sm:text-left' : 'text-center'}`}>{member.name}</h3>
+        <p className={`text-sm text-muted-foreground ${isHorizontal ? 'text-center sm:text-left' : 'text-center'}`}>{member.department}</p>
+        {member.bio && (
+          <p className={`text-sm text-muted-foreground mt-3 line-clamp-3 ${isHorizontal ? 'text-center sm:text-left' : 'text-center'}`}>{member.bio}</p>
+        )}
+      </div>
     </motion.div>
   );
 }

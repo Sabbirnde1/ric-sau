@@ -25,6 +25,27 @@ function formatInnovator(i: any) {
   return { ...i, achievements: parseJSON(i.achievements, []) };
 }
 
+// Helper to format RL committee member for API response
+function formatRlCommitteeMember(m: any) {
+  const parsedBio = parseJSON(m.bio, null);
+  if (parsedBio && typeof parsedBio === 'object') {
+    const placement = ['top', 'left', 'right'].includes(parsedBio.imagePlacement)
+      ? parsedBio.imagePlacement
+      : 'top';
+    return {
+      ...m,
+      bio: typeof parsedBio.text === 'string' ? parsedBio.text : '',
+      imagePlacement: placement,
+    };
+  }
+
+  return {
+    ...m,
+    bio: m.bio || '',
+    imagePlacement: 'top',
+  };
+}
+
 // Helper to format publication for API response
 function formatPublication(p: any) {
   return { ...p, authors: parseJSON(p.authors, []), keywords: parseJSON(p.keywords, []) };
@@ -105,7 +126,7 @@ export async function GET(request: Request) {
       }
       case 'rlCommittee': {
         const committee = await prisma.rlCommittee.findMany({ orderBy: { createdAt: 'desc' } });
-        data = committee;
+        data = committee.map(formatRlCommitteeMember);
         break;
       }
       case 'publications': {
@@ -239,16 +260,21 @@ export async function POST(request: Request) {
         break;
       }
       case 'rlCommittee': {
+        const placement = ['top', 'left', 'right'].includes(data.imagePlacement)
+          ? data.imagePlacement
+          : 'top';
+
         result = await prisma.rlCommittee.create({
           data: {
             name: data.name || '',
             role: data.role || '',
             department: data.department || '',
             email: data.email || '',
-            bio: data.bio || '',
+            bio: JSON.stringify({ text: data.bio || '', imagePlacement: placement }),
             image: data.image || null,
           }
         });
+        result = formatRlCommitteeMember(result);
         break;
       }
       case 'home': {
