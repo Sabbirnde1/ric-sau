@@ -484,10 +484,6 @@ export function HeroSection() {
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-white">
             {heroData.title || 'Sher-e-Bangla Agricultural University'}
           </span>
-          <br />
-          {/* <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-300 via-blue-400 to-violet-400">
-            of Science &amp; Technology
-          </span> */}
         </motion.h1>
 
         {/* Decorative divider */}
