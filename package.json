@@ -100,5 +100,8 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
     "tsx": "^4.21.0"
+  },
+  "overrides": {
+    "undici": "5.28.4"
   }
 }
