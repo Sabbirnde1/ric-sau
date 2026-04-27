@@ -5,6 +5,8 @@ import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { ChevronRight, Play, ChevronDown, Atom, FlaskConical, Microscope, Cpu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import Image from 'next/image';
+import { shouldUseUnoptimized } from '@/lib/utils';
 
 const defaultHeroStats = [
   { label: 'Research Projects', value: '50+', icon: 'flask' },
@@ -451,10 +453,13 @@ export function HeroSection() {
               transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
             >
               <div className="absolute inset-2 rounded-full bg-slate-900/90" />
-              <img
+              <Image
                 src={logoUrl}
                 alt="Research & Innovation Logo"
-                className="relative z-10 w-full h-full object-contain p-3 sm:p-4"
+                fill
+                sizes="160px"
+                className="relative z-10 object-contain p-3 sm:p-4"
+                unoptimized={shouldUseUnoptimized(logoUrl)}
                 onError={() => setLogoUrl(fallbackLogo)}
               />
             </motion.div>
@@ -482,12 +487,12 @@ export function HeroSection() {
           className="text-2xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 leading-[1.1] tracking-tight px-2 sm:px-0"
         >
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-white">
-            {heroData.title || 'Advancing the Future'}
+            {heroData.title || 'Sher-e-Bangla Agricultural University'}
           </span>
           <br />
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-300 via-blue-400 to-violet-400">
+          {/* <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-300 via-blue-400 to-violet-400">
             of Science &amp; Technology
-          </span>
+          </span> */}
         </motion.h1>
 
         {/* Decorative divider */}
@@ -576,7 +581,7 @@ export function HeroSection() {
                 <div className={`absolute inset-0 bg-gradient-to-b ${accent.glow} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
 
                 {/* Icon */}
-                <div className="relative mb-2 sm:mb-3">
+                <div className="relative mb-2 sm:mb-3"> 
                   <StatIcon type={stat.icon} className={`w-5 h-5 sm:w-6 sm:h-6 ${accent.color} opacity-60 group-hover:opacity-100 transition-opacity`} />
                 </div>
 
