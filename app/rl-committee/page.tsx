@@ -7,6 +7,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { User } from 'lucide-react';
 
+const shouldUseUnoptimized = (src: string) =>
+  src.startsWith('data:') || (src.startsWith('http') && !src.includes('images.pexels.com'));
+
 function MemberCard({ member }: { member: any }) {
   const [imgError, setImgError] = useState(false);
   const hasValidImage = member.image && member.image.trim() !== '' && !imgError;
@@ -32,7 +35,7 @@ function MemberCard({ member }: { member: any }) {
             fill
             sizes="128px"
             className="object-cover"
-            unoptimized={member.image.startsWith('data:') || (member.image.startsWith('http') && !member.image.includes('images.pexels.com'))}
+            unoptimized={shouldUseUnoptimized(member.image)}
             onError={() => setImgError(true)}
           />
         ) : (
@@ -119,6 +122,7 @@ export default function RLCommitteePage() {
           alt="RIC SAU Committee"
           fill
           className="object-cover brightness-50"
+          unoptimized={false}
           priority
         />
         <div className="absolute inset-0 bg-gradient-to-b from-blue-600/70 via-purple-600/80 to-blue-800/90"></div>
