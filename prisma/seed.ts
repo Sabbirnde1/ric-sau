@@ -27,8 +27,8 @@ async function main() {
     where: { slug: 'welcome-to-ric-sau' },
     update: {
       title: 'Welcome to RIC-SAU',
-      excerpt: 'Shahjalal University of Science and Technology Research & Innovation Centre',
-      content: 'Welcome to the Research & Innovation Centre at SUST. We are dedicated to fostering innovation and research excellence.',
+      excerpt: 'Sher-e-Bangla Agricultural University Research & Innovation Centre',
+      content: 'Welcome to the Research & Innovation Centre at Sher-e-Bangla Agricultural University. We are dedicated to fostering innovation and research excellence.',
       date: new Date().toISOString().split('T')[0],
       category: 'Announcement',
       author: 'Admin',
@@ -37,8 +37,8 @@ async function main() {
     create: {
       title: 'Welcome to RIC-SAU',
       slug: 'welcome-to-ric-sau',
-      excerpt: 'Shahjalal University of Science and Technology Research & Innovation Centre',
-      content: 'Welcome to the Research & Innovation Centre at SUST. We are dedicated to fostering innovation and research excellence.',
+      excerpt: 'Sher-e-Bangla Agricultural University Research & Innovation Centre',
+      content: 'Welcome to the Research & Innovation Centre at Sher-e-Bangla Agricultural University. We are dedicated to fostering innovation and research excellence.',
       date: new Date().toISOString().split('T')[0],
       category: 'Announcement',
       author: 'Admin',
@@ -55,7 +55,7 @@ async function main() {
       description: 'Join us for an exciting workshop on innovation and research methodologies.',
       date: '2026-04-15',
       time: '10:00 AM',
-      location: 'SUST Campus, Auditorium',
+      location: 'SAU Campus, Auditorium',
       category: 'Workshop',
       image: '/uploads/workshop.jpg',
     },
@@ -65,7 +65,7 @@ async function main() {
       description: 'Join us for an exciting workshop on innovation and research methodologies.',
       date: '2026-04-15',
       time: '10:00 AM',
-      location: 'SUST Campus, Auditorium',
+      location: 'SAU Campus, Auditorium',
       category: 'Workshop',
       image: '/uploads/workshop.jpg',
     },
@@ -91,13 +91,13 @@ async function main() {
   console.log('✅ Created project:', project1.title);
 
   // Create sample team member
-  const existingTeam = await prisma.team.findFirst({ where: { email: 'rahman@sust.edu' } });
+  const existingTeam = await prisma.team.findFirst({ where: { email: 'rahman@sau.edu.bd' } });
   const team1 = existingTeam ?? await prisma.team.create({
     data: {
       name: 'Dr. Muhammad Rahman',
       position: 'Lead Researcher',
       department: 'Computer Science',
-      email: 'rahman@sust.edu',
+      email: 'rahman@sau.edu.bd',
       bio: 'Dr. Rahman specializes in artificial intelligence and machine learning with a focus on healthcare applications.',
       specializations: JSON.stringify(['AI', 'Machine Learning', 'Healthcare IT']),
       publications: 25,
@@ -110,9 +110,9 @@ async function main() {
   const about = await prisma.about.upsert({
     where: { id: 1 },
     update: {
-      mission: 'To foster innovation and research excellence at SUST',
+      mission: 'To foster innovation and research excellence at Sher-e-Bangla Agricultural University',
       vision: 'To become a leading research center in Bangladesh',
-      description: 'The Research & Innovation Centre (RIC) at Shahjalal University of Science and Technology is dedicated to advancing knowledge through cutting-edge research.',
+      description: 'The Research & Innovation Centre (RIC) at Sher-e-Bangla Agricultural University is dedicated to advancing knowledge through cutting-edge research.',
       established: '2020',
       achievements: JSON.stringify([
         'Over 100 research publications',
@@ -122,9 +122,9 @@ async function main() {
       ]),
     },
     create: {
-      mission: 'To foster innovation and research excellence at SUST',
+      mission: 'To foster innovation and research excellence at Sher-e-Bangla Agricultural University',
       vision: 'To become a leading research center in Bangladesh',
-      description: 'The Research & Innovation Centre (RIC) at Shahjalal University of Science and Technology is dedicated to advancing knowledge through cutting-edge research.',
+      description: 'The Research & Innovation Centre (RIC) at Sher-e-Bangla Agricultural University is dedicated to advancing knowledge through cutting-edge research.',
       established: '2020',
       achievements: JSON.stringify([
         'Over 100 research publications',
@@ -140,15 +140,15 @@ async function main() {
   const contact = await prisma.contact.upsert({
     where: { id: 1 },
     update: {
-      address: 'Shahjalal University of Science and Technology, Sylhet 3114, Bangladesh',
+      address: 'Sher-e-Bangla Agricultural University, Dhaka, Bangladesh',
       phone: '+880-821-123456',
-      email: 'info@ric-sust.edu.bd',
+      email: 'info@ric-sau.edu.bd',
       officeHours: 'Saturday - Thursday: 9:00 AM - 5:00 PM',
     },
     create: {
-      address: 'Shahjalal University of Science and Technology, Sylhet 3114, Bangladesh',
+      address: 'Sher-e-Bangla Agricultural University, Dhaka, Bangladesh',
       phone: '+880-821-123456',
-      email: 'info@ric-sust.edu.bd',
+      email: 'info@ric-sau.edu.bd',
       officeHours: 'Saturday - Thursday: 9:00 AM - 5:00 PM',
     },
   });
@@ -160,7 +160,7 @@ async function main() {
     data: {
       name: 'Dr. Fatima Akter',
       title: 'Innovation Lead',
-      bio: 'Dr. Akter leads innovation initiatives at RIC-SUST with focus on sustainable technology.',
+      bio: 'Dr. Akter leads innovation initiatives at RIC-SAU with focus on sustainable technology.',
       specialization: 'Green Technology & Sustainability',
       achievements: 'Winner of National Innovation Award 2025',
     },
@@ -173,7 +173,7 @@ async function main() {
     update: {
       hero: JSON.stringify({
         title: 'Research & Innovation Centre',
-        subtitle: 'Shahjalal University of Science & Technology',
+        subtitle: 'Sher-e-Bangla Agricultural University',
         description: 'Empowering innovation and research excellence for a better tomorrow',
         videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
       }),
@@ -187,7 +187,7 @@ async function main() {
     create: {
       hero: JSON.stringify({
         title: 'Research & Innovation Centre',
-        subtitle: 'Shahjalal University of Science & Technology',
+        subtitle: 'Sher-e-Bangla Agricultural University',
         description: 'Empowering innovation and research excellence for a better tomorrow',
         videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
       }),

@@ -466,21 +466,6 @@ export function HeroSection() {
           </div>
         </motion.div>
 
-        {/* Badge */}
-        <motion.div variants={fadeUp} className="mb-5 sm:mb-6">
-          <motion.span
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium bg-indigo-500/10 border border-indigo-400/20 text-indigo-300 backdrop-blur-sm"
-            animate={{ boxShadow: ['0 0 0px rgba(99,102,241,0)', '0 0 20px rgba(99,102,241,0.15)', '0 0 0px rgba(99,102,241,0)'] }}
-            transition={{ duration: 3, repeat: Infinity }}
-          >
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400" />
-            </span>
-            Research &amp; Innovation Centre — SAU
-          </motion.span>
-        </motion.div>
-
         {/* Title */}
         <motion.h1
           variants={fadeUp}
