@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
+import { SignJWT } from 'jose';
 
 export async function POST(request: NextRequest) {
   try {
@@ -60,6 +62,27 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`Login successful: User '${username}' logged in`);
+    
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-for-development-only-change-in-prod');
+    const token = await new SignJWT({ 
+      id: user.id.toString(),
+      username: user.username,
+      role: user.role 
+    })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime('24h')
+      .sign(secret);
+
+    cookies().set({
+      name: 'adminToken',
+      value: token,
+      httpOnly: true,
+      path: '/',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24, // 24 hours
+      sameSite: 'lax',
+    });
     
     return NextResponse.json({ 
       success: true, 

@@ -530,8 +530,13 @@ export default function DashboardContent() {
     await refreshSection(activeTab);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('adminToken');
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (e) {
+      console.error('Logout error:', e);
+    }
+    localStorage.removeItem('adminUser');
     router.push('/login');
   };
 

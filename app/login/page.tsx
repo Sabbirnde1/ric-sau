@@ -13,10 +13,10 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // Check if user is already logged in
+  // Just check if we have user data (UI only, real check is server-side)
   useEffect(() => {
-    const token = localStorage.getItem('adminToken');
-    if (token === 'loggedIn') {
+    const user = localStorage.getItem('adminUser');
+    if (user) {
       router.push('/dashboard');
     } else {
       setLoading(false);
@@ -35,7 +35,6 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (data.success) {
-        localStorage.setItem('adminToken', 'loggedIn');
         localStorage.setItem('adminUser', JSON.stringify(data.user));
         router.push('/dashboard');
       } else {

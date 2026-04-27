@@ -23,7 +23,14 @@ export async function GET(request: NextRequest) {
   try {
     // Security: Check for setup secret
     const secret = request.nextUrl.searchParams.get('secret');
-    const expectedSecret = process.env.SETUP_SECRET || 'change-this-secret-in-production';
+    const expectedSecret = process.env.SETUP_SECRET;
+    
+    if (!expectedSecret) {
+      return NextResponse.json(
+        { success: false, error: 'Setup is disabled. SETUP_SECRET environment variable is not set.' },
+        { status: 403 }
+      );
+    }
     
     if (secret !== expectedSecret) {
       return NextResponse.json(
