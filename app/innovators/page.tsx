@@ -1,7 +1,17 @@
 import prisma from '@/lib/prisma';
 import InnovatorsClient from './InnovatorsClient';
+import { Metadata } from 'next';
 
 export const revalidate = 300;
+
+export const metadata: Metadata = {
+  title: 'Innovators & Innovations | RIC-SAU',
+  description: 'Explore visionary ideas, researchers, and innovations shaping agriculture, technology, and sustainability at Sher-e-Bangla Agricultural University.',
+  openGraph: {
+    title: 'Innovators & Innovations | RIC-SAU',
+    description: 'Explore visionary ideas, researchers, and innovations shaping agriculture, technology, and sustainability at Sher-e-Bangla Agricultural University.',
+  }
+};
 
 async function getInnovations() {
   try {

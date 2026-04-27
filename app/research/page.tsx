@@ -2,6 +2,16 @@ import { Brain, Code, Database, Shield, Zap, Users, ArrowRight, Calendar, User }
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import MotionWrapper from '@/components/MotionWrapper';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Research & Innovation | RIC-SAU',
+  description: 'Explore the cutting-edge research areas, active projects, and innovations at Sher-e-Bangla Agricultural University.',
+  openGraph: {
+    title: 'Research & Innovation | RIC-SAU',
+    description: 'Explore the cutting-edge research areas, active projects, and innovations at Sher-e-Bangla Agricultural University.',
+  }
+};
 
 const researchAreas = [
   {

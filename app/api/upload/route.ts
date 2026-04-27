@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
+import { put } from '@vercel/blob';
 
 export async function POST(request: NextRequest) {
   try {
@@ -48,8 +49,35 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
 
     // Serverless providers have ephemeral local disk.
-    // Use Cloudinary if configured, otherwise inline fallback.
+    // Try Vercel Blob -> Cloudinary -> inline fallback.
     if (process.env.NETLIFY || process.env.VERCEL) {
+      
+      // Try Vercel Blob first
+      if (process.env.BLOB_READ_WRITE_TOKEN) {
+        try {
+          const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+          const filename = `${Date.now()}-${originalName}`;
+          
+          const blob = await put(`uploads/${filename}`, bytes, {
+            access: 'public',
+            contentType: file.type,
+          });
+
+          return NextResponse.json({
+            success: true,
+            url: blob.url,
+            filename: file.name,
+            size: file.size,
+            type: file.type,
+            storage: 'blob',
+            optimization: optimizationMeta
+          });
+        } catch (error: any) {
+          console.error('Vercel Blob upload failed:', error);
+          // Fall back to Cloudinary or base64 if blob fails
+        }
+      }
+
       const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
       const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
       let cloudinaryError: string | null = null;
@@ -90,8 +118,8 @@ export async function POST(request: NextRequest) {
       const inlineMaxSize = 1 * 1024 * 1024; // 1MB
       if (file.size > inlineMaxSize) {
         const message = cloudinaryError
-          ? `Cloudinary upload failed: ${cloudinaryError}. Please fix CLOUDINARY_CLOUD_NAME and CLOUDINARY_UPLOAD_PRESET, then retry.`
-          : 'Upload failed on serverless storage for files above 1MB. Configure CLOUDINARY_CLOUD_NAME and CLOUDINARY_UPLOAD_PRESET for persistent uploads, or use an external image URL.';
+          ? `Cloudinary upload failed: ${cloudinaryError}. Please fix CLOUDINARY_CLOUD_NAME and CLOUDINARY_UPLOAD_PRESET, or configure Vercel Blob.`
+          : 'Upload failed on serverless storage for files above 1MB. Configure Vercel Blob or Cloudinary for persistent uploads, or use an external image URL.';
 
         return NextResponse.json({
           success: false,

@@ -78,7 +78,7 @@ export function Navbar() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       className={`fixed w-full z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white/95 backdrop-blur-md shadow-lg border-b' : 'bg-transparent'
+        scrolled ? 'bg-[#020617]/80 backdrop-blur-md shadow-lg border-b border-white/[0.05]' : 'bg-transparent'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -118,8 +118,8 @@ export function Navbar() {
                   prefetch={true}
                   className={`px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors ${
                     pathname === item.href
-                      ? 'text-blue-600 bg-blue-50'
-                      : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                      ? 'text-cyan-400 bg-white/[0.05]'
+                      : 'text-slate-300 hover:text-white hover:bg-white/[0.05]'
                   }`}
                 >
                   {item.name}
@@ -127,13 +127,13 @@ export function Navbar() {
                 </Link>
 
                 {item.submenu && (
-                  <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                  <div className="absolute left-0 mt-2 w-48 bg-[#020617]/95 backdrop-blur-md rounded-md shadow-xl border border-white/[0.05] py-1 z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                     {item.submenu.map((subitem) => (
                       <Link
                         key={subitem.name}
                         href={subitem.href}
                         prefetch={true}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                        className="block px-4 py-2 text-sm text-slate-300 hover:bg-white/[0.05] hover:text-white transition-colors"
                       >
                         {subitem.name}
                       </Link>
@@ -165,7 +165,7 @@ export function Navbar() {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden">
-            <Button variant="ghost" size="sm" onClick={() => setIsOpen(!isOpen)}>
+            <Button variant="ghost" size="sm" onClick={() => setIsOpen(!isOpen)} className="text-slate-300 hover:text-white hover:bg-white/[0.05]">
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
           </div>
@@ -179,7 +179,7 @@ export function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-white border-t"
+            className="md:hidden bg-[#020617]/95 backdrop-blur-xl border-t border-white/[0.05]"
           >
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
               {navigation.map((item) => (
@@ -187,23 +187,23 @@ export function Navbar() {
                   <Link
                     href={item.href}
                     prefetch={true}
-                    className={`block px-3 py-2 rounded-md text-base font-medium ${
+                    className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
                       pathname === item.href
-                        ? 'text-blue-600 bg-blue-50'
-                        : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                        ? 'text-cyan-400 bg-white/[0.05]'
+                        : 'text-slate-300 hover:text-white hover:bg-white/[0.05]'
                     }`}
                     onClick={() => setIsOpen(false)}
                   >
                     {item.name}
                   </Link>
                   {item.submenu && (
-                    <div className="ml-4 space-y-1">
+                    <div className="ml-4 space-y-1 border-l border-white/[0.05] pl-2 mt-1">
                       {item.submenu.map((subitem) => (
                         <Link
                           key={subitem.name}
                           href={subitem.href}
                           prefetch={true}
-                          className="block px-3 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md"
+                          className="block px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-white/[0.05] rounded-md transition-colors"
                           onClick={() => setIsOpen(false)}
                         >
                           {subitem.name}

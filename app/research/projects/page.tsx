@@ -1,7 +1,17 @@
 import prisma from '@/lib/prisma';
 import ProjectsClient from './ProjectsClient';
+import { Metadata } from 'next';
 
 export const revalidate = 300;
+
+export const metadata: Metadata = {
+  title: 'Research Projects | RIC-SAU',
+  description: 'Discover the ongoing and completed research projects at Sher-e-Bangla Agricultural University.',
+  openGraph: {
+    title: 'Research Projects | RIC-SAU',
+    description: 'Discover the ongoing and completed research projects at Sher-e-Bangla Agricultural University.',
+  }
+};
 
 function parseJSON(value: string | null | undefined, fallback: any) {
   if (!value) return fallback;
