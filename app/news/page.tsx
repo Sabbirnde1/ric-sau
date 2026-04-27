@@ -4,8 +4,14 @@ import { Button } from '@/components/ui/button';
 import MotionWrapper from '@/components/MotionWrapper';
 import Image from 'next/image';
 import prisma from '@/lib/prisma';
+import { shouldUseUnoptimized } from '@/lib/utils';
 
 export const revalidate = 300;
+
+export const metadata = {
+  title: 'News & Updates | RIC-SAU',
+  description: 'Stay updated with the latest research breakthroughs, events, and achievements from the Research & Innovation Centre at Sher-e-Bangla Agricultural University.',
+};
 
 async function getNewsArticles() {
   try {
@@ -62,7 +68,7 @@ export default async function NewsPage() {
                           fill
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           className="object-cover"
-                          unoptimized={article.image.startsWith('data:') || (article.image.startsWith('http') && !article.image.includes('images.pexels.com'))}
+                          unoptimized={shouldUseUnoptimized(article.image)}
                         />
                       ) : null}
                       <div className={`w-full h-full flex items-center justify-center ${article.image && article.image.trim() !== '' ? 'hidden' : ''}`}>

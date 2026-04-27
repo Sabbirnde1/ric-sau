@@ -13,21 +13,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check database connection
-    try {
-      await prisma.$connect();
-    } catch (dbError: any) {
-      console.error('Database connection error:', dbError);
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Database connection failed',
-          hint: 'Check DATABASE_URL environment variable',
-          details: process.env.NODE_ENV === 'development' ? dbError.message : undefined
-        },
-        { status: 500 }
-      );
-    }
     
     // Find user by username
     let user;
@@ -97,7 +82,5 @@ export async function POST(request: NextRequest) {
       },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

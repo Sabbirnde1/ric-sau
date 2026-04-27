@@ -15,7 +15,8 @@ export default function Dashboard() {
       setAuthorized(true);
       setChecking(false);
     } else {
-      router.replace('/login'); // Use replace instead of push to prevent back button issues
+      setChecking(false);
+      router.replace('/login');
     }
   }, [router]);
 

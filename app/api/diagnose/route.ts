@@ -143,8 +143,6 @@ export async function GET(request: NextRequest) {
       diagnostics.status = `❌ Found ${diagnostics.issues.length} issue(s) preventing login`;
     }
 
-    // Disconnect
-    await prisma.$disconnect();
 
     return NextResponse.json({
       success: diagnostics.issues.length === 0,

@@ -657,7 +657,8 @@ export default function DashboardContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type, data: form })
       });
-      if (response.ok) {
+      const json = await response.json();
+      if (response.ok && json.success) {
         await refreshSection(type);
         resetForm();
         setDialogStates({ ...dialogStates, [type]: false });
@@ -665,6 +666,8 @@ export default function DashboardContent() {
           clearDashboardDrafts(['news']);
         }
         toast({ title: 'Item added', description: 'New content item created successfully.' });
+      } else {
+        toast({ title: 'Create failed', description: json.error || `Could not add ${type}.`, variant: 'destructive' });
       }
     } catch (error) {
       console.error(`Error adding ${type}:`, error);

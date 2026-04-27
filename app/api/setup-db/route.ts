@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
           tagline: 'Research & Innovation Centre - Sher-e-Bangla Agricultural University',
           description: 'Leading research and innovation at Sher-e-Bangla Agricultural University',
           footerText: '© 2026 Research & Innovation Centre, SAU. All rights reserved.',
-          logo: 'https://via.placeholder.com/150x50/3B82F6/ffffff?text=RIC-SAU', // Default logo
+          logo: '/RIC SAU logo.png',
         }),
         seo: JSON.stringify({
           metaTitle: 'RIC-SAU | Research & Innovation Centre',
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
           tagline: 'Research & Innovation Centre - Sher-e-Bangla Agricultural University',
           description: 'Leading research and innovation at Sher-e-Bangla Agricultural University',
           footerText: '© 2026 Research & Innovation Centre, SAU. All rights reserved.',
-          logo: 'https://via.placeholder.com/150x50/3B82F6/ffffff?text=RIC-SAU', // Default logo
+          logo: '/RIC SAU logo.png',
         }),
         seo: JSON.stringify({
           metaTitle: 'RIC-SAU | Research & Innovation Centre',
@@ -263,9 +263,7 @@ export async function GET(request: NextRequest) {
         adminCreated: true,
         defaultCredentials: {
           username: 'admin',
-          email: 'admin@ric-sau.com',
-          password: 'admin123',
-          note: '⚠️ CHANGE THIS PASSWORD IMMEDIATELY after first login!'
+          note: '⚠️ Default password is admin123 — CHANGE THIS IMMEDIATELY after first login!'
         },
         contentCreated: {
           settings: true,

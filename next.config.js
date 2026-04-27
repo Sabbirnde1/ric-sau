@@ -47,7 +47,6 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
-  swcMinify: true,
   // Compiler optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',

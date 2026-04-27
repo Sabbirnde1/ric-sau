@@ -59,6 +59,7 @@ function MolecularNetwork() {
     const resize = () => {
       canvas.width = canvas.offsetWidth * devicePixelRatio;
       canvas.height = canvas.offsetHeight * devicePixelRatio;
+      ctx.setTransform(1, 0, 0, 1, 0, 0); // reset accumulated scale
       ctx.scale(devicePixelRatio, devicePixelRatio);
       init(canvas);
     };
@@ -186,14 +187,19 @@ function AnimatedCounter({ value }: { value: string }) {
 /* ── Floating Keywords ──────────────────────────────────── */
 function FloatingKeywords() {
   const keywords = useMemo(() =>
-    FLOATING_KEYWORDS.map((word, i) => ({
-      word,
-      x: 5 + Math.random() * 85,
-      y: 10 + Math.random() * 80,
-      duration: 18 + Math.random() * 14,
-      delay: i * 1.2,
-      size: Math.random() > 0.7 ? 'text-xs' : 'text-[10px]',
-    })),
+    FLOATING_KEYWORDS.map((word, i) => {
+      // Deterministic positions based on index to avoid SSR/hydration mismatch
+      const seed1 = ((i * 37 + 11) % 85) + 5;  // 5..90
+      const seed2 = ((i * 53 + 7) % 80) + 10;  // 10..90
+      return {
+        word,
+        x: seed1,
+        y: seed2,
+        duration: 18 + (i % 7) * 2,
+        delay: i * 1.2,
+        size: i % 3 === 0 ? 'text-xs' : 'text-[10px]',
+      };
+    }),
     []
   );
 
@@ -332,6 +338,10 @@ export function HeroSection() {
   const springY = useSpring(mouseY, { stiffness: 50, damping: 20 });
   const orbX = useTransform(springX, (v) => v * 0.02);
   const orbY = useTransform(springY, (v) => v * 0.02);
+  const orbXNeg = useTransform(orbX, (v) => -v * 1.2);
+  const orbYNeg = useTransform(orbY, (v) => -v * 1.2);
+  const orbXHalf = useTransform(orbX, (v) => v * 0.5);
+  const orbYHalf = useTransform(orbY, (v) => v * 0.5);
 
   const handleMouse = useCallback((e: React.MouseEvent) => {
     const rect = heroRef.current?.getBoundingClientRect();
@@ -407,11 +417,11 @@ export function HeroSection() {
         className="absolute top-1/4 left-[15%] w-[200px] h-[200px] sm:w-[450px] sm:h-[450px] rounded-full hero-orb-blue pointer-events-none"
       />
       <motion.div
-        style={{ x: useTransform(orbX, v => -v * 1.2), y: useTransform(orbY, v => -v * 1.2) }}
+        style={{ x: orbXNeg, y: orbYNeg }}
         className="absolute bottom-1/4 right-[15%] w-[180px] h-[180px] sm:w-[380px] sm:h-[380px] rounded-full hero-orb-purple pointer-events-none"
       />
       <motion.div
-        style={{ x: useTransform(orbX, v => v * 0.5), y: useTransform(orbY, v => v * 0.5) }}
+        style={{ x: orbXHalf, y: orbYHalf }}
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250px] h-[250px] sm:w-[550px] sm:h-[550px] rounded-full hero-orb-center pointer-events-none"
       />
 
