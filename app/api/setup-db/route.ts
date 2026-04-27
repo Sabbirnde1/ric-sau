@@ -32,33 +32,63 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Check if database is already initialized
-    const existingUsers = await prisma.user.count();
-    if (existingUsers > 0) {
-      return NextResponse.json({
-        success: false,
-        message: 'Database already initialized. Already has users.',
-        tip: 'To reinitialize, delete all data first or use a fresh database.'
-      }, { status: 400 });
-    }
-
-    console.log('🌱 Starting database setup...');
+    console.log('🌱 Starting database setup / refresh...');
 
     // Create admin user
     const hashedPassword = await bcrypt.hash('admin123', 10);
-    const admin = await prisma.user.create({
-      data: {
+    const admin = await prisma.user.upsert({
+      where: { username: 'admin' },
+      update: {
+        email: 'admin@ric-sau.com',
+        password: hashedPassword,
+        role: 'admin',
+      },
+      create: {
         username: 'admin',
         email: 'admin@ric-sau.com',
         password: hashedPassword,
         role: 'admin',
       },
     });
-    console.log('✅ Created admin user');
+    console.log('✅ Refreshed admin user');
 
     // Create settings with logo
-    const settings = await prisma.settings.create({
-      data: {
+    const settings = await prisma.settings.upsert({
+      where: { id: 1 },
+      update: {
+        general: JSON.stringify({
+          siteName: 'RIC-SAU',
+          tagline: 'Research & Innovation Centre - Sher-e-Bangla Agricultural University',
+          description: 'Leading research and innovation at Sher-e-Bangla Agricultural University',
+          footerText: '© 2026 Research & Innovation Centre, SAU. All rights reserved.',
+          logo: 'https://via.placeholder.com/150x50/3B82F6/ffffff?text=RIC-SAU', // Default logo
+        }),
+        seo: JSON.stringify({
+          metaTitle: 'RIC-SAU | Research & Innovation Centre',
+          metaDescription: 'Fostering innovation and research excellence at SAU',
+          metaKeywords: 'research, innovation, SAU, university, agriculture, technology',
+        }),
+        social: JSON.stringify({
+          facebook: 'https://facebook.com/ric-sau',
+          twitter: 'https://twitter.com/ric_sau',
+          linkedin: 'https://linkedin.com/company/ric-sau',
+          youtube: 'https://youtube.com/@ric-sau',
+        }),
+        theme: JSON.stringify({
+          primaryColor: '#3B82F6',
+          secondaryColor: '#10B981',
+          accentColor: '#F59E0B',
+          darkMode: false,
+        }),
+        features: JSON.stringify({
+          showNewsletterSignup: true,
+          showVideoModal: true,
+          enableComments: false,
+          enableSearching: true,
+          maintenanceMode: false,
+        }),
+      },
+      create: {
         general: JSON.stringify({
           siteName: 'RIC-SAU',
           tagline: 'Research & Innovation Centre - Sher-e-Bangla Agricultural University',
@@ -92,11 +122,26 @@ export async function GET(request: NextRequest) {
         }),
       },
     });
-    console.log('✅ Created settings with logo');
+    console.log('✅ Refreshed settings with logo');
 
     // Create home page data
-    const home = await prisma.home.create({
-      data: {
+    const home = await prisma.home.upsert({
+      where: { id: 1 },
+      update: {
+        hero: JSON.stringify({
+          title: 'Research & Innovation Center',
+          subtitle: 'Sher-e-Bangla Agricultural University',
+          description: 'Pioneering Agricultural Research & Technology Innovation',
+          videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        }),
+        stats: JSON.stringify([
+          { label: 'Active Projects', value: '25+' },
+          { label: 'Researchers', value: '50+' },
+          { label: 'Publications', value: '100+' },
+          { label: 'Partners', value: '15+' },
+        ]),
+      },
+      create: {
         hero: JSON.stringify({
           title: 'Research & Innovation Center',
           subtitle: 'Sher-e-Bangla Agricultural University',
@@ -111,11 +156,24 @@ export async function GET(request: NextRequest) {
         ]),
       },
     });
-    console.log('✅ Created home page');
+    console.log('✅ Refreshed home page');
 
     // Create about page
-    const about = await prisma.about.create({
-      data: {
+    const about = await prisma.about.upsert({
+      where: { id: 1 },
+      update: {
+        mission: 'To foster innovation and research excellence in agricultural sciences',
+        vision: 'To become a leading research center in agricultural innovation',
+        description: 'The Research & Innovation Center (RIC) at Sher-e-Bangla Agricultural University is dedicated to advancing agricultural knowledge through cutting-edge research.',
+        established: '2020',
+        achievements: JSON.stringify([
+          'Over 100 research publications',
+          '25+ active agricultural projects',
+          '15+ industry partnerships',
+          '50+ dedicated researchers',
+        ]),
+      },
+      create: {
         mission: 'To foster innovation and research excellence in agricultural sciences',
         vision: 'To become a leading research center in agricultural innovation',
         description: 'The Research & Innovation Center (RIC) at Sher-e-Bangla Agricultural University is dedicated to advancing agricultural knowledge through cutting-edge research.',
@@ -128,22 +186,40 @@ export async function GET(request: NextRequest) {
         ]),
       },
     });
-    console.log('✅ Created about page');
+    console.log('✅ Refreshed about page');
 
     // Create contact info
-    const contact = await prisma.contact.create({
-      data: {
+    const contact = await prisma.contact.upsert({
+      where: { id: 1 },
+      update: {
+        address: '4th Floor, Central Library, Sher-e-Bangla Agricultural University, Dhaka-1207, Bangladesh',
+        phone: '+880244814019',
+        email: 'info.sauric@gmail.com',
+        officeHours: 'Sunday - Thursday: 9:00 AM - 5:00 PM',
+      },
+      create: {
         address: '4th Floor, Central Library, Sher-e-Bangla Agricultural University, Dhaka-1207, Bangladesh',
         phone: '+880244814019',
         email: 'info.sauric@gmail.com',
         officeHours: 'Sunday - Thursday: 9:00 AM - 5:00 PM',
       },
     });
-    console.log('✅ Created contact info');
+    console.log('✅ Refreshed contact info');
 
     // Create sample news
-    const news = await prisma.news.create({
-      data: {
+    const news = await prisma.news.upsert({
+      where: { slug: 'welcome-to-ric-sau' },
+      update: {
+        title: 'Welcome to RIC-SAU',
+        slug: 'welcome-to-ric-sau',
+        excerpt: 'Research & Innovation Center officially launched at Sher-e-Bangla Agricultural University',
+        content: 'We are excited to announce the official launch of the Research & Innovation Center at SAU. Our mission is to drive agricultural innovation and research excellence.',
+        date: new Date().toISOString().split('T')[0],
+        category: 'Announcement',
+        author: 'Admin',
+        readTime: '2 min read',
+      },
+      create: {
         title: 'Welcome to RIC-SAU',
         slug: 'welcome-to-ric-sau',
         excerpt: 'Research & Innovation Center officially launched at Sher-e-Bangla Agricultural University',
@@ -154,11 +230,21 @@ export async function GET(request: NextRequest) {
         readTime: '2 min read',
       },
     });
-    console.log('✅ Created sample news');
+    console.log('✅ Refreshed sample news');
 
     // Create sample event
-    const event = await prisma.event.create({
-      data: {
+    const event = await prisma.event.upsert({
+      where: { slug: 'agricultural-innovation-summit-2026' },
+      update: {
+        slug: 'agricultural-innovation-summit-2026',
+        title: 'Agricultural Innovation Summit 2026',
+        description: 'Join us for an exciting summit on agricultural innovation and sustainable farming practices.',
+        date: '2026-04-15',
+        time: '10:00 AM',
+        location: 'SAU Campus, Main Auditorium',
+        category: 'Conference',
+      },
+      create: {
         slug: 'agricultural-innovation-summit-2026',
         title: 'Agricultural Innovation Summit 2026',
         description: 'Join us for an exciting summit on agricultural innovation and sustainable farming practices.',
@@ -168,7 +254,7 @@ export async function GET(request: NextRequest) {
         category: 'Conference',
       },
     });
-    console.log('✅ Created sample event');
+    console.log('✅ Refreshed sample event');
 
     return NextResponse.json({
       success: true,
