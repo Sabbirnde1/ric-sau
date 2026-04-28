@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import RichTextEditor from '@/components/ui/rich-text-editor';
 import { useToast } from '@/hooks/use-toast';
 import ImageUpload from '@/components/ui/image-upload';
 import { contentApi } from '@/lib/api-client';
@@ -140,7 +141,12 @@ export default function TeamTab() {
                     <div><Label>Department</Label><Input value={teamForm.department} onChange={(e) => setTeamForm({ ...teamForm, department: e.target.value })} placeholder="Research Department" /></div>
                     <div><Label>Email</Label><Input type="email" value={teamForm.email} onChange={(e) => setTeamForm({ ...teamForm, email: e.target.value })} placeholder="email@example.com" /></div>
                   </div>
-                  <div><Label>Bio</Label><Textarea value={teamForm.bio} onChange={(e) => setTeamForm({ ...teamForm, bio: e.target.value })} rows={3} placeholder="Professional bio and experience" /></div>
+                  <RichTextEditor
+                    label="Bio"
+                    value={teamForm.bio}
+                    onChange={(val) => setTeamForm({ ...teamForm, bio: val })}
+                    placeholder="Professional bio and experience"
+                  />
                   <ImageUpload 
                     label="Profile Photo" 
                     value={teamForm.image} 

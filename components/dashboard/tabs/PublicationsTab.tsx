@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import RichTextEditor from '@/components/ui/rich-text-editor';
 import { useToast } from '@/hooks/use-toast';
 import { contentApi } from '@/lib/api-client';
 
@@ -135,7 +136,12 @@ export default function PublicationsTab() {
                     <div><Label>Citations</Label><Input type="number" value={publicationForm.citations} onChange={(e) => setPublicationForm({ ...publicationForm, citations: Number(e.target.value) })} /></div>
                     <div><Label>DOI</Label><Input value={publicationForm.doi} onChange={(e) => setPublicationForm({ ...publicationForm, doi: e.target.value })} placeholder="10.1109/..." /></div>
                   </div>
-                  <div><Label>Abstract</Label><Textarea value={publicationForm.abstract} onChange={(e) => setPublicationForm({ ...publicationForm, abstract: e.target.value })} rows={4} placeholder="Paper abstract..." /></div>
+                  <RichTextEditor
+                    label="Abstract"
+                    value={publicationForm.abstract}
+                    onChange={(val) => setPublicationForm({ ...publicationForm, abstract: val })}
+                    placeholder="Paper abstract..."
+                  />
                   <div><Label>Keywords (comma-separated)</Label><Input value={publicationForm.keywords} onChange={(e) => setPublicationForm({ ...publicationForm, keywords: e.target.value })} placeholder="Deep Learning, Medical Imaging" /></div>
                   <Button onClick={handleAdd} className="w-full">Add Publication</Button>
                 </div>

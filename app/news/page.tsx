@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import MotionWrapper from '@/components/MotionWrapper';
 import Image from 'next/image';
 import prisma from '@/lib/prisma';
-import { shouldUseUnoptimized } from '@/lib/utils';
+import { shouldUseUnoptimized, stripHtml } from '@/lib/utils';
 import { EmptyState } from '@/components/EmptyState';
 
 export const revalidate = 300;
@@ -91,7 +91,7 @@ export default async function NewsPage() {
                           <span>{article.author}</span>
                         </div>
                       </div>
-                      <p className="text-gray-600 flex-1">{article.excerpt || article.content}</p>
+                      <p className="text-gray-600 flex-1 line-clamp-3">{stripHtml(article.excerpt || article.content)}</p>
                       <div className="pt-6">
                         <Link href={`/news/${article.slug}`}>
                           <Button className="w-full flex items-center justify-center">

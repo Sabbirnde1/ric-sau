@@ -134,7 +134,10 @@ export default function LabsClient({ initialLabs }: LabsClientProps) {
                   <div className="space-y-6">
                     <div>
                       <h3 className="text-3xl font-bold text-gray-900 mb-4">{lab.name}</h3>
-                      <p className="text-lg text-gray-600 leading-relaxed">{lab.description}</p>
+                      <div 
+                        className="text-lg text-gray-600 leading-relaxed prose max-w-none"
+                        dangerouslySetInnerHTML={{ __html: lab.description }}
+                      />
                     </div>
 
                     <div className="grid grid-cols-2 gap-6">

@@ -87,7 +87,10 @@ export default async function EventDetailsPage({ params }: { params: { slug: str
       {/* Event Details */}
       <section className="max-w-4xl mx-auto px-6 py-16">
         <div className="bg-white shadow-lg rounded-2xl p-8">
-          <p className="text-gray-700 mb-8 text-lg leading-relaxed">{event.description}</p>
+          <div 
+            className="text-gray-700 mb-8 text-lg leading-relaxed prose max-w-none"
+            dangerouslySetInnerHTML={{ __html: event.description }}
+          />
 
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">

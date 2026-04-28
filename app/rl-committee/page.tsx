@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
 import { User } from 'lucide-react';
+import { stripHtml } from '@/lib/utils';
 
 const shouldUseUnoptimized = (src: string) =>
   src.startsWith('data:') || (src.startsWith('http') && !src.includes('images.pexels.com'));
@@ -49,7 +50,7 @@ function MemberCard({ member }: { member: any }) {
         <h3 className={`text-xl font-semibold text-foreground mb-1 ${isHorizontal ? 'text-center sm:text-left' : 'text-center'}`}>{member.name}</h3>
         <p className={`text-sm text-muted-foreground ${isHorizontal ? 'text-center sm:text-left' : 'text-center'}`}>{member.department}</p>
         {member.bio && (
-          <p className={`text-sm text-muted-foreground mt-3 line-clamp-3 ${isHorizontal ? 'text-center sm:text-left' : 'text-center'}`}>{member.bio}</p>
+          <p className={`text-sm text-muted-foreground mt-3 line-clamp-3 ${isHorizontal ? 'text-center sm:text-left' : 'text-center'}`}>{stripHtml(member.bio)}</p>
         )}
       </div>
     </motion.div>

@@ -241,7 +241,10 @@ export default function PublicationsClient({ initialPublications }: Publications
                         <span>{publication.citations} citations</span>
                       </div>
 
-                      <p className="text-gray-600 mb-6 leading-relaxed">{publication.abstract}</p>
+                      <div 
+                        className="text-gray-600 mb-6 leading-relaxed prose max-w-none"
+                        dangerouslySetInnerHTML={{ __html: publication.abstract }}
+                      />
 
                       <div className="flex flex-wrap gap-2 mb-6">
                         {(publication.keywords || []).map((keyword: string) => (

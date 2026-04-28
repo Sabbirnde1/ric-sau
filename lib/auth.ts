@@ -2,6 +2,7 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { checkRateLimit, recordFailedAttempt, clearFailedAttempts } from "@/lib/rate-limit";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -16,19 +17,31 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Missing username or password");
         }
 
+        // Check Rate Limit (Brute Force Protection)
+        const rateLimit = checkRateLimit(credentials.username);
+        if (!rateLimit.success) {
+          const resetMinutes = Math.ceil((rateLimit.resetTime! - Date.now()) / 60000);
+          throw new Error(`Account locked due to too many failed attempts. Try again in ${resetMinutes} minutes.`);
+        }
+
         const user = await prisma.user.findUnique({
           where: { username: credentials.username }
         });
 
         if (!user) {
-          throw new Error("Invalid username or password");
+          const remaining = recordFailedAttempt(credentials.username);
+          throw new Error(`Invalid username or password. ${remaining} attempts left before lockout.`);
         }
 
         const isValid = await bcrypt.compare(credentials.password, user.password);
 
         if (!isValid) {
-          throw new Error("Invalid username or password");
+          const remaining = recordFailedAttempt(credentials.username);
+          throw new Error(`Invalid username or password. ${remaining} attempts left before lockout.`);
         }
+
+        // Success - clear any failed attempts
+        clearFailedAttempts(credentials.username);
 
         return {
           id: user.id.toString(),

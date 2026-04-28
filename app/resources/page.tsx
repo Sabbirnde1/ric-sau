@@ -110,7 +110,10 @@ export default function ResourcesPage() {
                 )}
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
-              <p className="text-gray-700">{item.description}</p>
+              <div 
+                className="text-gray-700 text-sm leading-relaxed prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: item.description }}
+              />
             </motion.div>
           ))}
         </div>

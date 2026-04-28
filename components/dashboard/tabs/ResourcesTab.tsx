@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import RichTextEditor from '@/components/ui/rich-text-editor';
 import { useToast } from '@/hooks/use-toast';
 import ImageUpload from '@/components/ui/image-upload';
 import { contentApi } from '@/lib/api-client';
@@ -129,7 +130,12 @@ export default function ResourcesTab() {
                 <DialogHeader><DialogTitle>{editingId ? 'Edit Resource' : 'Add New Resource'}</DialogTitle></DialogHeader>
                 <div className="space-y-4">
                   <div><Label>Resource Name</Label><Input value={resourceForm.title} onChange={(e) => setResourceForm({ ...resourceForm, title: e.target.value })} placeholder="High Performance Computing Cluster" /></div>
-                  <div><Label>Description</Label><Textarea value={resourceForm.description} onChange={(e) => setResourceForm({ ...resourceForm, description: e.target.value })} rows={4} placeholder="Details about the resource..." /></div>
+                  <RichTextEditor
+                    label="Description"
+                    value={resourceForm.description}
+                    onChange={(val) => setResourceForm({ ...resourceForm, description: val })}
+                    placeholder="Details about the resource..."
+                  />
                   <ImageUpload label="Resource Image" value={resourceForm.image} onChange={(url) => setResourceForm({ ...resourceForm, image: url })} enableCrop />
                   <Button onClick={handleAdd} className="w-full">{editingId ? 'Save Changes' : 'Add Resource'}</Button>
                 </div>

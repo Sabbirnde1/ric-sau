@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import RichTextEditor from '@/components/ui/rich-text-editor';
 import { useToast } from '@/hooks/use-toast';
 import ImageUpload from '@/components/ui/image-upload';
 import { contentApi } from '@/lib/api-client';
@@ -155,7 +156,11 @@ export default function RlCommitteeTab() {
                     <div><Label>Department</Label><Input value={rlCommitteeForm.department} onChange={(e) => setRlCommitteeForm({ ...rlCommitteeForm, department: e.target.value })} placeholder="Agricultural Research" /></div>
                     <div><Label>Email</Label><Input type="email" value={rlCommitteeForm.email} onChange={(e) => setRlCommitteeForm({ ...rlCommitteeForm, email: e.target.value })} /></div>
                   </div>
-                  <div><Label>Bio</Label><Textarea value={rlCommitteeForm.bio} onChange={(e) => setRlCommitteeForm({ ...rlCommitteeForm, bio: e.target.value })} rows={3} /></div>
+                  <RichTextEditor
+                    label="Bio"
+                    value={rlCommitteeForm.bio}
+                    onChange={(val) => setRlCommitteeForm({ ...rlCommitteeForm, bio: val })}
+                  />
                   <ImageUpload 
                     label="Profile Photo" 
                     value={rlCommitteeForm.image} 

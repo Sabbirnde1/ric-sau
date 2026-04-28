@@ -21,3 +21,8 @@ export function shouldUseUnoptimized(src: string) {
   }
   return false;
 }
+
+export function stripHtml(html: string) {
+  if (!html) return '';
+  return html.replace(/<[^>]*>?/gm, '');
+}

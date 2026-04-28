@@ -127,9 +127,10 @@ export default function ProjectDetailPage() {
                   {project.title}
                 </h1>
                 
-                <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-                  {project.description}
-                </p>
+                <div 
+                  className="text-xl text-gray-600 mb-8 leading-relaxed prose max-w-none"
+                  dangerouslySetInnerHTML={{ __html: project.description }}
+                />
 
                 <div className="grid grid-cols-2 gap-6 mb-8">
                   <div className="flex items-center space-x-3">

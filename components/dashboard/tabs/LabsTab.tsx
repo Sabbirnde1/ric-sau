@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import RichTextEditor from '@/components/ui/rich-text-editor';
 import { useToast } from '@/hooks/use-toast';
 import ImageUpload from '@/components/ui/image-upload';
 import { contentApi } from '@/lib/api-client';
@@ -146,7 +147,12 @@ export default function LabsTab() {
                 <DialogHeader><DialogTitle>{editingId ? 'Edit Lab' : 'Add New Lab'}</DialogTitle></DialogHeader>
                 <div className="space-y-4">
                   <div><Label>Lab Name</Label><Input value={labForm.name} onChange={(e) => setLabForm({ ...labForm, name: e.target.value })} placeholder="AI Research Lab" /></div>
-                  <div><Label>Description</Label><Textarea value={labForm.description} onChange={(e) => setLabForm({ ...labForm, description: e.target.value })} rows={4} placeholder="Lab description..." /></div>
+                  <RichTextEditor
+                    label="Description"
+                    value={labForm.description}
+                    onChange={(val) => setLabForm({ ...labForm, description: val })}
+                    placeholder="Lab description..."
+                  />
                   <div className="grid grid-cols-2 gap-4">
                     <div><Label>Director</Label><Input value={labForm.director} onChange={(e) => setLabForm({ ...labForm, director: e.target.value })} placeholder="Dr. John Doe" /></div>
                     <div><Label>Location</Label><Input value={labForm.location} onChange={(e) => setLabForm({ ...labForm, location: e.target.value })} placeholder="Building A, Floor 3" /></div>

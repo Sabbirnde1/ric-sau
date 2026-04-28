@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Link from 'next/link';
 import Image from 'next/image';
 import { EmptyState } from '@/components/EmptyState';
+import { stripHtml } from '@/lib/utils';
 
 interface Project {
   id: number;
@@ -43,7 +44,7 @@ export default function ProjectsClient({ initialProjects }: ProjectsClientProps)
       filtered = filtered.filter(
         (project) =>
           project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          stripHtml(project.description).toLowerCase().includes(searchTerm.toLowerCase()) ||
           project.lead.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -211,7 +212,7 @@ export default function ProjectsClient({ initialProjects }: ProjectsClientProps)
                   <div className="p-6">
                     <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">{project.title}</h3>
 
-                    <p className="text-gray-600 mb-4 leading-relaxed line-clamp-3">{project.description}</p>
+                    <p className="text-gray-600 mb-4 leading-relaxed line-clamp-3">{stripHtml(project.description)}</p>
 
                     <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                       <div className="flex items-center space-x-2">

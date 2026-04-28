@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from "next/link";
 import { Calendar as CalendarIcon } from 'lucide-react';
 import Image from 'next/image';
+import { stripHtml } from '@/lib/utils';
 
 interface Event {
   id: number;
@@ -48,7 +49,7 @@ export default function EventCard({ event }: { event: Event }) {
           {event.category}
         </span>
         <h3 className="text-xl font-bold mt-2 mb-3">{event.title}</h3>
-        <p className="text-gray-600 line-clamp-3">{event.description}</p>
+        <p className="text-gray-600 line-clamp-3">{stripHtml(event.description)}</p>
 
         <div className="mt-4 flex justify-between items-center text-sm text-gray-500">
           <span>{event.date}</span>

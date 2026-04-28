@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import RichTextEditor from '@/components/ui/rich-text-editor';
 import { useToast } from '@/hooks/use-toast';
 import ImageUpload from '@/components/ui/image-upload';
 import { contentApi } from '@/lib/api-client';
@@ -140,10 +141,11 @@ export default function EventsTab() {
                     <Label>Event Title</Label>
                     <Input value={eventForm.title} onChange={(e) => setEventForm({ ...eventForm, title: e.target.value })} placeholder="Conference, Workshop, etc." />
                   </div>
-                  <div>
-                    <Label>Description</Label>
-                    <Textarea value={eventForm.description} onChange={(e) => setEventForm({ ...eventForm, description: e.target.value })} rows={4} />
-                  </div>
+                  <RichTextEditor
+                    label="Description"
+                    value={eventForm.description}
+                    onChange={(val) => setEventForm({ ...eventForm, description: val })}
+                  />
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label>Date</Label>

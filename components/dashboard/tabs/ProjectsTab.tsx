@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import RichTextEditor from '@/components/ui/rich-text-editor';
 import { useToast } from '@/hooks/use-toast';
 import ImageUpload from '@/components/ui/image-upload';
 import { contentApi } from '@/lib/api-client';
@@ -129,7 +130,12 @@ export default function ProjectsTab() {
                 <DialogHeader><DialogTitle>Add New Project</DialogTitle></DialogHeader>
                 <div className="space-y-4">
                   <div><Label>Project Title</Label><Input value={projectForm.title} onChange={(e) => setProjectForm({ ...projectForm, title: e.target.value })} placeholder="Enter project title" /></div>
-                  <div><Label>Description</Label><Textarea value={projectForm.description} onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })} rows={4} placeholder="Detailed project description" /></div>
+                  <RichTextEditor
+                    label="Description"
+                    value={projectForm.description}
+                    onChange={(val) => setProjectForm({ ...projectForm, description: val })}
+                    placeholder="Detailed project description"
+                  />
                   <div className="grid grid-cols-2 gap-4">
                     <div><Label>Category</Label><Input value={projectForm.category} onChange={(e) => setProjectForm({ ...projectForm, category: e.target.value })} placeholder="AI & Healthcare" /></div>
                     <div><Label>Status</Label><Input value={projectForm.status} onChange={(e) => setProjectForm({ ...projectForm, status: e.target.value })} placeholder="Active" /></div>

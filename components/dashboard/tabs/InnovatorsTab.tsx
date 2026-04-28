@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import RichTextEditor from '@/components/ui/rich-text-editor';
 import { useToast } from '@/hooks/use-toast';
 import ImageUpload from '@/components/ui/image-upload';
 import { contentApi } from '@/lib/api-client';
@@ -150,7 +151,11 @@ export default function InnovatorsTab() {
                   </div>
                   <div><Label>Innovator Name</Label><Input value={innovatorForm.name} onChange={(e) => setInnovatorForm({ ...innovatorForm, name: e.target.value })} placeholder="Dr. Jane Smith" /></div>
                   <div><Label>Specialization</Label><Input value={innovatorForm.specialization} onChange={(e) => setInnovatorForm({ ...innovatorForm, specialization: e.target.value })} placeholder="Agricultural Technology" /></div>
-                  <div><Label>Bio / Description</Label><Textarea value={innovatorForm.bio} onChange={(e) => setInnovatorForm({ ...innovatorForm, bio: e.target.value })} rows={3} /></div>
+                  <RichTextEditor
+                    label="Bio / Description"
+                    value={innovatorForm.bio}
+                    onChange={(val) => setInnovatorForm({ ...innovatorForm, bio: val })}
+                  />
                   <div><Label>Achievements (comma-separated)</Label><Textarea value={innovatorForm.achievements} onChange={(e) => setInnovatorForm({ ...innovatorForm, achievements: e.target.value })} rows={2} placeholder="Award 2023, 10+ Patents" /></div>
                   <ImageUpload 
                     label="Innovation Image" 

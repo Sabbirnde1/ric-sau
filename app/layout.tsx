@@ -5,6 +5,8 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Toaster } from '@/components/ui/toaster';
 import AuthProvider from '@/components/AuthProvider';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -69,6 +71,8 @@ export default function RootLayout({
           </main>
           <Footer />
           <Toaster />
+          <Analytics />
+          <SpeedInsights />
         </AuthProvider>
       </body>
     </html>
