@@ -37,7 +37,7 @@ export default function PublicationsTab() {
   const fetchPublications = async () => {
     setLoading(true);
     try {
-      const data = await contentApi.getMany('publication');
+      const data = await contentApi.getMany('publications');
       setPublications(data || []);
     } catch (error) {
       toast({ title: 'Error', description: 'Failed to fetch publications', variant: 'destructive' });

@@ -32,7 +32,7 @@ export default function RlCommitteeTab() {
   const fetchRlCommittee = async () => {
     setLoading(true);
     try {
-      const data = await contentApi.getMany('rl-committee');
+      const data = await contentApi.getMany('rlCommittee');
       setRlCommittee(data || []);
     } catch (error) {
       toast({ title: 'Error', description: 'Failed to fetch committee members', variant: 'destructive' });
@@ -62,10 +62,10 @@ export default function RlCommitteeTab() {
     
     try {
       if (editingId) {
-        await contentApi.update('rl-committee', editingId, rlCommitteeForm);
+        await contentApi.update('rlCommittee', editingId, rlCommitteeForm);
         toast({ title: 'Success', description: 'Committee member updated' });
       } else {
-        await contentApi.create('rl-committee', rlCommitteeForm);
+        await contentApi.create('rlCommittee', rlCommitteeForm);
         toast({ title: 'Success', description: 'Committee member added' });
       }
       setDialogOpen(false);
@@ -80,7 +80,7 @@ export default function RlCommitteeTab() {
   const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to delete this member?')) return;
     try {
-      await contentApi.delete('rl-committee', id);
+      await contentApi.delete('rlCommittee', id);
       toast({ title: 'Deleted', description: 'Member removed' });
       fetchRlCommittee();
     } catch (error) {

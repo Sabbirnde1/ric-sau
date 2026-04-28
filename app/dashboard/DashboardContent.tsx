@@ -27,9 +27,7 @@ import ResourcesTab from '@/components/dashboard/tabs/ResourcesTab';
 import TeamTab from '@/components/dashboard/tabs/TeamTab';
 import InnovatorsTab from '@/components/dashboard/tabs/InnovatorsTab';
 import RlCommitteeTab from '@/components/dashboard/tabs/RlCommitteeTab';
-
-const shouldUseUnoptimized = (src: string) =>
-  src.startsWith('data:') || (src.startsWith('http') && !src.includes('images.pexels.com'));
+import { shouldUseUnoptimized } from '@/lib/utils';
 
 const LIST_PAGE_SIZE = 10;
 type SearchableTab =

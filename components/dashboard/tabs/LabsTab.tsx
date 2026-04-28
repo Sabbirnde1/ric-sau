@@ -33,7 +33,7 @@ export default function LabsTab() {
   const fetchLabs = async () => {
     setLoading(true);
     try {
-      const data = await contentApi.getMany('lab');
+      const data = await contentApi.getMany('labs');
       setLabs(data || []);
     } catch (error) {
       toast({ title: 'Error', description: 'Failed to fetch labs', variant: 'destructive' });

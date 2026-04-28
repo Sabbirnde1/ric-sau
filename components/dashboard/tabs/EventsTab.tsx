@@ -40,7 +40,7 @@ export default function EventsTab() {
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const data = await contentApi.getMany('event');
+      const data = await contentApi.getMany('events');
       setEvents(data || []);
     } catch (error) {
       toast({ title: 'Error', description: 'Failed to fetch events', variant: 'destructive' });

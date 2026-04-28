@@ -32,7 +32,7 @@ export default function InnovatorsTab() {
   const fetchInnovators = async () => {
     setLoading(true);
     try {
-      const data = await contentApi.getMany('innovator');
+      const data = await contentApi.getMany('innovators');
       setInnovators(data || []);
     } catch (error) {
       toast({ title: 'Error', description: 'Failed to fetch innovators', variant: 'destructive' });

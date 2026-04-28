@@ -16,21 +16,26 @@ interface Event {
 }
 
 export default async function EventsPage() {
-  const events = await prisma.event.findMany({
-    take: 24,
-    orderBy: { date: 'desc' },
-    select: {
-      id: true,
-      slug: true,
-      title: true,
-      description: true,
-      date: true,
-      time: true,
-      location: true,
-      category: true,
-      image: true,
-    },
-  });
+  let events: any[] = [];
+  try {
+    events = await prisma.event.findMany({
+      take: 24,
+      orderBy: { date: 'desc' },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        description: true,
+        date: true,
+        time: true,
+        location: true,
+        category: true,
+        image: true,
+      },
+    });
+  } catch (error) {
+    console.error('Failed to fetch events:', error);
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">

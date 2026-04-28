@@ -34,8 +34,7 @@ export default function ProjectsTab() {
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const data = await contentApi.getMany('project'); // Or 'projects', need to check. Usually contentApi uses singular or plural? In NewsTab it was 'news'.
-      // Let's assume it's 'projects'.
+      const data = await contentApi.getMany('projects');
       setProjects(data || []);
     } catch (error) {
       toast({ title: 'Error', description: 'Failed to fetch projects', variant: 'destructive' });

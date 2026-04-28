@@ -66,14 +66,16 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold mb-6 text-center">Admin Login</h2>
         {error && <p className="text-red-600 mb-4">{error}</p>}
-        <div className="space-y-4">
+        <form
+          onSubmit={(e) => { e.preventDefault(); handleLogin(); }}
+          className="space-y-4"
+        >
           <div>
             <Label htmlFor="username">Username</Label>
             <Input
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              onKeyDown={handleKeyDown}
               placeholder="Enter username"
               autoComplete="username"
             />
@@ -85,15 +87,14 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={handleKeyDown}
               placeholder="Enter password"
               autoComplete="current-password"
             />
           </div>
-          <Button className="w-full mt-4" onClick={handleLogin}>
+          <Button type="submit" className="w-full mt-4">
             Login
           </Button>
-        </div>
+        </form>
       </div>
     </div>
   );

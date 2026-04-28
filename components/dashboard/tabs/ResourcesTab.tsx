@@ -30,7 +30,7 @@ export default function ResourcesTab() {
   const fetchResources = async () => {
     setLoading(true);
     try {
-      const data = await contentApi.getMany('resource');
+      const data = await contentApi.getMany('resources');
       setResources(data || []);
     } catch (error) {
       toast({ title: 'Error', description: 'Failed to fetch resources', variant: 'destructive' });

@@ -32,11 +32,12 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [logoUrl, setLogoUrl] = useState('/RIC SAU logo.png');
+  const fallbackLogo = '/RIC SAU logo.png';
   const pathname = usePathname();
   const router = useRouter();
 
+  // Throttled scroll handler
   useEffect(() => {
-    // Throttle scroll handler for better performance
     let ticking = false;
     const handleScroll = () => {
       if (!ticking) {
@@ -51,27 +52,30 @@ export function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Sync auth state on route change — login sets 'adminUser' in localStorage
   useEffect(() => {
-    const token = localStorage.getItem('adminToken');
-    setIsLoggedIn(token === 'loggedIn');
+    const user = localStorage.getItem('adminUser');
+    setIsLoggedIn(!!user);
   }, [pathname]);
 
+  // Load dynamic logo from settings
   useEffect(() => {
     fetch('/api/settings?section=general')
       .then(res => res.json())
-      .then(data => {
-        if (data.data?.logo) setLogoUrl(data.data.logo);
-      })
+      .then(data => { if (data.data?.logo) setLogoUrl(data.data.logo); })
       .catch(() => {});
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('adminToken');
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (e) {
+      console.error('Logout error:', e);
+    }
+    localStorage.removeItem('adminUser');
     setIsLoggedIn(false);
     router.push('/login');
   };
-
-  const fallbackLogo = '/RIC SAU logo.png';
 
   return (
     <motion.nav
@@ -84,30 +88,19 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-12">
           {/* Logo */}
-          {/* <Link href="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">R</span>
-            </div>
-            <span className="font-bold text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Research & Innovation
+          <Link href="/" className="flex items-center space-x-2">
+            <img
+              src={logoUrl}
+              alt="Research & Innovation Logo"
+              width={32}
+              height={32}
+              className="w-8 h-8 object-contain"
+              onError={() => setLogoUrl(fallbackLogo)}
+            />
+            <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              RIC-SAU
             </span>
-          </Link> */}
-
-        <Link href="/" className="flex items-center space-x-2">
-          {/* Logo Image */}
-          <img
-            src={logoUrl}
-            alt="Research & Innovation Logo"
-            width={32}
-            height={32}
-            className="w-8 h-8 object-contain"
-            onError={() => setLogoUrl(fallbackLogo)}
-          />
-          {/* Text */}
-          <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            RIC-SAU
-          </span>
-        </Link>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
@@ -143,7 +136,7 @@ export function Navbar() {
               </div>
             ))}
 
-            {/* Login/Dashboard/Logout Buttons */}
+            {/* Auth Buttons */}
             {isLoggedIn ? (
               <div className="flex items-center space-x-2">
                 <Link href="/dashboard">
@@ -214,7 +207,7 @@ export function Navbar() {
                 </div>
               ))}
 
-              {/* Mobile Login/Dashboard/Logout */}
+              {/* Mobile Auth */}
               {isLoggedIn ? (
                 <div className="space-y-2 mt-2">
                   <Link href="/dashboard" onClick={() => setIsOpen(false)}>
@@ -226,10 +219,7 @@ export function Navbar() {
                   <Button
                     variant="ghost"
                     className="w-full text-red-500 hover:text-red-600 hover:bg-red-50 flex items-center justify-center space-x-2"
-                    onClick={() => {
-                      handleLogout();
-                      setIsOpen(false);
-                    }}
+                    onClick={() => { handleLogout(); setIsOpen(false); }}
                   >
                     <LogOut className="h-4 w-4" />
                     <span>Logout</span>
