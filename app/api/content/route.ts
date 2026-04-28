@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { getSchemaForType } from '@/lib/validations';
 
 export const revalidate = 60;
 
@@ -191,7 +192,19 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { type, data } = body;
+    let { type, data } = body;
+
+    const schema = getSchemaForType(type);
+    if (schema) {
+      const validationResult = schema.safeParse(data);
+      if (!validationResult.success) {
+        return NextResponse.json(
+          { success: false, error: 'Validation failed', details: validationResult.error.errors },
+          { status: 400 }
+        );
+      }
+      data = validationResult.data;
+    }
 
     let result;
     switch (type) {
@@ -484,8 +497,22 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { type, id, data } = body;
+    let { type, id, data } = body;
     const numericId = parseInt(id);
+
+    const schema = getSchemaForType(type);
+    if (schema) {
+      // Partial validation for PUT requests since they might update only some fields
+      const updateSchema = schema.partial ? schema.partial() : schema;
+      const validationResult = updateSchema.safeParse(data);
+      if (!validationResult.success) {
+        return NextResponse.json(
+          { success: false, error: 'Validation failed', details: validationResult.error.errors },
+          { status: 400 }
+        );
+      }
+      data = validationResult.data;
+    }
 
     let result;
     switch (type) {
