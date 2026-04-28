@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Link from 'next/link';
 import Image from 'next/image';
+import { EmptyState } from '@/components/EmptyState';
 
 interface Project {
   id: number;
@@ -150,11 +151,15 @@ export default function ProjectsClient({ initialProjects }: ProjectsClientProps)
           </motion.div>
 
           {filteredProjects.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="text-gray-400 text-6xl mb-4">🔍</div>
-              <h3 className="text-2xl font-semibold text-gray-900 mb-2">No Projects Found</h3>
-              <p className="text-gray-600">Try adjusting your search criteria or filters.</p>
-            </div>
+            <EmptyState 
+              title="No projects found" 
+              description="Try adjusting your search terms or filters to find what you're looking for."
+              onRetry={() => {
+                setSearchTerm('');
+                setSelectedCategory('all');
+                setSelectedStatus('all');
+              }}
+            />
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
               {filteredProjects.map((project, index) => (

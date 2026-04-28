@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { EmptyState } from '@/components/EmptyState';
 
 const defaultPublications = [
   {
@@ -192,11 +193,16 @@ export default function PublicationsClient({ initialPublications }: Publications
           </motion.div>
 
           {filteredPublications.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="text-gray-400 text-6xl mb-4">📚</div>
-              <h3 className="text-2xl font-semibold text-gray-900 mb-2">No Publications Found</h3>
-              <p className="text-gray-600">Try adjusting your search criteria or filters.</p>
-            </div>
+            <EmptyState 
+              title="No publications found" 
+              description="Try adjusting your search criteria or filters."
+              onRetry={() => {
+                setSearchTerm('');
+                setSelectedCategory('all');
+                setSelectedYear('all');
+                setSelectedType('all');
+              }}
+            />
           ) : (
             <div className="space-y-8">
               {filteredPublications.map((publication, index) => (

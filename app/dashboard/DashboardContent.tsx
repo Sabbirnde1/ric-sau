@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useRouter } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 import Image from 'next/image';
 import DashboardStatsGrid from '@/components/dashboard/DashboardStatsGrid';
 import { ToastAction } from '@/components/ui/toast';
@@ -538,13 +539,7 @@ export default function DashboardContent() {
   };
 
   const handleLogout = async () => {
-    try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-    } catch (e) {
-      console.error('Logout error:', e);
-    }
-    localStorage.removeItem('adminUser');
-    router.push('/login');
+    await signOut({ callbackUrl: '/login' });
   };
 
   const handleUpdateHome = async () => {

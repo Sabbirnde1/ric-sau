@@ -5,44 +5,42 @@ import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { signIn } from 'next-auth/react';
 
 export default function LoginPage() {
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   // Just check if we have user data (UI only, real check is server-side)
   useEffect(() => {
-    const user = localStorage.getItem('adminUser');
-    if (user) {
-      router.push('/dashboard');
-    } else {
-      setLoading(false);
-    }
+    // We can leave this or rely on middleware entirely.
   }, [router]);
+
 
   const handleLogin = async () => {
     setError('');
     setLoading(true);
+    
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+      const result = await signIn('credentials', {
+        redirect: false,
+        username,
+        password,
       });
-      const data = await res.json();
 
-      if (data.success) {
-        localStorage.setItem('adminUser', JSON.stringify(data.user));
-        router.push('/dashboard');
-      } else {
-        setError(data.error || 'Invalid username or password');
+      if (result?.error) {
+        setError(result.error);
         setLoading(false);
+      } else if (result?.ok) {
+        // Successful login
+        router.push('/dashboard');
+        router.refresh(); // Refresh to ensure session state updates
       }
-    } catch {
-      setError('Login failed. Please try again.');
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
       setLoading(false);
     }
   };

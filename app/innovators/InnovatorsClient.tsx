@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { EmptyState } from "@/components/EmptyState";
 
 const defaultInnovations = [
   { ripd: "AG-01-133", title: "Vertical Farming: Future Farming Technology for Food", pi: "S.M.Anamul Arefin", coPi: "Zerin Tasnim" },
@@ -186,7 +187,18 @@ export default function InnovatorsClient({ initialInnovations }: InnovatorsClien
             </motion.div>
           ))}
 
-          {filteredInnovations.length === 0 && <div className="col-span-full text-center text-gray-500 text-lg">No results found.</div>}
+          {filteredInnovations.length === 0 && (
+            <div className="col-span-full">
+              <EmptyState 
+                title="No innovators found" 
+                description="Try adjusting your search criteria or category filter."
+                onRetry={() => {
+                  setSearch('');
+                  setFilter('All');
+                }}
+              />
+            </div>
+          )}
         </div>
       </section>
 

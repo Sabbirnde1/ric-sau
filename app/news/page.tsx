@@ -5,6 +5,7 @@ import MotionWrapper from '@/components/MotionWrapper';
 import Image from 'next/image';
 import prisma from '@/lib/prisma';
 import { shouldUseUnoptimized } from '@/lib/utils';
+import { EmptyState } from '@/components/EmptyState';
 
 export const revalidate = 300;
 
@@ -54,7 +55,10 @@ export default async function NewsPage() {
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           {newsArticles.length === 0 ? (
-            <p className="text-center text-gray-500">No news articles yet.</p>
+            <EmptyState 
+              title="No news yet" 
+              description="Stay tuned! We'll post the latest updates and research breakthroughs right here."
+            />
           ) : (
             <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
               {newsArticles.map((article, index) => (
